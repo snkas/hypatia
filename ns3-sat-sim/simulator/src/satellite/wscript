@@ -1,0 +1,58 @@
+## -*- Mode: python; py-indent-offset: 2; indent-tabs-mode: nil; coding: utf-8; -*-
+
+import os
+import os.path
+import re
+
+def compile_generator(bld):
+  base_path = 'src/satellite/model'
+  data_path = '%s/data' % (base_path)
+  cxxflags = ' '.join(str(x) for x in bld.env['CXXFLAGS'])
+  cxx = bld.env['COMPILER_CXX']
+  src = '%s/constants-gen.cc' % data_path
+  dst = '%s/cgen' % data_path
+  header = '%s/iers-data.h' % (base_path)
+  source = '%s/iers-data.cc' % (base_path)
+
+  if not os.path.isfile(dst):
+    #print('%s %s %s -o %s' % (cxx, src, cxxflags, dst))
+    bld.exec_command('%s %s %s -o %s' % (cxx, cxxflags, src, dst))
+
+  bld.exec_command('./%s header %s' % (dst, base_path))
+  bld.exec_command('./%s source %s' % (dst, base_path))
+
+def build(bld):
+  module = bld.create_ns3_module('satellite', ['core', 'mobility'])
+  module.includes = '.'
+  module.source = [
+    'model/iers-data.cc',
+    'model/julian-date.cc',
+    'model/satellite.cc',
+    'model/satellite-position-helper.cc',
+    'model/satellite-position-mobility-model.cc',
+    'model/sgp4ext.cpp',
+    'model/sgp4io.cpp',
+    'model/sgp4unit.cpp',
+    'model/vector-extensions.cc',
+  ]
+
+  headers = bld(features='ns3header')
+  headers.module = 'satellite'
+  headers.source = [
+    'model/iers-data.h',
+    'model/julian-date.h',
+    'model/satellite.h',
+    'model/satellite-position-helper.h',
+    'model/satellite-position-mobility-model.h',
+    'model/sgp4ext.h',
+    'model/sgp4io.h',
+    'model/sgp4unit.h',
+    'model/vector-extensions.h',
+  ]
+
+  bld.add_pre_fun(compile_generator)
+
+  #if bld.env['ENABLE_EXAMPLES']:
+  #  bld.recurse('examples')
+
+  # bld.ns3_python_bindings()

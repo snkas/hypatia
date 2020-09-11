@@ -1,0 +1,40 @@
+# Hypatia
+
+Hypatia is a low earth orbit (LEO) satellite network simulation framework.
+
+It consists of four main components:
+
+* `satgenpy` : Python framework to generate LEO satellite networks and generate 
+  routing over time over a period of time. It additionally includes several 
+  analysis tools to study individual cases. 
+  (license: MIT)
+
+* `ns3-sat-sim` : ns-3 based framework which takes as input the state generated 
+  by `satgenpy` to perform packet-level simulations over LEO satellite networks.
+  It makes use of the `satellite` ns-3 module by Pedro Silva to calculate
+  satellite locations over time.
+  (license: GNU GPL version 2)
+  
+* `satviz` : Cesium visualization pipeline to generate interactive satellite network
+  visualizations. It makes use of the online Cesium API by generating CesiumJS code.
+  The API calls require its user to obtain a Cesium access token (via [https://cesium.com/]()).
+  More information can be found in `satviz/README.md`.
+  (license: MIT)
+
+* `paper` : Experimental and plotting code to reproduce the experiments and 
+  figures which are presented in the paper.
+  (license: MIT)
+
+This is the code repository introduced and used in "Exploring the “Internet from space” with Hypatia" 
+by Simon Kassing*, Debopam Bhattacherjee*, André Baptista Águas, Jens Eirik Saethre and Ankit Singla
+(*equal contribution), which is published in the Internet Measurement Conference (IMC) 2020.
+
+BibTeX citation:
+```
+To be announced.
+```
+
+## Getting started
+
+The reproduction of the paper is essentially the tutorial for Hypatia.
+Please navigate to `paper/README.md`.

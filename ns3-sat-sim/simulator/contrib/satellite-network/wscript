@@ -1,0 +1,48 @@
+# -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
+
+def build(bld):
+    module = bld.create_ns3_module('satellite-network', ['core', 'internet', 'applications', 'point-to-point', 'mpi', 'satellite', 'mobility', 'internet-apps', 'basic-sim'])
+    module.source = [
+        'model/point-to-point-laser-net-device.cc',
+        'model/point-to-point-laser-channel.cc',
+        'model/point-to-point-laser-remote-channel.cc',
+        'model/gsl-net-device.cc',
+        'model/gsl-channel.cc',
+        'model/ground-station.cc',
+        'helper/gsl-helper.cc',
+        'helper/point-to-point-laser-helper.cc',
+        'model/topology-satellite-network.cc',
+        'model/arbiter-satnet.cc',
+        'model/arbiter-single-forward.cc',
+        'helper/arbiter-single-forward-helper.cc',
+        'helper/gsl-if-bandwidth-helper.cc',
+        ]
+
+    module_test = bld.create_ns3_module_test_library('satellite-network')
+    module_test.source = [
+        'test/satellite-network-test-suite.cc',
+        ]
+
+    headers = bld(features='ns3header')
+    headers.module = 'satellite-network'
+    headers.source = [
+        'model/point-to-point-laser-net-device.h',
+        'model/point-to-point-laser-channel.h',
+        'model/point-to-point-laser-remote-channel.h',
+        'model/gsl-net-device.h',
+        'model/gsl-channel.h',
+        'model/ground-station.h',
+        'helper/gsl-helper.h',
+        'helper/point-to-point-laser-helper.h',
+        'model/topology-satellite-network.h',
+        'model/arbiter-satnet.h',
+        'model/arbiter-single-forward.h',
+        'helper/arbiter-single-forward-helper.h',
+        'helper/gsl-if-bandwidth-helper.h',
+        ]
+
+    if bld.env.ENABLE_EXAMPLES:
+       bld.recurse('examples')
+
+    # bld.ns3_python_bindings()
+

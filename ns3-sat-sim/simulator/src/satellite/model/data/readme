@@ -1,0 +1,111 @@
+The following files are provided by the IERS Rapid Service/Prediction Center:
+
+
+Latest issue of IERS Bulletin A, updated weekly (Thursday)
+----------------------------------------------------------------------------
+ser7.dat - The weekly IERS Bulletin A contains the IERS rapid
+  service and predictions of Earth orientation parameters.
+  Available by ftp, web, e-mail, and paper.
+readme.bulla - Explanatory material for the IERS Bulletin A.
+  Available by ftp and web.
+
+
+Standard data files, updated weekly (Thursday)
+----------------------------------------------------------------
+finals.all - This file (updated weekly) is the complete Earth
+  orientation data set, since 2 January 1976 with 1 year of predictions.
+  The nutation series in dPSI and dEPSILON uses the IAU 1980 Nutation
+  Theory.
+  Available by ftp and web.
+finals.data - This file (updated weekly) is the same as "finals.all"
+  except since 1 January 1992.
+  Available by ftp and web.
+readme.finals - Explains the format for "finals.all" and "finals.data".
+  Available by ftp and web.
+
+finals2000A.all - This file (updated weekly) is the complete Earth
+  orientation data set, since 2 January 1973 with 1 year of predictions.
+  The nutation series in dX and dY uses the IAU 2000A Nutation
+  Theory.
+  Available by ftp and web.
+finals2000A.data - This file (updated weekly) is the same as "finals2000A.all"
+  except since 1 January 1992.
+  Available by ftp and web.
+readme.finals2000A - Explains the format for "finals2000A.all" and
+  "finals2000A.data".
+  Available by ftp and web.
+
+gpsrapid.out - This file (updated weekly) contains all Earth
+  orientation parameters values since 1 May 1992 (with 15 days of
+  predictions).
+  Available by ftp, web, and e-mail.
+readme.gpsrapid -- Explains the format for "gpsrapid.out".
+  Available by ftp and web.
+
+mark3.out - A concise, simple file format containing only rapid service
+  and prediction of Earth orientation parameters (with 90 days of
+  predictions).
+  Available by ftp, web, and e-mail.
+
+
+Daily data files, updated daily (normally about 17:05 UTC)
+----------------------------------------------------------
+[Recommended for highest accuracy real-time applications]
+
+finals.daily - This file is similar to "finals.data" except it is updated
+  daily and contains values only for the last 90 days (plus 90 days of
+  predictions).
+  Available by ftp and web.
+readme.finals - Explains the format for "finals.daily".
+  Available by ftp and web.
+
+finals2000A.daily - This file is similar to "finals2000A.data" except it is
+  updated daily and contains values only for the last 90 days (plus 90 days
+  of predictions).
+  Available by ftp and web.
+readme.finals2000A - Explains the format for "finals2000A.daily".
+  Available by ftp and web.
+
+gpsrapid.daily - This file is similar to "gpsrapid.out" except it is
+  updated daily and contains values only for the last 90 days (plus
+  15 days of predictions).
+  Available by ftp and web.
+readme.gpsrapid -- Explains the format for "gpsrapid.out".
+  Available by ftp and web.
+
+
+Delta T values
+----------------------------------------------------------
+[For use only for low accuracy users]
+deltat.data - This file contains monthly Delta T (TT-UT1) values.  It is
+  updated approximately every quarter.
+  Available by ftp and web.
+
+deltat.preds - This file contains quarterly predictions of Delta T.  It is
+  updated approximately once per year.
+  Available by ftp and web.
+
+historic_deltat.data - This file contains Delta T (TT-UT1) values from the McCarthy
+  and Babcock (1986) paper.  This file is not updated.
+  Available by ftp and web.
+
+tai-utc.dat - This file documents the relationship between TAI and UTC,
+  including all accumulated leap seconds.
+  Available by ftp and web.
+
+
+Files from the IERS Earth Orientation Center (at the Paris Observatory)
+-----------------------------------------------------------------------
+bulb.dat - The most recent (monthly) IERS Bulletin B containing the final 
+  values of Earth orientation parameters.
+
+The annual "Explanatory Supplement to IERS Bulletins A and B" explains
+the IERS Earth orientation products.  It is available at
+<http://hpiers.obspm.fr/iers/bul/bulb/explanatory.html>.
+
+
+Discontinued files
+------------------
+tpmdat.dat - These low-accuracy Earth orientation prediction coefficients
+  are no longer distributed.
+
