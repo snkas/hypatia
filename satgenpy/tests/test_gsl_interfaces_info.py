@@ -26,7 +26,7 @@ from math import floor
 import os
 
 
-class TestDescription(unittest.TestCase):
+class TestGslInterfacesInfo(unittest.TestCase):
 
     def test_simple(self):
         satgen.generate_simple_gsl_interfaces_info(

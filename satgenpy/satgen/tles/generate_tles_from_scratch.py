@@ -103,7 +103,7 @@ def generate_tles_from_scratch_with_sgp(
                 # Export TLE from the SGP-4 object
                 line1, line2 = export_tle(sat_sgp4)
 
-                # Line 1 has some problems: there are unkonwn characters entered for the international
+                # Line 1 has some problems: there are unknown characters entered for the international
                 # designator, and the Julian date is not respected
                 # As such, we set our own bogus international designator 00000ABC
                 # and we set our own epoch date as 1 January, 2000
