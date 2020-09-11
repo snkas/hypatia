@@ -54,9 +54,11 @@ def read_gsl_interfaces_info(filename_gsl_interfaces_info, number_of_satellites,
 
             num_interfaces = exputil.parse_positive_int(split[1])
             if num_interfaces == 0:
-                raise ValueError("Satellite must have at least one interface")
+                raise ValueError("Node must have at least one interface")
 
             aggregate_max_bandwidth = exputil.parse_positive_float(split[2])
+            if aggregate_max_bandwidth == 0:
+                raise ValueError("Aggregate max. bandwidth cannot be zero")
 
             list_gsl_interfaces_info.append({
                 "number_of_interfaces": num_interfaces,
