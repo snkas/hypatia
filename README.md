@@ -38,5 +38,24 @@ To be announced.
 
 ## Getting started
 
-The reproduction of the paper is essentially the tutorial for Hypatia.
-Please navigate to `paper/README.md`.
+1. System setup:
+   - Python version 3.7+
+   - Recent Linux operating system (e.g., Ubuntu 18+)
+
+2. Install dependencies:
+   ```
+   sudo bash hypatia_install_dependencies.sh
+   ```
+   
+3. Build all four modules (as far as possible)
+   ```
+   bash hypatia_build.sh
+   ```
+   
+4. Run tests:
+   ```
+   bash hypatia_run_tests.sh
+   ```
+
+5. The reproduction of the paper is essentially the tutorial for Hypatia.
+   Please navigate to `paper/README.md`.
