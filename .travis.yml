@@ -1,0 +1,52 @@
+# Ubuntu 18.04
+os: linux
+dist: bionic
+
+language: cpp
+
+# Command(s) to install dependencies
+before_install:
+  - test -n $CC && unset CC
+  - test -n $CXX && unset CXX
+  - pyenv global 3.7
+
+  # ns3-sat-sim
+  - git submodule update --init --recursive
+  - sudo apt-get update
+  - sudo apt-get -y install mpic++
+  - sudo apt-get -y install libopenmpi-dev
+  - sudo apt-get -y install lcov
+  - sudo apt-get -y install gnuplot
+  - pip install numpy
+  - pip install statsmodels
+  - pip install git+https://github.com/snkas/exputilpy.git
+
+  # satgenpy
+  - pip install numpy astropy ephem networkx sgp4
+  - sudo apt-get install libproj-dev proj-data proj-bin
+  - sudo apt-get install libgeos-dev
+  - pip install git+https://github.com/snkas/exputilpy.git
+  - pip install cartopy
+
+  # paper
+  - pip install git+https://github.com/snkas/networkload.git
+
+# Command(s) to build
+install:
+
+  # ns3-sat-sim
+  - cd ns3-sat-sim
+  - bash build.sh --debug_all
+  - cd ..
+
+# Command(s) to run tests and examples
+script:
+
+  # ns3-sat-sim
+  - cd ns3-sat-sim
+  - bash test.sh
+  - cd ..
+
+# Command(s) to calculate coverage
+after_success:
+  - echo "Success"
