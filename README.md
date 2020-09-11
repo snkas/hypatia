@@ -47,7 +47,7 @@ To be announced.
    bash hypatia_install_dependencies.sh
    ```
    
-3. Build all four modules (as far as possible)
+3. Build all four modules (as far as possible):
    ```
    bash hypatia_build.sh
    ```
