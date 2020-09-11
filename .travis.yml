@@ -9,7 +9,7 @@ before_install:
   - test -n $CC && unset CC
   - test -n $CXX && unset CXX
   - pyenv global 3.7
-  - sudo bash hypatia_install_dependencies.sh
+  - bash hypatia_install_dependencies.sh
 
 # Command(s) to build
 install:

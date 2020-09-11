@@ -44,7 +44,7 @@ To be announced.
 
 2. Install dependencies:
    ```
-   sudo bash hypatia_install_dependencies.sh
+   bash hypatia_install_dependencies.sh
    ```
    
 3. Build all four modules (as far as possible)
