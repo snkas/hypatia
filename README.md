@@ -1,5 +1,7 @@
 # Hypatia
 
+[![Build Status](https://travis-ci.org/snkas/hypatia.svg?branch=master)](https://travis-ci.org/snkas/hypatia)
+
 Hypatia is a low earth orbit (LEO) satellite network simulation framework.
 
 It consists of four main components:
