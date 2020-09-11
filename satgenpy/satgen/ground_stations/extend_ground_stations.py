@@ -39,16 +39,16 @@ def geodetic2cartesian(lat, lon, ele):
     f = 1.0 / 298.26
 
     # First numerical eccentricity of ellipsoid
-    e = math.sqrt(2 * f - f * f)
-    lat = lat * (math.pi / 180)
-    lon = lon * (math.pi / 180)
+    e = math.sqrt(2.0 * f - f * f)
+    lat = lat * (math.pi / 180.0)
+    lon = lon * (math.pi / 180.0)
 
     # Radius of curvature in the prime vertical of the surface of the geodetic ellipsoid
-    v = a / math.sqrt(1 - e * e * math.sin(lat) * math.sin(lat))
+    v = a / math.sqrt(1.0 - e * e * math.sin(lat) * math.sin(lat))
 
     x = (v + ele) * math.cos(lat) * math.cos(lon)
     y = (v + ele) * math.cos(lat) * math.sin(lon)
-    z = (v * (1 - e * e) + ele) * math.sin(lat)
+    z = (v * (1.0 - e * e) + ele) * math.sin(lat)
 
     return x, y, z
 

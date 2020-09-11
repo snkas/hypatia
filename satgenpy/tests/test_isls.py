@@ -26,19 +26,15 @@ from math import floor
 import os
 
 
-class TestSatUtils(unittest.TestCase):
+class TestIsls(unittest.TestCase):
 
-    # def test_read_ground_stations(self):
-    #     result = satgen.read_ground_stations_extended("data/legacy/ground_stations_first_100.txt")
-    #     self.assertEqual(len(result), 100)
-    #
-    # def test_read_tles(self):
-    #     result = satgen.read_tles("data/legacy/starlink_tles_25x25.txt")
-    #     self.assertEqual(result["n_orbits"], 25)
-    #     self.assertEqual(result["n_sats_per_orbit"], 25)
-    #     self.assertEqual(len(result["satellites"]), 625)
+    def test_isls_empty(self):
+        satgen.generate_empty_isls("isls_empty.txt.tmp")
+        isls_list = satgen.read_isls("isls_empty.txt.tmp")
+        self.assertEqual(0, len(isls_list))
+        os.remove("isls_empty.txt.tmp")
 
-    def test_isls(self):
+    def test_isls_plus_grid(self):
         for values in [(25, 25, 1), (10, 5, 0), (24, 66, 6), (3, 3, 0)]:
             num_orbits = values[0]
             num_sat_per_orbit = values[1]
@@ -56,11 +52,36 @@ class TestSatUtils(unittest.TestCase):
                 neighbor_2 = orbit_of_i * num_sat_per_orbit + (i + num_sat_per_orbit - 1) % num_sat_per_orbit
 
                 # Links to different orbits
-                neighbor_3 = ((orbit_of_i + num_orbits - 1) % num_orbits) * num_sat_per_orbit + (i + num_sat_per_orbit - isl_shift) % num_sat_per_orbit
-                neighbor_4 = ((orbit_of_i + num_orbits + 1) % num_orbits) * num_sat_per_orbit + (i + num_sat_per_orbit + isl_shift) % num_sat_per_orbit
+                neighbor_3 = (
+                    ((orbit_of_i + num_orbits - 1) % num_orbits)
+                    * num_sat_per_orbit + (i + num_sat_per_orbit - isl_shift) % num_sat_per_orbit
+                )
+                neighbor_4 = (
+                    ((orbit_of_i + num_orbits + 1) % num_orbits)
+                    * num_sat_per_orbit + (i + num_sat_per_orbit + isl_shift) % num_sat_per_orbit
+                )
 
                 # All of them must be present
                 self.assertTrue((min(i, neighbor_1), max(i, neighbor_1)) in isls_list)
                 self.assertTrue((min(i, neighbor_2), max(i, neighbor_2)) in isls_list)
                 self.assertTrue((min(i, neighbor_3), max(i, neighbor_3)) in isls_list)
                 self.assertTrue((min(i, neighbor_4), max(i, neighbor_4)) in isls_list)
+
+    def test_isls_plus_grid_invalid(self):
+        try:
+            satgen.generate_plus_grid_isls("isls.txt.tmp", 2, 2, 0)
+            self.fail()
+        except ValueError:
+            self.assertTrue(True)
+
+        try:
+            satgen.generate_plus_grid_isls("isls.txt.tmp", 3, 2, 0)
+            self.fail()
+        except ValueError:
+            self.assertTrue(True)
+
+        try:
+            satgen.generate_plus_grid_isls("isls.txt.tmp", 1, 1, 0)
+            self.fail()
+        except ValueError:
+            self.assertTrue(True)
