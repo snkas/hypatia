@@ -79,7 +79,6 @@ def plot_pair_path_max_utilization(path_networkx_data, run_name, src_node_id, ds
                 for (from_time_ns, till_time_ns, utilization) in link_to_utilization[pair]:
                     if from_time_ns <= t < till_time_ns:
                         utilization_list.append(utilization)
-            # TODO: print(utilization_list)
 
             # And finally write the result
             f_out.write(str(t) + "," + str(max(utilization_list) if len(utilization_list) > 0 else 0) + "\n")
@@ -177,6 +176,16 @@ def main():
                 "../../../../../../../paper/ns3_experiments/traffic_matrix/data/" + run_name + " "
                 "../../../../../../../paper/ns3_experiments/traffic_matrix/pdf/" + run_name + " "
                 + "0 " + str(1 * 1000 * 1000 * 1000),  # Flow id = 0, 1 * 1000 * 1000 * 1000 ns = 1s interval
+                output_redirect=exputil.OutputRedirect.CONSOLE
+            )
+
+            local_shell.perfect_exec(
+                "cd ../../../ns3-sat-sim/simulator/contrib/basic-sim/tools/plotting/plot_tcp_flow; "
+                "python plot_tcp_flow.py "
+                "../../../../../../../paper/ns3_experiments/traffic_matrix/runs/" + run_name + "/logs_ns3 "
+                "../../../../../../../paper/ns3_experiments/traffic_matrix/data/" + run_name + " "
+                "../../../../../../../paper/ns3_experiments/traffic_matrix/pdf/" + run_name + " "
+                + "35 " + str(1 * 1000 * 1000 * 1000),  # Flow id = 35, 1 * 1000 * 1000 * 1000 ns = 1s interval
                 output_redirect=exputil.OutputRedirect.CONSOLE
             )
 
