@@ -47,7 +47,7 @@ set ylabel "Unused bandwidth (Mb/s)"
 # Axes ranges
 set xrange [0:200]       # Explicitly set the x-range [lower:upper]
 set yrange [0:10]       # Explicitly set the y-range [lower:upper]
-set xtics (0, 40, 80, 120, 160, 200)
+set xtics (0, 50, 100, 150, 200)
 # set ytics <start>, <incr> {,<end>}
 # set format x "%.2f%%"  # Set the x-tic format, e.g. in this case it takes 2 sign. decimals: "24.13%""
 

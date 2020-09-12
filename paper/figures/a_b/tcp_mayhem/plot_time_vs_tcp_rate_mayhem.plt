@@ -65,8 +65,8 @@ set key spacing 2
 set key at 100,30
 set key off
 
-set label "NewReno" at 60,14 textcolor rgb "#2177b0"
-set label "Vegas" at 40,5 textcolor rgb "#fc7f2b"
+set label "NewReno" at 60,10.5 textcolor rgb "#2177b0"
+set label "Vegas" at 42,5 textcolor rgb "#fc7f2b"
 
 #####################################
 ### PLOTS

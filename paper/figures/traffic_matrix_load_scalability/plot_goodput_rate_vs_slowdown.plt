@@ -44,7 +44,7 @@ set output "pdf/plot_goodput_rate_vs_slowdown.pdf"
 
 # Axes labels
 set xlabel "Traffic goodput rate (Gbit/s)" # Markup: e.g. 99^{th}, {/Symbol s}, {/Helvetica-Italic P}
-set ylabel "Slowdown (real s / sim s)"
+set ylabel "Slowdown (real s / virtual s)" font ",22"
 
 # Axes ranges
 set xrange [0.01:]       # Explicitly set the x-range [lower:upper]
