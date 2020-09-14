@@ -14,7 +14,7 @@ you can download and extract all (temporary) data which Hypatia generates for th
 1. Download `hypatia_paper_temp_data.tar.gz` and put it into `<hypatia>/paper/`.
 
    Download link (password (if asked): "hypatia_paper"): 
-   * *Download link to be announced*
+   * (v0: Preliminary draft data) https://polybox.ethz.ch/index.php/s/9G7ViXyvtkeTqJj
    
 2. Double-check: the archive `<hypatia>/paper/hypatia_paper_temp_data.tar.gz` now exists.
 
