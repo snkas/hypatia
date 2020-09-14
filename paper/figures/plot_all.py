@@ -29,6 +29,7 @@ plot_folders = [
     "constellation_comparison/general_ecdfs",
     "traffic_matrix_unused_bandwidth",
     "traffic_matrix_load_scalability",
+    "two_compete",
     "a_b/multiple_rtt_matching",
     "a_b/tcp_cwnd",
     "a_b/tcp_rate",

@@ -29,6 +29,7 @@ pdf_folders = [
     "constellation_comparison/general_ecdfs/pdf",
     "traffic_matrix_unused_bandwidth/pdf",
     "traffic_matrix_load_scalability/pdf",
+    "two_compete",
     "a_b/multiple_rtt_matching/pdf",
     "a_b/tcp_cwnd/pdf",
     "a_b/tcp_rate/pdf",
