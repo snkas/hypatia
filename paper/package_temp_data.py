@@ -45,6 +45,7 @@ temp_dir_paths = [
     "figures/constellation_comparison/general_ecdfs/pdf",
     "figures/traffic_matrix_load_scalability/pdf",
     "figures/traffic_matrix_unused_bandwidth/pdf",
+    "figures/two_compete/pdf",
 
     # Satgenpy analysis
     "satgenpy_analysis/data",
@@ -60,6 +61,10 @@ temp_dir_paths = [
     "ns3_experiments/traffic_matrix_load/runs",
     "ns3_experiments/traffic_matrix_load/data",
     "ns3_experiments/traffic_matrix_load/pdf",
+    "ns3_experiments/two_compete/runs",
+    "ns3_experiments/two_compete/data",
+    "ns3_experiments/two_compete/pdf",
+    "ns3_experiments/two_compete/extra_satgenpy_analysis_data",
 
 ]
 
