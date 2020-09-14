@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 import exputil
-import numpy as np
 
 
 def plot_pair_path_max_utilization(path_networkx_data, run_name, src_node_id, dst_node_id, is_static):
@@ -60,7 +59,7 @@ def plot_pair_path_max_utilization(path_networkx_data, run_name, src_node_id, ds
     number_of_intervals_total = 0
     number_of_intervals_with_a_path = 0
     number_of_intervals_with_at_least_a_third_unused_bandwidth = 0
-    all = []
+    all_intervals = []
     data_filename_at_100ms = "data/%s/pair_path_utilization_at_100ms_%d_to_%d.txt" % (
         run_name, src_node_id, dst_node_id
     )
@@ -82,7 +81,7 @@ def plot_pair_path_max_utilization(path_networkx_data, run_name, src_node_id, ds
 
             # And finally write the result
             f_out.write(str(t) + "," + str(max(utilization_list) if len(utilization_list) > 0 else 0) + "\n")
-            all.append((t, max(utilization_list) if len(utilization_list) > 0 else 0))
+            all_intervals.append((t, max(utilization_list) if len(utilization_list) > 0 else 0))
 
             # If there was a path, find what the max utilization was,
             # and then count if the utilization was less than 2/3rds
@@ -112,7 +111,9 @@ def plot_pair_path_max_utilization(path_networkx_data, run_name, src_node_id, ds
         print(s)
 
         s = "%.2f%% of the intervals have at least 33%% unused bandwidth" % (
-                float(number_of_intervals_with_at_least_a_third_unused_bandwidth) / float(number_of_intervals_with_a_path) * 100.0
+                float(number_of_intervals_with_at_least_a_third_unused_bandwidth)
+                /
+                float(number_of_intervals_with_a_path) * 100.0
         )
         f_out.write(s + "\n")
         print(s)
@@ -121,8 +122,8 @@ def plot_pair_path_max_utilization(path_networkx_data, run_name, src_node_id, ds
     data_filename_at_1s = "data/%s/pair_path_utilization_at_1s_%d_to_%d.txt" % (run_name, src_node_id, dst_node_id)
     with open(data_filename_at_1s, "w+") as f_out_1s:
         second_utilization_sum = 0.0
-        for i in range(1, len(all) + 1):
-            second_utilization_sum += all[i - 1][1]
+        for i in range(1, len(all_intervals) + 1):
+            second_utilization_sum += all_intervals[i - 1][1]
             if i % 10 == 0:
                 f_out_1s.write("%d,%.20f\n" % (
                     (i / 10 - 1) * 1000 * 1000 * 1000,
