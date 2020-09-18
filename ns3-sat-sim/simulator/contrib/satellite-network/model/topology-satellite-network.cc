@@ -398,7 +398,7 @@ namespace ns3 {
         // And then within function Ipv4AddressHelper::NewAddress (void), comment out:
         // Ipv4AddressGenerator::AddAllocated (addr);
         //
-        // Beware that if there are IP assignment conflicts, they are not detected.
+        // Beware that if you do this, and there are IP assignment conflicts, they are not detected.
         //
         std::cout << "    >> Assigning IP addresses..." << std::endl;
         std::cout << "       (with many interfaces, this can take long due to an inefficient IP assignment conflict checker)" << std::endl;
