@@ -379,27 +379,65 @@ namespace ns3 {
         } else {
             throw std::runtime_error(format_string("File %s could not be read.", filename.c_str()));
         }
+        std::cout << "    >> Read all GSL interfaces information for the " << node_gsl_if_info.size() << " nodes" << std::endl;
+        std::cout << "    >> Number of GSL interfaces to create... " << total_num_gsl_ifs << std::endl;
 
         // Create and install GSL network devices
         NetDeviceContainer devices = gsl_helper.Install(m_satelliteNodes, m_groundStationNodes, node_gsl_if_info);
+        std::cout << "    >> Finished install GSL interfaces (interfaces, network devices, one shared channel)" << std::endl;
 
         // Install queueing disciplines
         tch_gsl.Install(devices);
+        std::cout << "    >> Finished installing traffic control layer qdisc which will be removed later" << std::endl;
 
         // Assign IP addresses
-        TrafficControlHelper tch_uninstaller;
+        //
+        // This is slow because of an inefficient implementation, if you want to speed it up, you can need to edit:
+        // src/internet/helper/ipv4-address-helper.cc
+        //
+        // And then within function Ipv4AddressHelper::NewAddress (void), comment out:
+        // Ipv4AddressGenerator::AddAllocated (addr);
+        //
+        // Beware that if there are IP assignment conflicts, they are not detected.
+        //
+        std::cout << "    >> Assigning IP addresses..." << std::endl;
+        std::cout << "       (with many interfaces, this can take long due to an inefficient IP assignment conflict checker)" << std::endl;
+        std::cout << "       Progress (as there are more entries, it becomes slower):" << std::endl;
+        int64_t start_time_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+        int64_t last_time_ns = start_time_ns;
         for (uint32_t i = 0; i < devices.GetN(); i++) {
+
+            // Assign IPv4 address
             m_ipv4_helper.Assign(devices.Get(i));
             m_ipv4_helper.NewNetwork();
 
-            // Remove the traffic control layer (must be done here, else the Ipv4 helper will assign a default one)
+            // Give a progress update if at an even 10%
+            if (((i + 1) % (int) (devices.GetN() / 10.0)) == 0 || (i + 1) == devices.GetN()) {
+                int64_t now_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                printf("       - %.2f%% (t = %.2f s, update took %.2f s)\n",
+                    (float) (i + 1) / (float) devices.GetN() * 100.0,
+                    (now_ns - start_time_ns) / 1e9,
+                    (now_ns - last_time_ns) / 1e9
+                );
+                last_time_ns = now_ns;
+            }
+
+        }
+        std::cout << "    >> Finished assigning IPs" << std::endl;
+
+        // Remove the traffic control layer (must be done here, else the Ipv4 helper will assign a default one)
+        TrafficControlHelper tch_uninstaller;
+        std::cout << "    >> Removing traffic control layers (qdiscs)..." << std::endl;
+        for (uint32_t i = 0; i < devices.GetN(); i++) {
             tch_uninstaller.Uninstall(devices.Get(i));
         }
+        std::cout << "    >> Finished removing GSL queueing disciplines" << std::endl;
 
         // Check that the sum is equal
         if (total_num_gsl_ifs != devices.GetN()) {
             throw std::runtime_error("Not the expected amount of interfaces has been created.");
         }
+        std::cout << "    >> GSL interfaces are setup" << std::endl;
 
     }
 
