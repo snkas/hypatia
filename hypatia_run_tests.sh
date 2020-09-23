@@ -5,16 +5,16 @@ echo "It is highly recommend you use a recent Linux operating system (e.g., Ubun
 echo "Python version 3.7+ is required."
 echo ""
 
-# ns3-sat-sim
-echo "Running tests for ns3-sat-sim..."
-cd ns3-sat-sim || exit 1
-bash test.sh || exit 1
-cd .. || exit 1
-
 # satgenpy
 echo "Running tests for satgenpy..."
 cd satgenpy || exit 1
 bash run_tests.sh || exit 1
+cd .. || exit 1
+
+# ns3-sat-sim
+echo "Running tests for ns3-sat-sim..."
+cd ns3-sat-sim || exit 1
+bash test.sh || exit 1
 cd .. || exit 1
 
 # satviz
