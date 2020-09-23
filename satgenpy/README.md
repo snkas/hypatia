@@ -18,7 +18,7 @@ This repository enables you to do so.
 2. The following dependencies need to be installed:
 
    ```
-   pip install numpy astropy ephem networkx sgp4 geopy
+   pip install numpy astropy ephem networkx sgp4 geopy matplotlib
    sudo apt-get install libproj-dev proj-data proj-bin
    sudo apt-get install libgeos-dev 
    pip install cartopy
@@ -48,7 +48,7 @@ There are currently three dynamic state algorithms implemented:
    `# of ground stations` interfaces. Each ground station interface is bound to the 
    nearest satellite interface (at its index), and only sends there. Bandwidth
    is allocated on both sides based on the number of ground station the satellite connects to.
-   (WARNING: THIS IS STILL IN DEVELOPMENT STAGE)
+   (WARNING: THIS IS STILL IN EARLY DEVELOPMENT STAGE)
   
 
 ## File formats
