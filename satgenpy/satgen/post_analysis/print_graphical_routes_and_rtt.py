@@ -39,8 +39,11 @@ SATELLITE_UNUSED_COLOR = "red"
 ISL_COLOR = "#eb6b38"
 
 
-def print_routes_and_rtt(base_output_dir, satellite_network_dir, dynamic_state_update_interval_ms,
-                         simulation_end_time_s, src, dst):
+def print_graphical_routes_and_rtt(
+        base_output_dir, satellite_network_dir,
+        dynamic_state_update_interval_ms,
+        simulation_end_time_s, src, dst
+):
 
     # Local shell
     local_shell = exputil.LocalShell()
@@ -335,7 +338,7 @@ def main():
         )
         print("Data dir: " + args[0])
         print("Used data dir to form base output dir: " + base_output_dir)
-        print_routes_and_rtt(
+        print_graphical_routes_and_rtt(
             base_output_dir,
             args[1],
             int(args[2]),

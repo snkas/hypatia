@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import math
-from.read_ground_stations import *
+from .read_ground_stations import *
 
 
 def geodetic2cartesian(lat, lon, ele):
