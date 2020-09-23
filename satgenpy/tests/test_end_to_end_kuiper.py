@@ -273,7 +273,20 @@ class TestEndToEnd(unittest.TestCase):
                     lines2 = []
                     for line in f_in2:
                         lines2.append(line.strip())
-                    self.assertEqual(lines1, lines2)
+
+                    # Too computationally costly, so the below is equivalent: self.assertEqual(lines1, lines2)
+                    self.assertEqual(len(lines1), len(lines2))
+                    for i in range(len(lines1)):
+                        a_spl = lines1[i].split(",")
+                        b_spl = lines2[i].split(",")
+                        self.assertEqual(len(a_spl), len(b_spl))
+                        self.assertEqual(len(a_spl), 2)
+                        a_time = int(a_spl[0])
+                        b_time = int(b_spl[0])
+                        a_rtt = float(a_spl[1])
+                        b_rtt = float(b_spl[1])
+                        self.assertAlmostEqual(a_time, b_time, places=7)
+                        self.assertAlmostEqual(a_rtt, b_rtt, places=7)
 
             # Clean up
             local_shell.remove_force_recursive("temp_gen_data")

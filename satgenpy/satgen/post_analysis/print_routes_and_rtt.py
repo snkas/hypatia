@@ -121,7 +121,7 @@ def print_routes_and_rtt(base_output_dir, satellite_network_dir, dynamic_state_u
         data_filename = data_dir + "/networkx_rtt_" + str(src) + "_to_" + str(dst) + ".txt"
         with open(data_filename, "w+") as data_file:
             for i in range(len(rtt_ns_list)):
-                data_file.write(str(rtt_ns_list[i][0]) + "," + str(rtt_ns_list[i][1]) + "\n")
+                data_file.write("%d,%.10f\n" % (rtt_ns_list[i][0], rtt_ns_list[i][1]))
 
         # Make plot
         pdf_filename = pdf_dir + "/time_vs_networkx_rtt_" + str(src) + "_to_" + str(dst) + ".pdf"
