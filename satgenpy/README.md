@@ -18,7 +18,7 @@ This repository enables you to do so.
 2. The following dependencies need to be installed:
 
    ```
-   pip install numpy astropy ephem networkx sgp4
+   pip install numpy astropy ephem networkx sgp4 geopy
    sudo apt-get install libproj-dev proj-data proj-bin
    sudo apt-get install libgeos-dev 
    pip install cartopy
