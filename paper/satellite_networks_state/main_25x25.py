@@ -112,7 +112,8 @@ def calculate(duration_s, time_step_ms, dynamic_state_algorithm, num_threads):
         duration_s,
         MAX_GSL_LENGTH_M,
         MAX_ISL_LENGTH_M,
-        dynamic_state_algorithm
+        dynamic_state_algorithm,
+        True
     )
 
 

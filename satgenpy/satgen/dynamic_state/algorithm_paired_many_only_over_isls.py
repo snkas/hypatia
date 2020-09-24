@@ -33,7 +33,8 @@ def algorithm_paired_many_only_over_isls(
         num_isls_per_sat,
         sat_neighbor_to_if,
         list_gsl_interfaces_info,
-        prev_output
+        prev_output,
+        enable_verbose_logs
 ):
     """
     PAIRED-MANY ONLY OVER INTER-SATELLITE LINKS ALGORITHM

@@ -45,7 +45,8 @@ def worker(args):
         list_gsl_interfaces_info,
         max_gsl_length_m,
         max_isl_length_m,
-        dynamic_state_algorithm
+        dynamic_state_algorithm,
+        print_logs
      ) = args
 
     # Generate dynamic state
@@ -61,17 +62,18 @@ def worker(args):
         list_gsl_interfaces_info,
         max_gsl_length_m,
         max_isl_length_m,
-        dynamic_state_algorithm  # Options:
-                                 # "algorithm_free_one_only_gs_relays"
-                                 # "algorithm_free_one_only_over_isls"
-                                 # "algorithm_free_gs_one_sat_many_only_over_isls"
-                                 # "algorithm_paired_many_only_over_isls"
+        dynamic_state_algorithm,  # Options:
+                                  # "algorithm_free_one_only_gs_relays"
+                                  # "algorithm_free_one_only_over_isls"
+                                  # "algorithm_free_gs_one_sat_many_only_over_isls"
+                                  # "algorithm_paired_many_only_over_isls"
+        print_logs
     )
 
 
 def help_dynamic_state(
         output_generated_data_dir, num_threads, name, time_step_ms, duration_s,
-        max_gsl_length_m, max_isl_length_m, dynamic_state_algorithm
+        max_gsl_length_m, max_isl_length_m, dynamic_state_algorithm, print_logs
 ):
 
     # Directory
@@ -129,7 +131,8 @@ def help_dynamic_state(
             list_gsl_interfaces_info,
             max_gsl_length_m,
             max_isl_length_m,
-            dynamic_state_algorithm
+            dynamic_state_algorithm,
+            print_logs
         ))
 
         current += num_time_steps

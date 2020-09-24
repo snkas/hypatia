@@ -227,7 +227,8 @@ class TestEndToEnd(unittest.TestCase):
                 duration_s,
                 MAX_GSL_LENGTH_M,
                 MAX_ISL_LENGTH_M,
-                dynamic_state_algorithm
+                dynamic_state_algorithm,
+                False
             )
 
             # Clean slate start

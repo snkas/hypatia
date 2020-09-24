@@ -43,10 +43,11 @@ def generate_dynamic_state(
         list_gsl_interfaces_info,
         max_gsl_length_m,
         max_isl_length_m,
-        dynamic_state_algorithm  # Options:
-                                 # "algorithm_free_one_only_gs_relays"
-                                 # "algorithm_free_one_only_over_isls"
-                                 # "algorithm_paired_many_only_over_isls"
+        dynamic_state_algorithm,  # Options:
+                                  # "algorithm_free_one_only_gs_relays"
+                                  # "algorithm_free_one_only_over_isls"
+                                  # "algorithm_paired_many_only_over_isls"
+        enable_verbose_logs
 ):
     if offset_ns % time_step_ns != 0:
         raise ValueError("Offset must be a multiple of time_step_ns")
@@ -63,7 +64,8 @@ def generate_dynamic_state(
             max_gsl_length_m,
             max_isl_length_m,
             dynamic_state_algorithm,
-            prev_output
+            prev_output,
+            enable_verbose_logs
         )
 
 
@@ -78,20 +80,23 @@ def generate_dynamic_state_at(
         max_gsl_length_m,
         max_isl_length_m,
         dynamic_state_algorithm,
-        prev_output
+        prev_output,
+        enable_verbose_logs
 ):
     print("FORWARDING STATE AT T = " + (str(time_since_epoch_ns))
           + "ns (= " + str(time_since_epoch_ns / 1e9) + " seconds)")
 
     #################################
 
-    print("\nBASIC INFORMATION")
+    if enable_verbose_logs:
+        print("\nBASIC INFORMATION")
 
     # Time
     time = epoch + time_since_epoch_ns * u.ns
-    print("  > Epoch.................. " + str(epoch))
-    print("  > Time since epoch....... " + str(time_since_epoch_ns) + " ns")
-    print("  > Absolute time.......... " + str(time))
+    if enable_verbose_logs:
+        print("  > Epoch.................. " + str(epoch))
+        print("  > Time since epoch....... " + str(time_since_epoch_ns) + " ns")
+        print("  > Absolute time.......... " + str(time))
 
     # Graphs
     sat_net_graph_without_gs = nx.Graph()
@@ -102,14 +107,16 @@ def generate_dynamic_state_at(
         sat_net_graph_without_gs.add_node(i)
     for i in range(len(satellites) + len(ground_stations)):
         sat_net_graph_only_gs.add_node(i)
-    print("  > Satellites............. " + str(len(satellites)))
-    print("  > Ground stations........ " + str(len(ground_stations)))
-    print("  > Max. range GSL......... " + str(max_gsl_length_m) + "m")
-    print("  > Max. range ISL......... " + str(max_isl_length_m) + "m")
+    if enable_verbose_logs:
+        print("  > Satellites............. " + str(len(satellites)))
+        print("  > Ground stations........ " + str(len(ground_stations)))
+        print("  > Max. range GSL......... " + str(max_gsl_length_m) + "m")
+        print("  > Max. range ISL......... " + str(max_isl_length_m) + "m")
 
     #################################
 
-    print("\nISL INFORMATION")
+    if enable_verbose_logs:
+        print("\nISL INFORMATION")
 
     # ISL edges
     isls_valid = 0
@@ -132,15 +139,17 @@ def generate_dynamic_state_at(
         else:
             isls_invalid += 1
 
-    print("  > Total ISLs............. " + str(len(list_isls)))
-    print("    >> Valid ISLs (used)... " + str(isls_valid))
-    print("    >> Invalid ISLs........ " + str(isls_invalid))
-    print("  > Min. ISLs/satellite.... " + str(np.min(num_isls_per_sat)))
-    print("  > Max. ISLs/satellite.... " + str(np.max(num_isls_per_sat)))
+    if enable_verbose_logs:
+        print("  > Total ISLs............. " + str(len(list_isls)))
+        print("    >> Valid ISLs (used)... " + str(isls_valid))
+        print("    >> Invalid ISLs........ " + str(isls_invalid))
+        print("  > Min. ISLs/satellite.... " + str(np.min(num_isls_per_sat)))
+        print("  > Max. ISLs/satellite.... " + str(np.max(num_isls_per_sat)))
 
     #################################
 
-    print("\nGSL INTERFACE INFORMATION")
+    if enable_verbose_logs:
+        print("\nGSL INTERFACE INFORMATION")
 
     satellite_gsl_if_count_list = list(map(
         lambda x: x["number_of_interfaces"],
@@ -150,14 +159,16 @@ def generate_dynamic_state_at(
         lambda x: x["number_of_interfaces"],
         list_gsl_interfaces_info[len(satellites):(len(satellites) + len(ground_stations))]
     ))
-    print("  > Min. GSL IFs/satellite........ " + str(np.min(satellite_gsl_if_count_list)))
-    print("  > Max. GSL IFs/satellite........ " + str(np.max(satellite_gsl_if_count_list)))
-    print("  > Min. GSL IFs/ground station... " + str(np.min(ground_station_gsl_if_count_list)))
-    print("  > Max. GSL IFs/ground_station... " + str(np.max(ground_station_gsl_if_count_list)))
+    if enable_verbose_logs:
+        print("  > Min. GSL IFs/satellite........ " + str(np.min(satellite_gsl_if_count_list)))
+        print("  > Max. GSL IFs/satellite........ " + str(np.max(satellite_gsl_if_count_list)))
+        print("  > Min. GSL IFs/ground station... " + str(np.min(ground_station_gsl_if_count_list)))
+        print("  > Max. GSL IFs/ground_station... " + str(np.max(ground_station_gsl_if_count_list)))
 
     #################################
 
-    print("\nGSL IN-RANGE INFORMATION")
+    if enable_verbose_logs:
+        print("\nGSL IN-RANGE INFORMATION")
 
     # What satellites can a ground station see
     ground_station_satellites_in_range = []
@@ -185,8 +196,9 @@ def generate_dynamic_state_at(
 
     # Print how many are in range
     ground_station_num_in_range = list(map(lambda x: len(x), ground_station_satellites_in_range))
-    print("  > Min. satellites in range... " + str(np.min(ground_station_num_in_range)))
-    print("  > Max. satellites in range... " + str(np.max(ground_station_num_in_range)))
+    if enable_verbose_logs:
+        print("  > Min. satellites in range... " + str(np.min(ground_station_num_in_range)))
+        print("  > Max. satellites in range... " + str(np.max(ground_station_num_in_range)))
 
     #################################
 
@@ -208,7 +220,8 @@ def generate_dynamic_state_at(
             num_isls_per_sat,
             sat_neighbor_to_if,
             list_gsl_interfaces_info,
-            prev_output
+            prev_output,
+            enable_verbose_logs
         )
 
     elif dynamic_state_algorithm == "algorithm_free_gs_one_sat_many_only_over_isls":
@@ -223,7 +236,8 @@ def generate_dynamic_state_at(
             num_isls_per_sat,
             sat_neighbor_to_if,
             list_gsl_interfaces_info,
-            prev_output
+            prev_output,
+            enable_verbose_logs
         )
 
     elif dynamic_state_algorithm == "algorithm_free_one_only_gs_relays":
@@ -236,7 +250,8 @@ def generate_dynamic_state_at(
             sat_net_graph_only_gs,
             num_isls_per_sat,
             list_gsl_interfaces_info,
-            prev_output
+            prev_output,
+            enable_verbose_logs
         )
 
     elif dynamic_state_algorithm == "algorithm_paired_many_only_over_isls":
@@ -251,7 +266,8 @@ def generate_dynamic_state_at(
             num_isls_per_sat,
             sat_neighbor_to_if,
             list_gsl_interfaces_info,
-            prev_output
+            prev_output,
+            enable_verbose_logs
         )
     
     else:

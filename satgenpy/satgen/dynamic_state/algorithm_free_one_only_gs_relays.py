@@ -32,7 +32,8 @@ def algorithm_free_one_only_gs_relays(
         sat_net_graph_only_gs,
         num_isls_per_sat,
         list_gsl_interfaces_info,
-        prev_output
+        prev_output,
+        enable_verbose_logs
 ):
     """
     FREE-ONE ONLY OVER GROUND STATION RELAYS ALGORITHM
@@ -60,7 +61,8 @@ def algorithm_free_one_only_gs_relays(
     be used for questions of a single pair of communicating
     """
 
-    print("\nALGORITHM: FREE ONE ONLY GS RELAYS")
+    if enable_verbose_logs:
+        print("\nALGORITHM: FREE ONE ONLY GS RELAYS")
 
     # For this algorithm to function, there cannot be any ISLs
     for sid in range(len(num_isls_per_sat)):
@@ -83,7 +85,8 @@ def algorithm_free_one_only_gs_relays(
 
     # There is only one GSL interface for each node (pre-condition), which as-such will get the entire bandwidth
     output_filename = output_dynamic_state_dir + "/gsl_if_bandwidth_" + str(time_since_epoch_ns) + ".txt"
-    print("  > Writing interface bandwidth state to: " + output_filename)
+    if enable_verbose_logs:
+        print("  > Writing interface bandwidth state to: " + output_filename)
     with open(output_filename, "w+") as f_out:
         if time_since_epoch_ns == 0:
             for node_id in range(len(satellites)):
@@ -99,7 +102,8 @@ def algorithm_free_one_only_gs_relays(
     #
 
     # Calculate shortest paths
-    print("  > Calculating Floyd-Warshall for graph only with ground-station relays")
+    if enable_verbose_logs:
+        print("  > Calculating Floyd-Warshall for graph only with ground-station relays")
     dist_sat_net = nx.floyd_warshall_numpy(sat_net_graph_only_gs)
 
     # Forwarding state
@@ -110,7 +114,8 @@ def algorithm_free_one_only_gs_relays(
 
     # Now write state to file for complete graph
     output_filename = output_dynamic_state_dir + "/fstate_" + str(time_since_epoch_ns) + ".txt"
-    print("  > Writing forwarding state to: " + output_filename)
+    if enable_verbose_logs:
+        print("  > Writing forwarding state to: " + output_filename)
     with open(output_filename, "w+") as f_out:
 
         # Satellites and ground stations to ground stations
@@ -165,7 +170,8 @@ def algorithm_free_one_only_gs_relays(
                         ))
                     fstate[(current_node_id, dst_gs_node_id)] = next_hop_decision
 
-    print("")
+    if enable_verbose_logs:
+        print("")
 
     return {
         "fstate": fstate

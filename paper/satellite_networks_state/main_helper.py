@@ -163,5 +163,6 @@ class MainHelper:
             duration_s,
             self.MAX_GSL_LENGTH_M,
             self.MAX_ISL_LENGTH_M,
-            dynamic_state_algorithm
+            dynamic_state_algorithm,
+            True
         )
