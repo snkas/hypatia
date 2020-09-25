@@ -294,15 +294,17 @@ class TestEndToEnd(unittest.TestCase):
 
             # Now let's run all analyses available
 
-            # Print graphically
-            satgen.post_analysis.print_graphical_routes_and_rtt(
-                output_analysis_data_dir + "/" + name,
-                output_generated_data_dir + "/" + name,
-                default_time_step_ms,
-                duration_s,
-                12,
-                13
-            )
+            # TODO: Disabled because it requires downloading files from CDNs, which can take too long
+            # # Print graphically
+            #
+            # satgen.post_analysis.print_graphical_routes_and_rtt(
+            #     output_analysis_data_dir + "/" + name,
+            #     output_generated_data_dir + "/" + name,
+            #     default_time_step_ms,
+            #     duration_s,
+            #     12,
+            #     13
+            # )
 
             # Analyze paths
             satgen.post_analysis.analyze_path(
