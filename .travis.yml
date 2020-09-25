@@ -13,7 +13,7 @@ before_install:
 
 # Command(s) to build
 install:
-  - bash hypatia_build.sh
+  - bash hypatia_build.sh --travis
 
 # Command(s) to run tests and examples
 script:
