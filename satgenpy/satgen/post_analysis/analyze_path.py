@@ -210,7 +210,7 @@ def analyze_path(
         most_path_changes_list = sorted(most_path_changes_list, reverse=True)
         f_out.write("MOST PATH CHANGES TOP-10 WITHOUT DUPLICATE NODES\n")
         f_out.write("-------------------------------------\n")
-        f_out.write("#      Pair           Number of paths\n")
+        f_out.write("#      Pair           Number of path changes\n")
         already_plotted_nodes = set()
         num_plotted = 0
         for i in range(len(most_path_changes_list)):
