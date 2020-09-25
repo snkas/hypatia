@@ -62,7 +62,7 @@ class TestEndToEnd(unittest.TestCase):
             output_generated_data_dir = "temp_gen_data"
             num_threads = 1
             default_time_step_ms = 100
-            all_time_step_ms = [50, 100, 1000]
+            all_time_step_ms = [50, 100, 1000, 10000]
             duration_s = 200
 
             # Add base name to setting
@@ -514,6 +514,67 @@ class TestEndToEnd(unittest.TestCase):
                 all_time_step_ms,
                 duration_s
             )
+
+            # Missed path changes
+            for time_step_ms in all_time_step_ms:
+                columns = exputil.read_csv_direct_in_columns(
+                    output_analysis_data_dir + "/" + name +
+                    "/" + name + "/200s/path/data/"
+                    + "ecdf_pairs_" + str(time_step_ms) + "ms_missed_path_changes.txt",
+                    "float,pos_float"
+                )
+                for i in range(len(columns[0])):
+
+                    # Cumulative y-axis check
+                    if i == 0:
+                        self.assertEqual(columns[1][i], 0)
+                    else:
+                        self.assertEqual(columns[1][i], 1.0)
+
+                    # Only one should have missed for the 10s one
+                    if i == 0:
+                        self.assertEqual(columns[0][i], float("-inf"))
+                    else:
+                        if time_step_ms == 10000:
+                            self.assertEqual(columns[0][i], 1)
+                        else:
+                            self.assertEqual(columns[0][i], 0)
+
+            # Time between path changes
+            columns = exputil.read_csv_direct_in_columns(
+                output_analysis_data_dir + "/" + name +
+                "/" + name + "/200s/path/data/"
+                + "ecdf_overall_time_between_path_change.txt",
+                "float,pos_float"
+            )
+            self.assertEqual(len(columns[0]), 5)  # Total 5 path changes, but only 4 of them are not from epoch
+            for i in range(len(columns[0])):
+
+                # Cumulative y-axis check
+                if i == 0:
+                    self.assertEqual(columns[1][i], 0)
+                else:
+                    if i == 1:
+                        self.assertEqual(columns[1][i], 0.25)
+                    elif i == 2:
+                        self.assertEqual(columns[1][i], 0.5)
+                    elif i == 3:
+                        self.assertEqual(columns[1][i], 0.75)
+                    elif i == 4:
+                        self.assertEqual(columns[1][i], 1.0)
+
+                # Gap values
+                if i == 0:
+                    self.assertEqual(columns[0][i], float("-inf"))
+                else:
+                    if i == 1:
+                        self.assertEqual(columns[0][i], 2750000000)
+                    elif i == 2:
+                        self.assertEqual(columns[0][i], 9600000000)
+                    elif i == 3:
+                        self.assertEqual(columns[0][i], 46700000000)
+                    elif i == 4:
+                        self.assertEqual(columns[0][i], 51650000000)
 
             # Clean up
             local_shell.remove_force_recursive("temp_gen_data")

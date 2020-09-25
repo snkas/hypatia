@@ -127,7 +127,7 @@ def analyze_time_step_path(output_data_dir, satellite_network_dir,
     for src in range(len(ground_stations)):
         for dst in range(src + 1, len(ground_stations)):
             base_path_list = per_dyn_state_path_list_per_pair[0][src][dst]
-            for j in range(2, len(base_path_list)):
+            for j in range(2, len(base_path_list)):  # First change is from epoch, which is not representative
                 time_between_path_change_ns_list.append(base_path_list[j][1] - base_path_list[j - 1][1])
             for c_idx in range(0, len(configs)):
                 worse_path_list = per_dyn_state_path_list_per_pair[c_idx][src][dst]
