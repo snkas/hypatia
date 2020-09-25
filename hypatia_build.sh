@@ -8,7 +8,8 @@ echo ""
 # ns3-sat-sim
 echo "Building ns3-sat-sim..."
 cd ns3-sat-sim || exit 1
-bash build.sh --debug_all || exit 1
+# Temporarily disabled build to test quicker if it works using jekyll
+# bash build.sh --debug_all || exit 1
 # For optimized: bash build.sh --optimized || exit 1
 cd .. || exit 1
 

@@ -10,6 +10,8 @@ sudo apt-get update || exit 1
 
 # satgenpy
 echo "Installing dependencies for satgenpy..."
+pip uninstall shapely
+pip install shapely --no-binary shapely
 pip install numpy astropy ephem networkx sgp4 geopy matplotlib || exit 1
 sudo apt-get install libproj-dev proj-data proj-bin || exit 1
 sudo apt-get install libgeos-dev || exit 1
