@@ -98,7 +98,7 @@ def analyze_path(
                     dst_node_id = len(satellites) + dst
                     path = get_path(src_node_id, dst_node_id, fstate)
                     if path is None:
-                        if len(path_list_per_pair[src][dst]) == 0 or [] != path_list_per_pair[src][dst][-1]:
+                        if len(path_list_per_pair[src][dst]) == 0 or path_list_per_pair[src][dst][-1] != []:
                             path_list_per_pair[src][dst].append([])
                             num_path_changes += 1
                     else:
@@ -125,7 +125,9 @@ def analyze_path(
             r = []
             for x in path_list_per_pair[src][dst]:
                 if len(x) != 0:
-                    r.append(len(x))
+                    if len(x) < 2:
+                        raise ValueError("Path must have 0 or at least 2 nodes")
+                    r.append(len(x) - 1)  # Number of nodes - 1 is the hop count
             temp_list.append(r)
         hop_count_list_per_pair.append(temp_list)
 
@@ -143,7 +145,7 @@ def analyze_path(
             max_hop_count = np.max(hop_count_list_per_pair[src][dst])
             list_max_hop_count_to_min_hop_count.append(float(max_hop_count) / float(min_hop_count))
             list_max_minus_min_hop_count.append(max_hop_count - min_hop_count)
-            list_num_path_changes.append(len(path_list_per_pair[src][dst]))
+            list_num_path_changes.append(len(path_list_per_pair[src][dst]) - 1)  # First path is not a change, so - 1
 
     # Write and plot ECDFs
     for element in [
@@ -204,7 +206,7 @@ def analyze_path(
         most_path_changes_list = []
         for src in range(len(ground_stations)):
             for dst in range(src + 1, len(ground_stations)):
-                most_path_changes_list.append((len(path_list_per_pair[src][dst]), src, dst))
+                most_path_changes_list.append((len(path_list_per_pair[src][dst]) - 1, src, dst))
         most_path_changes_list = sorted(most_path_changes_list, reverse=True)
         f_out.write("MOST PATH CHANGES TOP-10 WITHOUT DUPLICATE NODES\n")
         f_out.write("-------------------------------------\n")

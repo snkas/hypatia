@@ -313,6 +313,91 @@ class TestEndToEnd(unittest.TestCase):
                 ""
             )
 
+            # Number of path changes per pair
+            columns = exputil.read_csv_direct_in_columns(
+                output_analysis_data_dir + "/" + name +
+                "/" + name + "/100ms_for_200s/path/data/ecdf_pairs_num_path_changes.txt",
+                "float,pos_float"
+            )
+            for i in range(len(columns[0])):
+
+                # Cumulative y-axis check
+                if i == 0:
+                    self.assertEqual(columns[1][i], 0)
+                else:
+                    self.assertEqual(columns[1][i], 1.0)
+
+                # Only one pair with 5 path changes
+                if i == 0:
+                    self.assertEqual(columns[0][i], float("-inf"))
+                else:
+                    self.assertEqual(columns[0][i], 5)
+
+            # Max minus min hop count per pair
+            columns = exputil.read_csv_direct_in_columns(
+                output_analysis_data_dir + "/" + name +
+                "/" + name + "/100ms_for_200s/path/data/ecdf_pairs_max_minus_min_hop_count.txt",
+                "float,pos_float"
+            )
+            for i in range(len(columns[0])):
+
+                # Cumulative y-axis check
+                if i == 0:
+                    self.assertEqual(columns[1][i], 0)
+                else:
+                    self.assertEqual(columns[1][i], 1.0)
+
+                # Shortest is 3 hops, longest is 6 hops, max delta is 3
+                if i == 0:
+                    self.assertEqual(columns[0][i], float("-inf"))
+                else:
+                    self.assertEqual(columns[0][i], 3)
+
+            # Max divided by min hop count per pair
+            columns = exputil.read_csv_direct_in_columns(
+                output_analysis_data_dir + "/" + name +
+                "/" + name + "/100ms_for_200s/path/data/ecdf_pairs_max_hop_count_to_min_hop_count.txt",
+                "float,pos_float"
+            )
+            for i in range(len(columns[0])):
+
+                # Cumulative y-axis check
+                if i == 0:
+                    self.assertEqual(columns[1][i], 0)
+                else:
+                    self.assertEqual(columns[1][i], 1.0)
+
+                # Shortest is 3 hops, longest is 6 hops, max/min division is 2.0
+                if i == 0:
+                    self.assertEqual(columns[0][i], float("-inf"))
+                else:
+                    self.assertEqual(columns[0][i], 2.0)
+
+            # For all pairs, the distribution how many times they changed path
+            columns = exputil.read_csv_direct_in_columns(
+                output_analysis_data_dir + "/" + name +
+                "/" + name + "/100ms_for_200s/path/data/ecdf_time_step_num_path_changes.txt",
+                "float,pos_float"
+            )
+            start_cumulative = 0.0
+            for i in range(len(columns[0])):
+
+                # Cumulative y-axis check
+                if i == 0:
+                    self.assertEqual(columns[1][i], start_cumulative)
+                else:
+                    self.assertGreater(columns[1][i], start_cumulative)
+                if i - 1 == range(len(columns[0])):
+                    self.assertEqual(columns[1][i], 1.0)
+
+                # There are only 5 time moments, none of which overlap, so this needs to be 5 times 1
+                if i == 0:
+                    self.assertEqual(columns[0][i], float("-inf"))
+                elif i > 2000 - 6:
+                    self.assertEqual(columns[0][i], 1.0)
+                else:
+                    self.assertEqual(columns[0][i], 0)
+
             # Analyze RTTs
             satgen.post_analysis.analyze_rtt(
                 output_analysis_data_dir + "/" + name,
@@ -321,6 +406,106 @@ class TestEndToEnd(unittest.TestCase):
                 duration_s,
                 ""
             )
+
+            # Min. RTT
+            columns = exputil.read_csv_direct_in_columns(
+                output_analysis_data_dir + "/" + name +
+                "/" + name + "/100ms_for_200s/rtt/data/ecdf_pairs_min_rtt_ns.txt",
+                "float,pos_float"
+            )
+            for i in range(len(columns[0])):
+
+                # Cumulative y-axis check
+                if i == 0:
+                    self.assertEqual(columns[1][i], 0)
+                else:
+                    self.assertEqual(columns[1][i], 1.0)
+
+                # Only one pair with minimum RTT 25ish
+                if i == 0:
+                    self.assertEqual(columns[0][i], float("-inf"))
+                else:
+                    self.assertAlmostEqual(columns[0][i], 25229775.250687573, delta=100)
+
+            # Max. RTT
+            columns = exputil.read_csv_direct_in_columns(
+                output_analysis_data_dir + "/" + name +
+                "/" + name + "/100ms_for_200s/rtt/data/ecdf_pairs_max_rtt_ns.txt",
+                "float,pos_float"
+            )
+            for i in range(len(columns[0])):
+
+                # Cumulative y-axis check
+                if i == 0:
+                    self.assertEqual(columns[1][i], 0)
+                else:
+                    self.assertEqual(columns[1][i], 1.0)
+
+                # Only one pair with max. RTT 48ish
+                if i == 0:
+                    self.assertEqual(columns[0][i], float("-inf"))
+                else:
+                    self.assertAlmostEqual(columns[0][i], 48165140.010532916, delta=100)
+
+            # Max. - Min. RTT
+            columns = exputil.read_csv_direct_in_columns(
+                output_analysis_data_dir + "/" + name +
+                "/" + name + "/100ms_for_200s/rtt/data/ecdf_pairs_max_minus_min_rtt_ns.txt",
+                "float,pos_float"
+            )
+            for i in range(len(columns[0])):
+
+                # Cumulative y-axis check
+                if i == 0:
+                    self.assertEqual(columns[1][i], 0)
+                else:
+                    self.assertEqual(columns[1][i], 1.0)
+
+                # Only one pair with minimum RTT of 25ish, max. RTT is 48ish
+                if i == 0:
+                    self.assertEqual(columns[0][i], float("-inf"))
+                else:
+                    self.assertAlmostEqual(columns[0][i], 48165140.010532916 - 25229775.250687573, delta=100)
+
+            # Max. / Min. RTT
+            columns = exputil.read_csv_direct_in_columns(
+                output_analysis_data_dir + "/" + name +
+                "/" + name + "/100ms_for_200s/rtt/data/ecdf_pairs_max_rtt_to_min_rtt_slowdown.txt",
+                "float,pos_float"
+            )
+            for i in range(len(columns[0])):
+
+                # Cumulative y-axis check
+                if i == 0:
+                    self.assertEqual(columns[1][i], 0)
+                else:
+                    self.assertEqual(columns[1][i], 1.0)
+
+                # Only one pair with minimum RTT of 25ish, max. RTT is 48ish
+                if i == 0:
+                    self.assertEqual(columns[0][i], float("-inf"))
+                else:
+                    self.assertAlmostEqual(columns[0][i], 48165140.010532916 / 25229775.250687573, delta=0.01)
+
+            # Geodesic slowdown
+            columns = exputil.read_csv_direct_in_columns(
+                output_analysis_data_dir + "/" + name +
+                "/" + name + "/100ms_for_200s/rtt/data/ecdf_pairs_max_rtt_to_geodesic_slowdown.txt",
+                "float,pos_float"
+            )
+            for i in range(len(columns[0])):
+
+                # Cumulative y-axis check
+                if i == 0:
+                    self.assertEqual(columns[1][i], 0)
+                else:
+                    self.assertEqual(columns[1][i], 1.0)
+
+                # Distance Manila to Dalian is 2,703 km according to Google Maps, RTT = 2*D / c
+                if i == 0:
+                    self.assertEqual(columns[0][i], float("-inf"))
+                else:
+                    self.assertAlmostEqual(columns[0][i], 48165140.010532916 / (2 * 2703000 / 0.299792), delta=0.01)
 
             # Analyze time step paths
             satgen.post_analysis.analyze_time_step_path(
