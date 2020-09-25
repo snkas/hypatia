@@ -20,3 +20,7 @@ echo "Nothing to build for satviz."
 
 # paper
 echo "Nothing to build for paper."
+
+# Confirmation build is finished
+echo ""
+echo "Hypatia modules have been built."

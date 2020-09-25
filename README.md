@@ -27,7 +27,7 @@ It consists of four main components:
   figures which are presented in the paper.
   (license: MIT)
   
-(there is a fifth folder called `dev_testing` which is used for continued development)
+(there is a fifth folder called `integration_tests` which is used for integration testing purposes)
 
 This is the code repository introduced and used in "Exploring the “Internet from space” with Hypatia" 
 by Simon Kassing*, Debopam Bhattacherjee*, André Baptista Águas, Jens Eirik Saethre and Ankit Singla

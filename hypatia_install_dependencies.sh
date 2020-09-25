@@ -30,3 +30,7 @@ echo "There are currently no dependencies for satviz."
 echo "Installing dependencies for paper..."
 pip install numpy || exit 1
 pip install git+https://github.com/snkas/networkload.git || exit 1
+
+# Confirmation dependencies are installed
+echo ""
+echo "Hypatia dependencies have been installed."
