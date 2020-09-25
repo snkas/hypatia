@@ -61,7 +61,8 @@ class TestEndToEnd(unittest.TestCase):
             # Specific outcomes
             output_generated_data_dir = "temp_gen_data"
             num_threads = 1
-            time_step_ms = 100
+            default_time_step_ms = 100
+            all_time_step_ms = [50, 100, 1000]
             duration_s = 200
 
             # Add base name to setting
@@ -218,18 +219,19 @@ class TestEndToEnd(unittest.TestCase):
             )
 
             # Forwarding state
-            print("Generating forwarding state...")
-            satgen.help_dynamic_state(
-                output_generated_data_dir,
-                num_threads,
-                name,
-                time_step_ms,
-                duration_s,
-                MAX_GSL_LENGTH_M,
-                MAX_ISL_LENGTH_M,
-                dynamic_state_algorithm,
-                False
-            )
+            for time_step_ms in all_time_step_ms:
+                print("Generating forwarding state...")
+                satgen.help_dynamic_state(
+                    output_generated_data_dir,
+                    num_threads,
+                    name,
+                    time_step_ms,
+                    duration_s,
+                    MAX_GSL_LENGTH_M,
+                    MAX_ISL_LENGTH_M,
+                    dynamic_state_algorithm,
+                    False
+                )
 
             # Clean slate start
             local_shell.remove_force_recursive("temp_analysis_data")
@@ -238,10 +240,11 @@ class TestEndToEnd(unittest.TestCase):
             satgen.post_analysis.print_routes_and_rtt(
                 output_analysis_data_dir + "/" + name,
                 output_generated_data_dir + "/" + name,
-                time_step_ms,
+                default_time_step_ms,
                 duration_s,
                 12,
-                13
+                13,
+                ""
             )
 
             # Now, we just want to see that the output path matches
@@ -287,7 +290,45 @@ class TestEndToEnd(unittest.TestCase):
                         a_rtt = float(a_spl[1])
                         b_rtt = float(b_spl[1])
                         self.assertEqual(a_time, b_time)
-                        self.assertAlmostEqual(a_rtt, b_rtt, places=6)  # TODO: Investigate platform-specific outcome in higher decimal places
+                        self.assertAlmostEqual(a_rtt, b_rtt, places=6)
+
+            # Now let's run all analyses available
+
+            # Print graphically
+            satgen.post_analysis.print_graphical_routes_and_rtt(
+                output_analysis_data_dir + "/" + name,
+                output_generated_data_dir + "/" + name,
+                default_time_step_ms,
+                duration_s,
+                12,
+                13
+            )
+
+            # Analyze paths
+            satgen.post_analysis.analyze_path(
+                output_analysis_data_dir + "/" + name,
+                output_generated_data_dir + "/" + name,
+                default_time_step_ms,
+                duration_s,
+                ""
+            )
+
+            # Analyze RTTs
+            satgen.post_analysis.analyze_rtt(
+                output_analysis_data_dir + "/" + name,
+                output_generated_data_dir + "/" + name,
+                default_time_step_ms,
+                duration_s,
+                ""
+            )
+
+            # Analyze time step paths
+            satgen.post_analysis.analyze_time_step_path(
+                output_analysis_data_dir + "/" + name,
+                output_generated_data_dir + "/" + name,
+                all_time_step_ms,
+                duration_s
+            )
 
             # Clean up
             local_shell.remove_force_recursive("temp_gen_data")

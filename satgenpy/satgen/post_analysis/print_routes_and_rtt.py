@@ -30,7 +30,7 @@ import tempfile
 
 
 def print_routes_and_rtt(base_output_dir, satellite_network_dir, dynamic_state_update_interval_ms,
-                         simulation_end_time_s, src, dst):
+                         simulation_end_time_s, src, dst, satgenpy_dir_with_ending_slash):
 
     # Local shell
     local_shell = exputil.LocalShell()
@@ -127,7 +127,7 @@ def print_routes_and_rtt(base_output_dir, satellite_network_dir, dynamic_state_u
         pdf_filename = pdf_dir + "/time_vs_networkx_rtt_" + str(src) + "_to_" + str(dst) + ".pdf"
         tf = tempfile.NamedTemporaryFile(delete=False)
         tf.close()
-        local_shell.copy_file("plot/plot_time_vs_networkx_rtt.plt", tf.name)
+        local_shell.copy_file(satgenpy_dir_with_ending_slash + "plot/plot_time_vs_networkx_rtt.plt", tf.name)
         local_shell.sed_replace_in_file_plain(tf.name, "[OUTPUT-FILE]", pdf_filename)
         local_shell.sed_replace_in_file_plain(tf.name, "[DATA-FILE]", data_filename)
         local_shell.perfect_exec("gnuplot " + tf.name)
@@ -155,7 +155,8 @@ def main():
             int(args[2]),
             int(args[3]),
             int(args[4]),
-            int(args[5])
+            int(args[5]),
+            ""  # Must be executed in satgenpy directory
         )
 
 

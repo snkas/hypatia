@@ -40,7 +40,10 @@ SPEED_OF_LIGHT_M_PER_S = 299792458.0
 GEODESIC_ECDF_PLOT_CUTOFF_KM = 500
 
 
-def analyze_rtt(output_data_dir, satellite_network_dir, dynamic_state_update_interval_ms, simulation_end_time_s):
+def analyze_rtt(
+        output_data_dir, satellite_network_dir, dynamic_state_update_interval_ms,
+        simulation_end_time_s, satgenpy_dir_with_ending_slash
+):
 
     # Dynamic state directory
     satellite_network_dynamic_state_dir = "%s/dynamic_state_%dms_for_%ds" % (
@@ -191,7 +194,7 @@ def analyze_rtt(output_data_dir, satellite_network_dir, dynamic_state_update_int
                 ))
                 print_routes_and_rtt(base_output_dir, satellite_network_dir, dynamic_state_update_interval_ms,
                                      simulation_end_time_s, len(satellites) + largest_rtt_delta_list[i][3],
-                                     len(satellites) + largest_rtt_delta_list[i][4])
+                                     len(satellites) + largest_rtt_delta_list[i][4], satgenpy_dir_with_ending_slash)
                 already_plotted_nodes.add(largest_rtt_delta_list[i][3])
                 already_plotted_nodes.add(largest_rtt_delta_list[i][4])
                 num_plotted += 1
@@ -223,7 +226,7 @@ def analyze_rtt(output_data_dir, satellite_network_dir, dynamic_state_update_int
                 ))
                 print_routes_and_rtt(base_output_dir, satellite_network_dir, dynamic_state_update_interval_ms,
                                      simulation_end_time_s, len(satellites) + most_unreachable_list[i][1],
-                                     len(satellites) + most_unreachable_list[i][2])
+                                     len(satellites) + most_unreachable_list[i][2], satgenpy_dir_with_ending_slash)
                 already_plotted_nodes.add(most_unreachable_list[i][1])
                 already_plotted_nodes.add(most_unreachable_list[i][2])
                 num_plotted += 1
@@ -247,7 +250,8 @@ def main():
             args[0],
             args[1],
             int(args[2]),
-            int(args[3])
+            int(args[3]),
+            ""  # Must be executed in satgenpy directory
         )
 
 
