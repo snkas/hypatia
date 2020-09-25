@@ -1,7 +1,7 @@
 # Main information
 echo "Hypatia: installing dependencies"
 echo ""
-echo "It is highly recommend you use a recent Linux operating system (e.g., Ubuntu 18 or higher)."
+echo "It is highly recommend you use a recent Linux operating system (e.g., Ubuntu 20 or higher)."
 echo "Python version 3.7+ is required."
 echo ""
 
@@ -10,8 +10,6 @@ sudo apt-get update || exit 1
 
 # satgenpy
 echo "Installing dependencies for satgenpy..."
-pip uninstall shapely
-pip install shapely --no-binary shapely
 pip install numpy astropy ephem networkx sgp4 geopy matplotlib || exit 1
 sudo apt-get install libproj-dev proj-data proj-bin || exit 1
 sudo apt-get install libgeos-dev || exit 1

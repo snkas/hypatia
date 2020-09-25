@@ -1,7 +1,7 @@
 # Main information
 echo "Hypatia: test"
 echo ""
-echo "It is highly recommend you use a recent Linux operating system (e.g., Ubuntu 18 or higher)."
+echo "It is highly recommend you use a recent Linux operating system (e.g., Ubuntu 20 or higher)."
 echo "Python version 3.7+ is required."
 echo ""
 
