@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
-import sys
 from .graph_tools import *
 from satgen.ground_stations import *
 from satgen.tles import *
@@ -176,23 +174,3 @@ def analyze_time_step_path(output_data_dir, satellite_network_dir,
             f_out.write("\n")
 
     print("Done")
-
-
-def main():
-    args = sys.argv[1:]
-    if len(args) != 4:
-        print("Must supply exactly four arguments")
-        print("Usage: python analyze_step_changes.py [output_data_dir] [satellite_network_dir] "
-              "[dynamic_state_update_interval_ms: e.g., 100,1000] [end_time_s]")
-        exit(1)
-    else:
-        analyze_time_step_path(
-            args[0],
-            args[1],
-            list(map(lambda x: int(x), args[2].split(","))),
-            int(args[3])
-        )
-
-
-if __name__ == "__main__":
-    main()

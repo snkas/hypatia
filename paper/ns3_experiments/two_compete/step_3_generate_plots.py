@@ -155,7 +155,7 @@ def main():
 
     # Rio de Janeiro to St. Petersburg with only ISLs on Kuiper
     local_shell.perfect_exec(
-        "cd ../../../satgenpy; python -m satgen.post_analysis.print_routes_and_rtt "
+        "cd ../../../satgenpy; python -m satgen.post_analysis.main_print_routes_and_rtt "
         "../paper/ns3_experiments/two_compete/extra_satgenpy_analysis_data ../paper/satellite_networks_state/gen_data/"
         "kuiper_630_isls_plus_grid_ground_stations_top_100_algorithm_free_one_only_over_isls "
         "100 200 1174 1229 "
@@ -164,7 +164,7 @@ def main():
 
     # Fortaleza to Tehran with only ISLs on Kuiper
     local_shell.perfect_exec(
-        "cd ../../../satgenpy; python -m satgen.post_analysis.print_routes_and_rtt "
+        "cd ../../../satgenpy; python -m satgen.post_analysis.main_print_routes_and_rtt "
         "../paper/ns3_experiments/two_compete/extra_satgenpy_analysis_data ../paper/satellite_networks_state/gen_data/"
         "kuiper_630_isls_plus_grid_ground_stations_top_100_algorithm_free_one_only_over_isls "
         "100 200 1254 1195 "

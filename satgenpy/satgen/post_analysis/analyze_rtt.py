@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-
-import sys
 from .graph_tools import *
 from satgen.isls import *
 from satgen.ground_stations import *
@@ -238,22 +236,3 @@ def analyze_rtt(
     print("Done")
 
 
-def main():
-    args = sys.argv[1:]
-    if len(args) != 4:
-        print("Must supply exactly four arguments")
-        print("Usage: python analyze_rtt.py [output_data_dir] [satellite_network_dir] "
-              "[dynamic_state_update_interval_ms] [end_time_s]")
-        exit(1)
-    else:
-        analyze_rtt(
-            args[0],
-            args[1],
-            int(args[2]),
-            int(args[3]),
-            ""  # Must be executed in satgenpy directory
-        )
-
-
-if __name__ == "__main__":
-    main()

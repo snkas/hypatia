@@ -105,7 +105,7 @@ for traffic_mode in ["specific", "general"]:
                 # Generate the path file if it does not exist yet (expensive)
                 if not local_shell.file_exists(resulting_path_filename):
                     local_shell.perfect_exec(
-                        "cd ../../../satgenpy; python -m satgen.post_analysis.print_routes_and_rtt "
+                        "cd ../../../satgenpy; python -m satgen.post_analysis.main_print_routes_and_rtt "
                         "../paper/ns3_experiments/traffic_matrix/extra_satgenpy_analysis_data "
                         "../paper/satellite_networks_state/gen_data/"
                         "kuiper_630_isls_plus_grid_ground_stations_top_100_algorithm_free_one_only_over_isls "
