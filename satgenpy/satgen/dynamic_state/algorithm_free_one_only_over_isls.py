@@ -99,6 +99,7 @@ def algorithm_free_one_only_over_isls(
     # Calculate shortest paths
     if enable_verbose_logs:
         print("  > Calculating Floyd-Warshall for graph without ground-station relays")
+    # (Note: Numpy has a deprecation warning here because of how networkx uses matrices)
     dist_sat_net_without_gs = nx.floyd_warshall_numpy(sat_net_graph_without_gs)
 
     # Forwarding state

@@ -270,7 +270,7 @@ class TestEndToEnd(unittest.TestCase):
 
             # ... and the RTT
             with open(output_analysis_data_dir + "/" + name + "/data/networkx_rtt_12_to_13.txt", "r") as f_in1:
-                with open("tests/data_to_match/kuiper_630_networkx_rtt_1173_to_1241.txt", "r") as f_in2:
+                with open("tests/data_to_match/kuiper_630/networkx_rtt_1173_to_1241.txt", "r") as f_in2:
                     lines1 = []
                     for line in f_in1:
                         lines1.append(line.strip())
