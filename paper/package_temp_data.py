@@ -80,6 +80,18 @@ for temp_dir_path in temp_dir_paths:
     local_shell.perfect_exec("scp -r %s/* temp_data/%s/" % (temp_dir_path, flat_directory_name))
 print("")
 
+# Perform cleaning commands
+print("Executing cleaning command")
+if not local_shell.file_exists("clean.sh"):
+    print("Failure -- there must be a clean.sh to remove directory names etc.")
+    print("For example, you can create an empty one if there is no cleaning needed:\n")
+    print("           echo \"echo 'No cleaning'\" > clean.sh\n")
+    exit(1)
+print("  > Executing: bash clean.sh")
+local_shell.perfect_exec("bash clean.sh", output_redirect=exputil.OutputRedirect.CONSOLE)
+print("  > Finished executing clean.sh")
+print("")
+
 # Finally create the zip
 print("Creating final archive")
 local_shell.perfect_exec("tar -czvf hypatia_paper_temp_data.tar.gz temp_data")
