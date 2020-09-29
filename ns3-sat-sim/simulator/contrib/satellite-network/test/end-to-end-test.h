@@ -31,7 +31,6 @@ using namespace ns3;
 class EndToEndTestCase : public TestCase {
 public:
     EndToEndTestCase () : TestCase ("end-to-end") {};
-    const std::string temp_dir = ".tmp-end-to-end-test";
 
     void DoRun () {
 
@@ -63,17 +62,23 @@ public:
         // Finalize the simulation
         basicSimulation->Finalize();
 
+        // TODO: Check all UDP burst packets arrived
+        // TODO: Check some timing one-ways?
+        // TODO: Check some of the ISL utilizations?
+
         // Make sure these are removed
-        remove_file_if_exists(temp_dir + "/config_ns3.properties");
-        remove_file_if_exists(temp_dir + "/topology.properties");
-        remove_file_if_exists(temp_dir + "/tcp_flow_schedule.csv");
-        remove_file_if_exists(temp_dir + "/logs_ns3/finished.txt");
-        remove_file_if_exists(temp_dir + "/logs_ns3/timing_results.txt");
-        remove_file_if_exists(temp_dir + "/logs_ns3/timing_results.csv");
-        remove_file_if_exists(temp_dir + "/logs_ns3/udp_burst_0_outgoing.csv");
-        remove_file_if_exists(temp_dir + "/logs_ns3/udp_burst_0_incoming.csv");
-        remove_dir_if_exists(temp_dir + "/logs_ns3");
-        remove_dir_if_exists(temp_dir);
+        remove_file_if_exists(run_dir + "/logs_ns3/finished.txt");
+        remove_file_if_exists(run_dir + "/logs_ns3/finished.txt");
+        remove_file_if_exists(run_dir + "/logs_ns3/isl_utilization.csv");
+        remove_file_if_exists(run_dir + "/logs_ns3/timing_results.csv");
+        remove_file_if_exists(run_dir + "/logs_ns3/timing_results.txt");
+        remove_file_if_exists(run_dir + "/logs_ns3/udp_burst_0_outgoing.csv");
+        remove_file_if_exists(run_dir + "/logs_ns3/udp_burst_0_incoming.csv");
+        remove_file_if_exists(run_dir + "/logs_ns3/udp_bursts_outgoing.csv");
+        remove_file_if_exists(run_dir + "/logs_ns3/udp_bursts_incoming.csv");
+        remove_file_if_exists(run_dir + "/logs_ns3/udp_bursts_outgoing.txt");
+        remove_file_if_exists(run_dir + "/logs_ns3/udp_bursts_incoming.txt");
+        remove_dir_if_exists(run_dir + "/logs_ns3");
 
     }
 
