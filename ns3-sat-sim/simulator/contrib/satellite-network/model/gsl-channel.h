@@ -47,46 +47,38 @@ public:
   GSLChannel ();
 
   // Transmission
-  virtual bool TransmitStart (Ptr<const Packet> p, Ptr<GSLNetDevice> src, Address dst_address, Time txTime);
-  bool TransmitTo(Ptr<const Packet> p, Ptr<GSLNetDevice> srcNetDevice, Ptr<GSLNetDevice> dstNetDevice, Time txTime, bool isSameSystem);
+  virtual bool TransmitStart (
+          Ptr<const Packet> p,
+          Ptr<GSLNetDevice> src,
+          Address dst_address,
+          Time txTime
+  );
+  bool TransmitTo(
+          Ptr<const Packet> p,
+          Ptr<GSLNetDevice> srcNetDevice,
+          Ptr<GSLNetDevice> dstNetDevice,
+          Time txTime,
+          bool isSameSystem
+  );
 
   // Device management
   void Attach (Ptr<GSLNetDevice> device);
   virtual std::size_t GetNDevices (void) const;
-  Ptr<GSLNetDevice> GetGSLDevice (std::size_t i) const;
   virtual Ptr<NetDevice> GetDevice (std::size_t i) const;
 
 protected:
   Time GetDelay (Ptr<MobilityModel> senderMobility, Ptr<MobilityModel> receiverMobility) const;
-  bool IsInitialized (void) const;
-                    
-private:
 
-  Time   m_initialDelay;      //!< Propagation delay at the initial distance
-                              //   used to give a delay estimate to the
-                              //   distributed simulator
-  double m_propagationSpeed;  //!< propagation speed on the channel
-  double m_range;             //!< maximum distance two devices can communicate over this channel
+  Time   m_initialDelay;                      //!< Propagation delay at the initial distance
+                                              //   used to give a delay estimate to the
+                                              //   distributed simulator (if it were enabled).
 
-  enum WireState
-  {
+  double m_propagationSpeedMetersPerSecond;   //!< Propagation speed on the channel (used to live calculate the delay
+                                              //   for each packet which is sent over this channel.
 
-    INITIALIZING,   /** Initializing state */
-    IDLE,           /** Idle state (no transmission from NetDevice) */
-    TRANSMITTING,   /** Transmitting state (data being transmitted from NetDevice. */
-    PROPAGATING     /** Propagating state (data is being propagated in the channel. */
-  };
-
-  class GSLLink
-  {
-    public:
-        GSLLink() : m_state (INITIALIZING), m_net_device (0) {}
-        WireState           m_state;       //!< State of the link
-        Ptr<GSLNetDevice>   m_net_device;  //!< First NetDevice
-  };
-
-  typedef sgi::hash_map<Mac48Address, GSLLink, Mac48AddressHash> MacToNetDevice;
-  typedef sgi::hash_map<Mac48Address, GSLLink, Mac48AddressHash>::iterator MacToNetDeviceI;
+  // Mac address to net device
+  typedef sgi::hash_map<Mac48Address, Ptr<GSLNetDevice>, Mac48AddressHash> MacToNetDevice;
+  typedef sgi::hash_map<Mac48Address, Ptr<GSLNetDevice>, Mac48AddressHash>::iterator MacToNetDeviceI;
   MacToNetDevice m_link;
   std::vector<Ptr<GSLNetDevice>> m_net_devices;
 

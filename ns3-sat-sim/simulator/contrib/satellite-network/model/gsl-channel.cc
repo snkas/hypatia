@@ -23,6 +23,7 @@
 
 #include "gsl-channel.h"
 #include "ns3/core-module.h"
+#include "ns3/abort.h"
 #include "ns3/mpi-interface.h"
 #include "ns3/gsl-net-device.h"
 
@@ -43,13 +44,9 @@ GSLChannel::GetTypeId (void)
                    TimeValue (Seconds (0)),
                    MakeTimeAccessor (&GSLChannel::m_initialDelay),
                    MakeTimeChecker ())
-    .AddAttribute ("PropagationSpeed", "Propagation speed through the channel",
-                   DoubleValue (299792458.0),
-                   MakeDoubleAccessor (&GSLChannel::m_propagationSpeed),
-                   MakeDoubleChecker<double> ())
-    .AddAttribute ("Range", "Maximum distance satellite and ground station can communicate",
-                   DoubleValue (1089686),  // from SpaceX recent FCC filing (in meters): sqrt(550000^2 + 940700^2)
-                   MakeDoubleAccessor (&GSLChannel::m_range),
+    .AddAttribute ("PropagationSpeed", "Propagation speed through the channel in m/s",
+                   DoubleValue (299792458.0), // Default is speed of light
+                   MakeDoubleAccessor (&GSLChannel::m_propagationSpeedMetersPerSecond),
                    MakeDoubleChecker<double> ())
   ;
   return tid;
@@ -75,46 +72,53 @@ GSLChannel::TransmitStart (
   Mac48Address address48 = Mac48Address::ConvertFrom (dst_address);
   MacToNetDeviceI it = m_link.find (address48);
   if (it != m_link.end ()) {
-    Ptr<GSLNetDevice> dst = it->second.m_net_device;
+    Ptr<GSLNetDevice> dst = it->second;
     bool sameSystem = (src->GetNode()->GetSystemId() == dst->GetNode()->GetSystemId());
-    return TransmitTo(p, src, it->second.m_net_device, txTime, sameSystem);
+    return TransmitTo(p, src, it->second, txTime, sameSystem);
   }
 
+  NS_ABORT_MSG("MAC address could not be mapped to a network device.");
   return false;
 }
 
 bool
 GSLChannel::TransmitTo(Ptr<const Packet> p, Ptr<GSLNetDevice> srcNetDevice, Ptr<GSLNetDevice> destNetDevice, Time txTime, bool isSameSystem) {
-  Ptr<MobilityModel> senderMobility = srcNetDevice->GetNode()->GetObject<MobilityModel>();
 
+  // Mobility models for source and destination
+  Ptr<MobilityModel> senderMobility = srcNetDevice->GetNode()->GetObject<MobilityModel>();
   Ptr<Node> receiverNode = destNetDevice->GetNode();
   Ptr<MobilityModel> receiverMobility = receiverNode->GetObject<MobilityModel>();
 
-  // if the satellite is not in range do not send the packet
-  /* TODO: For now, we assume the forwarding state is able to prevent this value getting exceeded too much.
-  double distance = senderMobility->GetDistanceFrom(receiverMobility);
-  if (distance > m_range) {
-    // do not send the packet
-    return false;
-  }
-   */
+  // Calculate delay
+  Time delay = this->GetDelay(senderMobility, receiverMobility);
+  NS_LOG_DEBUG(
+          "Sending packet " << p << " from node " << srcNetDevice->GetNode()->GetId()
+          << " to " << destNetDevice->GetNode()->GetId() << " with delay " << delay
+  );
 
-  NS_LOG_LOGIC ("transmitting to: " << destNetDevice->GetNode()->GetId());
-  Time delay = this->GetDelay(senderMobility, receiverMobility); 
+  // Distributed mode is not enabled
+  NS_ABORT_MSG_UNLESS(isSameSystem, "MPI distributed mode is currently not supported by the GSL channel.");
 
-  if (isSameSystem) {
-    Simulator::ScheduleWithContext (receiverNode->GetId(),
-                                    txTime + delay, &GSLNetDevice::Receive,
-                                    destNetDevice, p->Copy ());
-  }
-  else {
-#ifdef NS3_MPI
-    Time rxTime = Simulator::Now () + txTime + delay;
-    MpiInterface::SendPacket (p->Copy (), rxTime, destNetDevice->GetNode()->GetId (), destNetDevice->GetIfIndex());
-#else
-    NS_FATAL_ERROR ("Can't use distributed simulator without MPI compiled in");
-#endif
-  }
+  // Schedule arrival of packet at destination network device
+  Simulator::ScheduleWithContext(
+          receiverNode->GetId(),
+          txTime + delay,
+          &GSLNetDevice::Receive,
+          destNetDevice,
+          p->Copy ()
+  );
+
+  // Re-enabled below code if distributed is again enabled:
+  //  if (isSameSystem) {
+  //
+  //  } else {
+  //#ifdef NS3_MPI
+  //    Time rxTime = Simulator::Now () + txTime + delay;
+  //    MpiInterface::SendPacket (p->Copy (), rxTime, destNetDevice->GetNode()->GetId (), destNetDevice->GetIfIndex());
+  //#else
+  //    NS_FATAL_ERROR ("Can't use distributed simulator without MPI compiled in");
+  //#endif
+  //  }
 
   return true;
 }
@@ -123,80 +127,49 @@ void
 GSLChannel::Attach (Ptr<GSLNetDevice> device)
 {
     NS_LOG_FUNCTION (this << device);
-    NS_ASSERT (device != 0);
-
-    GSLLink gslLink = GSLLink();
-    gslLink.m_net_device = device;
-    gslLink.m_state = IDLE;
+    NS_ABORT_MSG_IF (device == 0, "Cannot add zero pointer network device.");
 
     Mac48Address address48 = Mac48Address::ConvertFrom (device->GetAddress());
-    m_link[address48] = gslLink;
+    m_link[address48] = device;
     m_net_devices.push_back(device);
-}
-
-std::size_t
-GSLChannel::GetNDevices (void) const
-{
-  NS_LOG_FUNCTION_NOARGS ();
-  return m_net_devices.size();
-}
-
-Ptr<GSLNetDevice>
-GSLChannel::GetGSLDevice (std::size_t i) const
-{
-  NS_LOG_FUNCTION_NOARGS ();
-  return m_net_devices[i];
-}
-
-Ptr<NetDevice>
-GSLChannel::GetDevice (std::size_t i) const
-{
-  NS_LOG_FUNCTION_NOARGS ();
-  if (i == 0) {
-    return GetGSLDevice(0);
-  }
-  // TODO: Why this?
-  uint32_t node_0_system_id = GetGSLDevice(0)->GetNode()->GetSystemId();
-  for (uint32_t i = 0; i < GetNDevices(); i++) {
-    if (GetGSLDevice(i)->GetNode()->GetSystemId() != node_0_system_id) {
-      return GetGSLDevice(i);
-    }
-  }
-  return GetGSLDevice (i);
 }
 
 Time
 GSLChannel::GetDelay (Ptr<MobilityModel> a, Ptr<MobilityModel> b) const
 {
-  double distance = a->GetDistanceFrom (b);
-  double seconds = distance / m_propagationSpeed;
+  double distance_m = a->GetDistanceFrom (b);
+  double seconds = distance_m / m_propagationSpeedMetersPerSecond;
   return Seconds (seconds);
 }
 
-bool
-GSLChannel::IsInitialized (void) const
+size_t Mac48AddressHash::operator() (Mac48Address const &x) const
 {
-  for (auto it = m_link.begin(); it != m_link.end(); it++) {
-    NS_ASSERT (it->second.m_state != INITIALIZING);
-  }
+    uint8_t address[6]; //!< address value
+    x.CopyTo(address);
 
-  return true;
+    uint32_t host = 0;
+    uint8_t byte = 0;
+    for (size_t i = 0; i < 6; i++) {
+        byte = address[i];
+        host <<= 8;
+        host |= byte;
+    }
+
+    return host;
 }
 
-size_t Mac48AddressHash::operator() (Mac48Address const &x) const
-{ 
-  uint8_t address[6]; //!< address value
-  x.CopyTo(address);
+std::size_t
+GSLChannel::GetNDevices (void) const
+{
+    NS_LOG_FUNCTION_NOARGS ();
+    return m_net_devices.size();
+}
 
-  uint32_t host = 0;
-  uint8_t byte = 0;
-  for (size_t i = 0; i < 6; i++) {
-    byte = address[i]; 
-    host <<= 8;
-    host |= byte;
-  }
-
-  return host;
+Ptr<NetDevice>
+GSLChannel::GetDevice (std::size_t i) const
+{
+    NS_LOG_FUNCTION (this << i);
+    return m_net_devices.at(i);
 }
 
 } // namespace ns3

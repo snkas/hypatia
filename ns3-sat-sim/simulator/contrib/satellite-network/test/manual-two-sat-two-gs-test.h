@@ -20,6 +20,7 @@
 #include "ns3/arbiter-single-forward-helper.h"
 #include "ns3/ipv4-arbiter-routing-helper.h"
 #include "ns3/gsl-if-bandwidth-helper.h"
+#include "ns3/gsl-channel.h"
 
 #include "ns3/test.h"
 #include "test-helpers.h"
@@ -290,6 +291,10 @@ public:
         // Remove the traffic control layer (must be done here, else the Ipv4 helper will assign a default one)
         TrafficControlHelper tch_gsl_uninstaller;
         tch_gsl_uninstaller.Uninstall(devices);
+
+        // Some small checks about what was installed
+        ASSERT_EQUAL(4, allNodes.Get(2)->GetObject<Ipv4>()->GetNetDevice(1)->GetChannel()->GetObject<GSLChannel>()->GetNDevices());
+        ASSERT_EQUAL(devices.Get(1), allNodes.Get(2)->GetObject<Ipv4>()->GetNetDevice(1)->GetChannel()->GetObject<GSLChannel>()->GetDevice(1));
 
         //////////////////////
         // ARP lookup table filling
