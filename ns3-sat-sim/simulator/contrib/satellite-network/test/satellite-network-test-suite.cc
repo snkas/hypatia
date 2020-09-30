@@ -16,7 +16,9 @@ public:
         // Manual end-to-end, which means the application helpers are used
         // directly instead of the schedulers reading from files
         AddTestCase(new EndToEndTestCase, TestCase::QUICK);
-        AddTestCase(new ManualTwoSatTwoGsTest, TestCase::QUICK);
+        AddTestCase(new ManualTwoSatTwoGsFirstTest, TestCase::QUICK);
+        AddTestCase(new ManualTwoSatTwoGsUpSharedTest, TestCase::QUICK);
+        AddTestCase(new ManualTwoSatTwoGsDownBothFullTest, TestCase::QUICK);
 
         // Simple info wrappers
         AddTestCase(new SatelliteInfoTestCase, TestCase::QUICK);
