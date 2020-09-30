@@ -4,6 +4,8 @@
 #include "ns3/test.h"
 #include "end-to-end-test.h"
 #include "manual-two-sat-two-gs-test.h"
+#include "satellite-info-test.h"
+#include "ground-station-info-test.h"
 
 using namespace ns3;
 
@@ -15,6 +17,10 @@ public:
         // directly instead of the schedulers reading from files
         AddTestCase(new EndToEndTestCase, TestCase::QUICK);
         AddTestCase(new ManualTwoSatTwoGsTest, TestCase::QUICK);
+
+        // Simple info wrappers
+        AddTestCase(new SatelliteInfoTestCase, TestCase::QUICK);
+        AddTestCase(new GroundStationInfoTestCase, TestCase::QUICK);
 
     }
 };
