@@ -40,7 +40,7 @@ GSLChannel::GetTypeId (void)
     .SetParent<Channel> ()
     .SetGroupName ("GSL")
     .AddConstructor<GSLChannel> ()
-    .AddAttribute ("Delay", "Inital propagation delay through the channel",
+    .AddAttribute ("Delay", "Initial propagation delay through the channel",
                    TimeValue (Seconds (0)),
                    MakeTimeAccessor (&GSLChannel::m_initialDelay),
                    MakeTimeChecker ())
