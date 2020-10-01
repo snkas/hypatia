@@ -39,6 +39,9 @@ public:
 
     void setup_scenario() {
 
+        // Clear all nodes
+        allNodes = NodeContainer();
+
         // Satellites have node id 0 and 1
         // Ground stations have node id 2 and 3
 
@@ -648,10 +651,9 @@ public:
         ApplicationContainer udpApp = udpBurstHelper.Install(allNodes);
         udpApp.Start(Seconds(0.0));
 
+        // UDP burst info entry
         int src_udp_id = 3;
         int dst_udp_id = 2;
-
-        // UDP burst info entry
         UdpBurstInfo udpBurstInfo(
                 0,
                 src_udp_id,
@@ -683,10 +685,9 @@ public:
         app.Start(NanoSeconds(0));
         app.Stop(NanoSeconds(10000000000000));
 
+        // 3 --> 0
         int src_tcp_id = 3;
         int dst_tcp_id = 0;
-
-        // 3 --> 0
         TcpFlowSendHelper source0(
                 "ns3::TcpSocketFactory",
                 InetSocketAddress(allNodes.Get(dst_tcp_id)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 1024),
@@ -722,6 +723,181 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////
+
+class ManualTwoSatTwoGsUpSharedUdpTest : public ManualTwoSatTwoGsTest {
+public:
+    ManualTwoSatTwoGsUpSharedUdpTest () : ManualTwoSatTwoGsTest ("manual-two-sat-two-gs up-shared-udp") {};
+
+    void DoRun () {
+
+        // Test many configs
+        std::vector<std::tuple<int64_t, int64_t, double, double, int64_t, int64_t, double, double>> test_configs;
+
+        // Ground station sends to other ground station and to one satellite
+        test_configs.push_back(std::make_tuple(3, 2, 4.0, 3.5, 3, 0, 4.0, 3.5));
+        test_configs.push_back(std::make_tuple(3, 2, 4.0, 3.5, 3, 2, 4.0, 3.5));
+
+        // Ground station sends two flows to one satellite
+        test_configs.push_back(std::make_tuple(3, 1, 4.0, 3.5, 3, 1, 4.0, 3.5));
+        test_configs.push_back(std::make_tuple(3, 0, 4.0, 3.5, 3, 0, 4.0, 3.5));
+
+        // Satellite sends to other satellite and one ground station
+        test_configs.push_back(std::make_tuple(0, 1, 20.0, 4.0, 0, 2, 20.0, 7.0));
+        test_configs.push_back(std::make_tuple(0, 1, 20.0, 4.0, 0, 3, 20.0, 7.0));
+        test_configs.push_back(std::make_tuple(1, 0, 20.0, 4.0, 1, 2, 20.0, 7.0));
+        test_configs.push_back(std::make_tuple(1, 0, 20.0, 4.0, 1, 3, 20.0, 7.0));
+
+        // Over the ISL
+        test_configs.push_back(std::make_tuple(0, 1, 3.0, 2.0, 0, 1, 3.0, 2.0));
+        test_configs.push_back(std::make_tuple(1, 0, 3.0, 2.0, 1, 0, 3.0, 2.0));
+        test_configs.push_back(std::make_tuple(0, 1, 20.0, 4.0, 1, 0, 20.0, 4.0));
+        test_configs.push_back(std::make_tuple(1, 0, 20.0, 4.0, 0, 1, 20.0, 4.0));
+
+        // Both satellite send full down to one ground station
+        test_configs.push_back(std::make_tuple(1, 2, 20.0, 7.0, 0, 2, 20.0, 7.0));
+        test_configs.push_back(std::make_tuple(1, 3, 20.0, 7.0, 0, 3, 20.0, 7.0));
+
+        // Both ground stations send full to one satellite each
+        test_configs.push_back(std::make_tuple(3, 0, 20.0, 7.0, 2, 0, 20.0, 7.0));
+        test_configs.push_back(std::make_tuple(3, 1, 20.0, 7.0, 2, 1, 20.0, 7.0));
+
+        // Each ground station sends to one satellite
+        test_configs.push_back(std::make_tuple(3, 0, 20.0, 7.0, 2, 1, 20.0, 7.0));
+        test_configs.push_back(std::make_tuple(3, 1, 20.0, 7.0, 2, 0, 20.0, 7.0));
+
+        // Check outcome of each config
+        for (size_t i = 0; i < test_configs.size(); i++) {
+            std::cout << "UDP config: " << i << std::endl;
+            std::tuple<int64_t, int64_t, double, double, int64_t, int64_t, double, double> config = test_configs.at(i);
+
+            // Retrieve from config
+            int src_udp_id_1 = std::get<0>(config);
+            int dst_udp_id_1 = std::get<1>(config);
+            double burst_1_rate = std::get<2>(config);
+            double burst_1_exp_rate = std::get<3>(config);
+            int src_udp_id_2 = std::get<4>(config);
+            int dst_udp_id_2 = std::get<5>(config);
+            double burst_2_rate = std::get<6>(config);
+            double burst_2_exp_rate = std::get<7>(config);
+
+            const std::string temp_dir = ".tmp-manual-two-sat-two-gs-up-shared-udp-test";
+
+            // Create temporary run directory
+            mkdir_if_not_exists(temp_dir);
+
+            // A configuration file
+            std::ofstream config_file;
+            config_file.open (temp_dir + "/config_ns3.properties");
+            int64_t duration_ns = 500000000;
+            double duration_s = duration_ns / 1e9;
+            config_file << "simulation_end_time_ns=" << duration_ns << std::endl;
+            config_file << "simulation_seed=987654321" << std::endl;
+            config_file.close();
+
+            // Load basic simulation environment
+            Ptr<BasicSimulation> basicSimulation = CreateObject<BasicSimulation>(temp_dir);
+
+            // Basic optimization
+            TcpOptimizer::OptimizeBasic(basicSimulation);
+
+            // Install the scenario
+            setup_scenario();
+
+            //////////////////////
+            // Arbiter routing
+
+            Ptr<ArbiterCustom2> arbiter;
+
+            arbiter = CreateObject<ArbiterCustom2>(allNodes.Get(0), allNodes);
+            allNodes.Get(0)->GetObject<Ipv4>()->GetRoutingProtocol()->GetObject<Ipv4ArbiterRouting>()->SetArbiter(arbiter);
+
+            arbiter = CreateObject<ArbiterCustom2>(allNodes.Get(1), allNodes);
+            allNodes.Get(1)->GetObject<Ipv4>()->GetRoutingProtocol()->GetObject<Ipv4ArbiterRouting>()->SetArbiter(arbiter);
+
+            arbiter = CreateObject<ArbiterCustom2>(allNodes.Get(2), allNodes);
+            allNodes.Get(2)->GetObject<Ipv4>()->GetRoutingProtocol()->GetObject<Ipv4ArbiterRouting>()->SetArbiter(arbiter);
+
+            arbiter = CreateObject<ArbiterCustom2>(allNodes.Get(3), allNodes);
+            allNodes.Get(3)->GetObject<Ipv4>()->GetRoutingProtocol()->GetObject<Ipv4ArbiterRouting>()->SetArbiter(arbiter);
+
+            //////////////////////
+            // UDP application
+
+            // Install a UDP burst client on all
+            UdpBurstHelper udpBurstHelper(1026, basicSimulation->GetLogsDir());
+            ApplicationContainer udpApp = udpBurstHelper.Install(allNodes);
+            udpApp.Start(Seconds(0.0));
+
+            // UDP burst info entry
+            UdpBurstInfo udpBurstInfo1(
+                    0,
+                    src_udp_id_1,
+                    dst_udp_id_1,
+                    burst_1_rate, // Rate in Mbit/s
+                    0,
+                    100000000000, // Duration in ns // 100000000000
+                    "abc",
+                    "def"
+            );
+            udpApp.Get(src_udp_id_1)->GetObject<UdpBurstApplication>()->RegisterOutgoingBurst(
+                    udpBurstInfo1,
+                    InetSocketAddress(allNodes.Get(dst_udp_id_1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 1026),
+                    true
+            );
+            udpApp.Get(dst_udp_id_1)->GetObject<UdpBurstApplication>()->RegisterIncomingBurst(
+                    udpBurstInfo1,
+                    true
+            );
+
+            // UDP burst info entry
+            UdpBurstInfo udpBurstInfo2(
+                    1,
+                    src_udp_id_2,
+                    dst_udp_id_2,
+                    burst_2_rate, // Rate in Mbit/s
+                    0,
+                    100000000000, // Duration in ns // 100000000000
+                    "abc",
+                    "def"
+            );
+            udpApp.Get(src_udp_id_2)->GetObject<UdpBurstApplication>()->RegisterOutgoingBurst(
+                    udpBurstInfo2,
+                    InetSocketAddress(allNodes.Get(dst_udp_id_2)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 1026),
+                    true
+            );
+            udpApp.Get(dst_udp_id_2)->GetObject<UdpBurstApplication>()->RegisterIncomingBurst(
+                    udpBurstInfo2,
+                    true
+            );
+
+            // Run simulation
+            basicSimulation->Run();
+
+            // And the UDP flows should have half of the 7 Mbit/s up of the ground station each
+            std::vector<std::tuple<UdpBurstInfo, uint64_t>> incoming_1_info = udpApp.Get(dst_udp_id_1)->GetObject<UdpBurstApplication>()->GetIncomingBurstsInformation();
+            std::vector<std::tuple<UdpBurstInfo, uint64_t>> incoming_2_info = udpApp.Get(dst_udp_id_2)->GetObject<UdpBurstApplication>()->GetIncomingBurstsInformation();
+            size_t index_2 = 0;
+            if (dst_udp_id_1 == dst_udp_id_2) {
+                index_2 = 1;
+            }
+            double measured_rate_1 = (double) std::get<1>(incoming_1_info.at(0)) * 1500.0 / duration_s / 125000.0;
+            double measured_rate_2 = (double) std::get<1>(incoming_2_info.at(index_2)) * 1500.0 / duration_s / 125000.0;
+            std::cout << "UDP Rate 1: " << measured_rate_1 << std::endl;
+            std::cout << "UDP Rate 2: " << measured_rate_2 << std::endl;
+
+            // Checks
+            ASSERT_EQUAL_APPROX(measured_rate_1, burst_1_exp_rate, 0.2);
+            ASSERT_EQUAL_APPROX(measured_rate_2, burst_2_exp_rate, 0.2);
+            ASSERT_TRUE(measured_rate_1 + measured_rate_2 <= burst_1_exp_rate + burst_2_exp_rate);
+
+            // Finalize the simulation
+            basicSimulation->Finalize();
+
+        }
+
+    }
+
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -780,10 +956,9 @@ public:
         ApplicationContainer udpApp = udpBurstHelper.Install(allNodes);
         udpApp.Start(Seconds(0.0));
 
+        // UDP burst info entry
         int src_udp_id = 0;
         int dst_udp_id = 2;
-
-        // UDP burst info entry
         UdpBurstInfo udpBurstInfo(
                 0,
                 src_udp_id,
@@ -794,8 +969,6 @@ public:
                 "abc",
                 "def"
         );
-
-        // Register all bursts being sent from there and being received
         udpApp.Get(src_udp_id)->GetObject<UdpBurstApplication>()->RegisterOutgoingBurst(
                 udpBurstInfo,
                 InetSocketAddress(allNodes.Get(dst_udp_id)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 1026),
@@ -815,35 +988,36 @@ public:
         app.Start(NanoSeconds(0));
         app.Stop(NanoSeconds(10000000000000));
 
-        int src_id = 3;
-        int dst_id = 2;
-
         // src --> dst
+        int src_tcp_id = 3;
+        int dst_tcp_id = 2;
         TcpFlowSendHelper source0(
                 "ns3::TcpSocketFactory",
-                InetSocketAddress(allNodes.Get(dst_id)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 1024),
+                InetSocketAddress(allNodes.Get(dst_tcp_id)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 1024),
                 10000000000,
                 0,
                 true,
                 basicSimulation->GetLogsDir(),
                 ""
         );
-        app = source0.Install(allNodes.Get(src_id));
+        app = source0.Install(allNodes.Get(src_tcp_id));
         app.Start(NanoSeconds(0));
         app.Stop(NanoSeconds(10000000000));
 
         // Run simulation
         basicSimulation->Run();
 
-        std::vector<std::tuple<UdpBurstInfo, uint64_t>> incoming_2_info = udpApp.Get(dst_udp_id)->GetObject<UdpBurstApplication>()->GetIncomingBurstsInformation();
-        std::cout << "TCP Rate:" << app.Get(0)->GetObject<TcpFlowSendApplication>()->GetAckedBytes() / 2.0 / 125000.0 << std::endl;
-        std::cout << "UDP Rate:" << (double) std::get<1>(incoming_2_info.at(0)) * 1500.0 / 1.0 / 125000.0  << std::endl;
+        // UDP info
+        std::vector<std::tuple<UdpBurstInfo, uint64_t>> incoming_udp_info = udpApp.Get(dst_udp_id)->GetObject<UdpBurstApplication>()->GetIncomingBurstsInformation();
+
+//        std::cout << "TCP Rate:" << app.Get(0)->GetObject<TcpFlowSendApplication>()->GetAckedBytes() / 2.0 / 125000.0 << std::endl;
+//        std::cout << "UDP Rate:" << (double) std::get<1>(incoming_2_info.at(0)) * 1500.0 / 1.0 / 125000.0  << std::endl;
 
         // TCP flow should have about 5.5-7 Mbit/s (TCP is not great)
         ASSERT_EQUAL_APPROX(app.Get(0)->GetObject<TcpFlowSendApplication>()->GetAckedBytes() / 2.0 / 125000.0, 7.0, 1.5);
 
         // And the UDP flow around 6 Mbit/s
-        ASSERT_EQUAL_APPROX((double) std::get<1>(incoming_2_info.at(0)) * 1500.0 / 2.0 / 125000.0, 6, 0.2);
+        ASSERT_EQUAL_APPROX((double) std::get<1>(incoming_udp_info.at(0)) * 1500.0 / 2.0 / 125000.0, 6, 0.2);
 
         // Finalize the simulation
         basicSimulation->Finalize();

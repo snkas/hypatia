@@ -13,11 +13,13 @@ class SatelliteNetworkTestSuite : public TestSuite {
 public:
     SatelliteNetworkTestSuite() : TestSuite("satellite-network", UNIT) {
 
-        // Manual end-to-end, which means the application helpers are used
-        // directly instead of the schedulers reading from files
+        // Running it complete with reading in files etc.
         AddTestCase(new EndToEndTestCase, TestCase::QUICK);
+
+        // Running it by creating every component manually (not using satellite-network.cc/h)
         AddTestCase(new ManualTwoSatTwoGsFirstTest, TestCase::QUICK);
         AddTestCase(new ManualTwoSatTwoGsUpSharedTest, TestCase::QUICK);
+        AddTestCase(new ManualTwoSatTwoGsUpSharedUdpTest, TestCase::QUICK);
         AddTestCase(new ManualTwoSatTwoGsDownBothFullTest, TestCase::QUICK);
 
         // Simple info wrappers
