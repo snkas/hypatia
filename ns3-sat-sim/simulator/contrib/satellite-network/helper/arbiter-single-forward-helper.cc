@@ -21,10 +21,10 @@
 
 namespace ns3 {
 
-ArbiterSingleForwardHelper::ArbiterSingleForwardHelper (Ptr<BasicSimulation> basicSimulation, Ptr<TopologySatelliteNetwork> topology) {
+ArbiterSingleForwardHelper::ArbiterSingleForwardHelper (Ptr<BasicSimulation> basicSimulation, NodeContainer nodes) {
     std::cout << "SETUP SINGLE FORWARDING ROUTING" << std::endl;
     m_basicSimulation = basicSimulation;
-    m_topology = topology;
+    m_nodes = nodes;
 
     // Read in initial forwarding state
     std::cout << "  > Create initial single forwarding state" << std::endl;
@@ -33,11 +33,10 @@ ArbiterSingleForwardHelper::ArbiterSingleForwardHelper (Ptr<BasicSimulation> bas
 
     // Set the routing arbiters
     std::cout << "  > Setting the routing arbiter on each node" << std::endl;
-    NodeContainer nodes = m_topology->GetNodes();
-    for (int i = 0; i < m_topology->GetNumNodes(); i++) {
-        Ptr<ArbiterSingleForward> arbiter = CreateObject<ArbiterSingleForward>(nodes.Get(i), nodes, m_topology, initial_forwarding_state[i]);
+    for (size_t i = 0; i < m_nodes.GetN(); i++) {
+        Ptr<ArbiterSingleForward> arbiter = CreateObject<ArbiterSingleForward>(m_nodes.Get(i), m_nodes, initial_forwarding_state[i]);
         m_arbiters.push_back(arbiter);
-        nodes.Get(i)->GetObject<Ipv4>()->GetRoutingProtocol()->GetObject<Ipv4ArbiterRouting>()->SetArbiter(arbiter);
+        m_nodes.Get(i)->GetObject<Ipv4>()->GetRoutingProtocol()->GetObject<Ipv4ArbiterRouting>()->SetArbiter(arbiter);
     }
     basicSimulation->RegisterTimestamp("Setup routing arbiter on each node");
 
@@ -54,9 +53,9 @@ ArbiterSingleForwardHelper::ArbiterSingleForwardHelper (Ptr<BasicSimulation> bas
 std::vector<std::vector<std::tuple<int32_t, int32_t, int32_t>>>
 ArbiterSingleForwardHelper::InitialEmptyForwardingState() {
     std::vector<std::vector<std::tuple<int32_t, int32_t, int32_t>>> initial_forwarding_state;
-    for (int i = 0; i < m_topology->GetNumNodes(); i++) {
+    for (size_t i = 0; i < m_nodes.GetN(); i++) {
         std::vector <std::tuple<int32_t, int32_t, int32_t>> next_hop_list;
-        for (int j = 0; j < m_topology->GetNumNodes(); j++) {
+        for (size_t j = 0; j < m_nodes.GetN(); j++) {
             next_hop_list.push_back(std::make_tuple(-2, -2, -2)); // -2 indicates an invalid entry
         }
         initial_forwarding_state.push_back(next_hop_list);
@@ -89,23 +88,35 @@ void ArbiterSingleForwardHelper::UpdateForwardingState(int64_t t) {
             // Split on ,
             std::vector<std::string> comma_split = split_string(line, ",", 5);
 
-            // Retrieve node identifiers
+            // Retrieve identifiers
             int64_t current_node_id = parse_positive_int64(comma_split[0]);
             int64_t target_node_id = parse_positive_int64(comma_split[1]);
             int64_t next_hop_node_id = parse_int64(comma_split[2]);
             int64_t my_if_id = parse_int64(comma_split[3]);
             int64_t next_if_id = parse_int64(comma_split[4]);
-            // TODO: more node identifier checks
-            if (next_hop_node_id < -1) {
-                throw std::runtime_error("Invalid next hop id.");
-            } else if (my_if_id < -1) {
-                throw std::runtime_error("Invalid my interface id.");
-            } else if (next_if_id < -1) {
-                throw std::runtime_error("Invalid next interface id.");
-            }
+
+            // Check the node identifiers
+            NS_ABORT_MSG_IF(current_node_id < 0 || current_node_id >= m_nodes.GetN(), "Invalid current node id.");
+            NS_ABORT_MSG_IF(target_node_id < 0 || target_node_id >= m_nodes.GetN(), "Invalid target node id.");
+            NS_ABORT_MSG_IF(next_hop_node_id < -1 || next_hop_node_id >= m_nodes.GetN(), "Invalid next hop node id.");
+
+            // Drops are only valid if all three values are -1
+            NS_ABORT_MSG_IF(
+                    !(next_hop_node_id == -1 && my_if_id == -1 && next_if_id == -1)
+                    &&
+                    !(next_hop_node_id != -1 && my_if_id != -1 && next_if_id != -1),
+                    "All three must be -1 for it to signify a drop."
+            );
+
+            // Check the interfaces exist
+            NS_ABORT_MSG_UNLESS(my_if_id == -1 || (my_if_id >= 0 && my_if_id + 1 < m_nodes.Get(current_node_id)->GetObject<Ipv4>()->GetNInterfaces()), "Invalid current interface");
+            NS_ABORT_MSG_UNLESS(next_if_id == -1 || (next_if_id >= 0 && next_if_id + 1 < m_nodes.Get(next_hop_node_id)->GetObject<Ipv4>()->GetNInterfaces()), "Invalid next hop interface");
+
+            // TODO: If my_if_id is a GSL interface, the destination must also be a GSL interface
+            // TODO: If my_if_id is a p2p laser interface, the destination interface must be its counter-part
 
             // Add to forwarding state
-            m_arbiters[current_node_id]->SetSingleForwardState(
+            m_arbiters.at(current_node_id)->SetSingleForwardState(
                     target_node_id,
                     next_hop_node_id,
                     1 + my_if_id,   // Skip the loop-back interface
@@ -128,11 +139,13 @@ void ArbiterSingleForwardHelper::UpdateForwardingState(int64_t t) {
     // but it does create a very tight coupling between the two -- technically this class
     // can be used for other purposes as well
     if (!parse_boolean(m_basicSimulation->GetConfigParamOrDefault("satellite_network_force_static", "false"))) {
+
         // Plan the next update
         int64_t next_update_ns = t + m_dynamicStateUpdateIntervalNs;
         if (next_update_ns < m_basicSimulation->GetSimulationEndTimeNs()) {
             Simulator::Schedule(NanoSeconds(m_dynamicStateUpdateIntervalNs), &ArbiterSingleForwardHelper::UpdateForwardingState, this, next_update_ns);
         }
+
     }
 
 }

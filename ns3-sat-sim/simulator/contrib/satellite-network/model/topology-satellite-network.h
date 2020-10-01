@@ -76,7 +76,6 @@ namespace ns3 {
         void SetNodeInterfaceBandwidth(int32_t node_id, int32_t if_id, double bandwidth);
 
         // Additional accessors
-        uint32_t GetIpOfNodeInterface(int32_t node_id, int32_t if_id);
         uint32_t GetNumSatellites();
         uint32_t GetNumGroundStations();
         const NodeContainer& GetSatelliteNodes();

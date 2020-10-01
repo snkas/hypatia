@@ -33,13 +33,9 @@ TypeId ArbiterSatnet::GetTypeId (void)
 
 ArbiterSatnet::ArbiterSatnet(
         Ptr<Node> this_node,
-        NodeContainer nodes,
-        Ptr<TopologySatelliteNetwork> topology
+        NodeContainer nodes
 ) : Arbiter(this_node, nodes) {
-
-    // Topology
-    m_topology = topology;
-
+    // Intentionally left empty
 }
 
 ArbiterResult ArbiterSatnet::Decide(
@@ -64,11 +60,14 @@ ArbiterResult ArbiterSatnet::Decide(
     int32_t own_if_id = std::get<1>(next_node_id_my_if_next_if);
     int32_t next_if_id = std::get<2>(next_node_id_my_if_next_if);
 
-    // Invalid selected node id
+    // If the result is invalid
+    NS_ABORT_MSG_IF(next_node_id == -2 || own_if_id == -2 || next_if_id == -2, "Forwarding state is not set for this node to this target node (invalid).");
+
+    // Check whether it is a drop or not
     if (next_node_id != -1) {
 
         // Retrieve the IP gateway
-        uint32_t select_ip_gateway = m_topology->GetIpOfNodeInterface(next_node_id, next_if_id);
+        uint32_t select_ip_gateway = m_nodes.Get(next_node_id)->GetObject<Ipv4>()->GetAddress(next_if_id, 0).GetLocal().Get();
 
         // We succeeded in finding the interface and gateway to the next hop
         return ArbiterResult(false, own_if_id, select_ip_gateway);

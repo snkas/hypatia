@@ -25,20 +25,21 @@
 #include "ns3/topology-satellite-network.h"
 #include "ns3/ipv4-arbiter-routing.h"
 #include "ns3/arbiter-single-forward.h"
+#include "ns3/abort.h"
 
 namespace ns3 {
 
     class ArbiterSingleForwardHelper
     {
     public:
-        ArbiterSingleForwardHelper(Ptr<BasicSimulation> basicSimulation, Ptr<TopologySatelliteNetwork> topology);
+        ArbiterSingleForwardHelper(Ptr<BasicSimulation> basicSimulation, NodeContainer nodes);
     private:
         std::vector<std::vector<std::tuple<int32_t, int32_t, int32_t>>> InitialEmptyForwardingState();
         void UpdateForwardingState(int64_t t);
 
         // Parameters
         Ptr<BasicSimulation> m_basicSimulation;
-        Ptr<TopologySatelliteNetwork> m_topology;
+        NodeContainer m_nodes;
         int64_t m_dynamicStateUpdateIntervalNs;
         std::vector<Ptr<ArbiterSingleForward>> m_arbiters;
 

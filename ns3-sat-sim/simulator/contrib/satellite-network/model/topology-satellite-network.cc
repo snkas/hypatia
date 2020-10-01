@@ -546,9 +546,4 @@ namespace ns3 {
         return m_endpoints;
     }
 
-    uint32_t TopologySatelliteNetwork::GetIpOfNodeInterface(int32_t node_id, int32_t if_id) {
-       // std::cout << "Grabbing for " << node_id << " with interface: " << if_id << std::endl;
-        return m_allNodes.Get(node_id)->GetObject<Ipv4>()->GetAddress(if_id, 0).GetLocal().Get();
-    }
-
 }

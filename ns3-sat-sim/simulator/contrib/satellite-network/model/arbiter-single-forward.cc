@@ -34,9 +34,8 @@ TypeId ArbiterSingleForward::GetTypeId (void)
 ArbiterSingleForward::ArbiterSingleForward(
         Ptr<Node> this_node,
         NodeContainer nodes,
-        Ptr<TopologySatelliteNetwork> topology,
         std::vector<std::tuple<int32_t, int32_t, int32_t>> next_hop_list
-) : ArbiterSatnet(this_node, nodes, topology)
+) : ArbiterSatnet(this_node, nodes)
 {
     m_next_hop_list = next_hop_list;
 }
@@ -52,13 +51,14 @@ std::tuple<int32_t, int32_t, int32_t> ArbiterSingleForward::TopologySatelliteNet
 }
 
 void ArbiterSingleForward::SetSingleForwardState(int32_t target_node_id, int32_t next_node_id, int32_t own_if_id, int32_t next_if_id) {
+    NS_ABORT_MSG_IF(next_node_id == -2 || own_if_id == -2 || next_if_id == -2, "Not permitted to set invalid (-2).");
     m_next_hop_list[target_node_id] = std::make_tuple(next_node_id, own_if_id, next_if_id);
 }
 
 std::string ArbiterSingleForward::StringReprOfForwardingState() {
     std::ostringstream res;
     res << "Single-forward state of node " << m_node_id << std::endl;
-    for (int i = 0; i < m_topology->GetNumNodes(); i++) {
+    for (size_t i = 0; i < m_nodes.GetN(); i++) {
         res << "  -> " << i << ": (" << std::get<0>(m_next_hop_list[i]) << ", "
             << std::get<1>(m_next_hop_list[i]) << ", "
             << std::get<2>(m_next_hop_list[i]) << ")" << std::endl;

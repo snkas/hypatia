@@ -37,7 +37,7 @@ public:
 
     ManualTwoSatTwoGsTest(std::string s) : TestCase(s) {};
 
-    void setup_scenario() {
+    void setup_scenario(double distance_multiplier) {
 
         // Clear all nodes
         allNodes = NodeContainer();
@@ -72,15 +72,15 @@ public:
 
         // Satellites mobility models
         mobility.Install(satelliteNodes.Get(0));
-        satelliteNodes.Get(0)->GetObject<MobilityModel>()->SetPosition(Vector(-1000000, -1000000, -1000000));
+        satelliteNodes.Get(0)->GetObject<MobilityModel>()->SetPosition(Vector(-1 * distance_multiplier, -1 * distance_multiplier, -1 * distance_multiplier));
         mobility.Install(satelliteNodes.Get(1));
-        satelliteNodes.Get(1)->GetObject<MobilityModel>()->SetPosition(Vector(1000000, -1000000, -1000000));
+        satelliteNodes.Get(1)->GetObject<MobilityModel>()->SetPosition(Vector(1 * distance_multiplier, -1 * distance_multiplier, -1 * distance_multiplier));
 
         // Ground stations mobility models
         mobility.Install(groundStationNodes.Get(0));
-        groundStationNodes.Get(0)->GetObject<MobilityModel>()->SetPosition(Vector(1000000, 1000000, -1000000));
+        groundStationNodes.Get(0)->GetObject<MobilityModel>()->SetPosition(Vector(1 * distance_multiplier, 1 * distance_multiplier, -1 * distance_multiplier));
         mobility.Install(groundStationNodes.Get(1));
-        groundStationNodes.Get(1)->GetObject<MobilityModel>()->SetPosition(Vector(1000000, -1000000, 1000000));
+        groundStationNodes.Get(1)->GetObject<MobilityModel>()->SetPosition(Vector(1 * distance_multiplier, -1 * distance_multiplier, 1 * distance_multiplier));
 
         //////////////////////
         // IPv4 stack with routing arbiter
@@ -345,7 +345,7 @@ public:
         Ptr<BasicSimulation> basicSimulation = CreateObject<BasicSimulation>(temp_dir);
 
         // Install the scenario
-        setup_scenario();
+        setup_scenario(1000000.0);
 
         //////////////////////
         // Arbiter routing
@@ -624,7 +624,7 @@ public:
         TcpOptimizer::OptimizeBasic(basicSimulation);
 
         // Install the scenario
-        setup_scenario();
+        setup_scenario(1000000.0);
 
         //////////////////////
         // Arbiter routing
@@ -801,7 +801,7 @@ public:
             TcpOptimizer::OptimizeBasic(basicSimulation);
 
             // Install the scenario
-            setup_scenario();
+            setup_scenario(1000000.0);
 
             //////////////////////
             // Arbiter routing
@@ -926,7 +926,7 @@ public:
         TcpOptimizer::OptimizeBasic(basicSimulation);
 
         // Install the scenario
-        setup_scenario();
+        setup_scenario(1000000.0);
 
         //////////////////////
         // Arbiter routing
@@ -1018,6 +1018,158 @@ public:
 
         // And the UDP flow around 6 Mbit/s
         ASSERT_EQUAL_APPROX((double) std::get<1>(incoming_udp_info.at(0)) * 1500.0 / 2.0 / 125000.0, 6, 0.2);
+
+        // Finalize the simulation
+        basicSimulation->Finalize();
+
+    }
+
+};
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+class ManualTwoSatTwoGsChangingForwardingTest : public ManualTwoSatTwoGsTest {
+public:
+    ManualTwoSatTwoGsChangingForwardingTest () : ManualTwoSatTwoGsTest ("manual-two-sat-two-gs changing-forwarding") {};
+
+    void DoRun () {
+
+        // Retrieve from config
+        int src_udp_id_1 = 2;
+        int dst_udp_id_1 = 3;
+        double burst_1_rate = 100.0;
+
+        const std::string temp_dir = ".tmp-manual-two-sat-two-gs-changing-forwarding-test";
+
+        // Create temporary run directory
+        mkdir_if_not_exists(temp_dir);
+        mkdir_if_not_exists(temp_dir + "/network_state");
+
+        // Configuration file
+        std::ofstream config_file;
+        config_file.open (temp_dir + "/config_ns3.properties");
+        config_file << "simulation_end_time_ns=4000000000" << std::endl; // 4s duration
+        config_file << "simulation_seed=987654321" << std::endl;
+        config_file << "dynamic_state_update_interval_ns=1000000000" << std::endl; // Every 1000ms
+        config_file << "satellite_network_routes_dir=network_state" << std::endl;
+        config_file << "satellite_network_force_static=false" << std::endl;
+        config_file.close();
+
+        // Forwarding state files
+        std::ofstream fstate_file;
+
+        fstate_file.open (temp_dir + "/network_state/fstate_0.txt");
+        fstate_file << "2,3,0,0,1" << std::endl;
+        fstate_file << "0,3,1,0,0" << std::endl;
+        fstate_file << "1,3,3,1,0" << std::endl;
+        fstate_file.close();
+
+        fstate_file.open (temp_dir + "/network_state/fstate_1000000000.txt");
+        fstate_file << "0,3,-1,-1,-1" << std::endl;
+        fstate_file.close();
+
+        fstate_file.open (temp_dir + "/network_state/fstate_2000000000.txt");
+        fstate_file << "0,3,3,1,0" << std::endl;
+        fstate_file.close();
+
+        fstate_file.open (temp_dir + "/network_state/fstate_3000000000.txt");
+        fstate_file << "2,3,1,0,1" << std::endl;
+        fstate_file.close();
+
+        // Load basic simulation environment
+        Ptr<BasicSimulation> basicSimulation = CreateObject<BasicSimulation>(temp_dir);
+
+        // Install the scenario
+        setup_scenario(100.0);
+
+        // Load in the arbiter helper
+        ArbiterSingleForwardHelper arbiterHelper(basicSimulation, allNodes);
+
+        // Get the arbiter of node 2
+        Ptr<Arbiter> arbiter = allNodes.Get(2)->GetObject<Ipv4>()->GetRoutingProtocol()->GetObject<Ipv4ArbiterRouting>()->GetArbiter();
+
+        // At the start
+        ASSERT_EQUAL(
+            arbiter->GetObject<ArbiterSingleForward>()->StringReprOfForwardingState(),
+            "Single-forward state of node 2\n"
+            "  -> 0: (-2, -2, -2)\n"
+            "  -> 1: (-2, -2, -2)\n"
+            "  -> 2: (-2, -2, -2)\n"
+            "  -> 3: (0, 1, 2)\n"
+        );
+
+        // Basic optimization
+        TcpOptimizer::OptimizeBasic(basicSimulation);
+
+        //////////////////////
+        // UDP application
+
+        // Install a UDP burst client on all
+        UdpBurstHelper udpBurstHelper(1026, basicSimulation->GetLogsDir());
+        ApplicationContainer udpApp = udpBurstHelper.Install(allNodes);
+        udpApp.Start(Seconds(0.0));
+
+        // UDP burst info entry
+        UdpBurstInfo udpBurstInfo1(
+                0,
+                src_udp_id_1,
+                dst_udp_id_1,
+                burst_1_rate, // Rate in Mbit/s
+                0,
+                100000000000, // Duration in ns // 100000000000
+                "abc",
+                "def"
+        );
+        udpApp.Get(src_udp_id_1)->GetObject<UdpBurstApplication>()->RegisterOutgoingBurst(
+                udpBurstInfo1,
+                InetSocketAddress(allNodes.Get(dst_udp_id_1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 1026),
+                true
+        );
+        udpApp.Get(dst_udp_id_1)->GetObject<UdpBurstApplication>()->RegisterIncomingBurst(
+                udpBurstInfo1,
+                true
+        );
+
+        // Run simulation
+        basicSimulation->Run();
+
+        // At the end
+        ASSERT_EQUAL(
+                arbiter->GetObject<ArbiterSingleForward>()->StringReprOfForwardingState(),
+                "Single-forward state of node 2\n"
+                "  -> 0: (-2, -2, -2)\n"
+                "  -> 1: (-2, -2, -2)\n"
+                "  -> 2: (-2, -2, -2)\n"
+                "  -> 3: (1, 1, 2)\n"
+        );
+
+        // Incoming counting
+        int arrival_0s_to_1s = 0;
+        int arrival_1s_to_2s = 0;
+        int arrival_2s_to_3s = 0;
+        int arrival_3s_to_4s = 0;
+        std::vector<std::string> lines_precise_incoming_csv = read_file_direct(temp_dir + "/logs_ns3/udp_burst_0_incoming.csv");
+        for (std::string line : lines_precise_incoming_csv) {
+            std::vector <std::string> line_spl = split_string(line, ",");
+            int64_t timestamp = parse_positive_int64(line_spl[2]);
+            if (timestamp < 1000000000) {
+                arrival_0s_to_1s += 1;
+            } else if (timestamp < 2000000000) {
+                arrival_1s_to_2s += 1;
+            } else if (timestamp < 3000000000) {
+                arrival_2s_to_3s += 1;
+            } else if (timestamp < 4000000000) {
+                arrival_3s_to_4s += 1;
+            }
+        }
+
+        // Only an outage in interval [1s, 2s)
+        double expected_packets_at_full_rate_over_isl = 4.0 * 1000.0 * 1000.0 / 8.0 / 1500.0;
+        double expected_packets_at_full_rate_over_gsl_only = 7.0 * 1000.0 * 1000.0 / 8.0 / 1500.0;
+        ASSERT_EQUAL_APPROX(arrival_0s_to_1s, expected_packets_at_full_rate_over_isl, 5);
+        ASSERT_EQUAL_APPROX(arrival_1s_to_2s, 100, 5); // 100 packets are still in the ISL queue
+        ASSERT_EQUAL_APPROX(arrival_2s_to_3s, expected_packets_at_full_rate_over_gsl_only, 5);
+        ASSERT_EQUAL_APPROX(arrival_3s_to_4s, expected_packets_at_full_rate_over_gsl_only, 5);
 
         // Finalize the simulation
         basicSimulation->Finalize();

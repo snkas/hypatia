@@ -46,7 +46,7 @@ class ArbiterSatnet : public Arbiter
 
 public:
     static TypeId GetTypeId (void);
-    ArbiterSatnet(Ptr<Node> this_node, NodeContainer nodes, Ptr<TopologySatelliteNetwork> topology);
+    ArbiterSatnet(Ptr<Node> this_node, NodeContainer nodes);
 
     // Topology implementation
     ArbiterResult Decide(
@@ -80,9 +80,6 @@ public:
     ) = 0;
 
     virtual std::string StringReprOfForwardingState() = 0;
-
-protected:
-    Ptr<TopologySatelliteNetwork> m_topology;
 
 };
 

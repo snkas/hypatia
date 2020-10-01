@@ -24,6 +24,7 @@
 #include "ns3/arbiter-satnet.h"
 #include "ns3/topology-satellite-network.h"
 #include "ns3/hash.h"
+#include "ns3/abort.h"
 #include "ns3/ipv4-header.h"
 #include "ns3/udp-header.h"
 #include "ns3/tcp-header.h"
@@ -39,7 +40,6 @@ public:
     ArbiterSingleForward(
             Ptr<Node> this_node,
             NodeContainer nodes,
-            Ptr<TopologySatelliteNetwork> topology,
             std::vector<std::tuple<int32_t, int32_t, int32_t>> next_hop_list
     );
 
