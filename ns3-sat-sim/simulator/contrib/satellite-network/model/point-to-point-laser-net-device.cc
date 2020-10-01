@@ -723,11 +723,7 @@ PointToPointLaserNetDevice::TrackUtilization(bool next_state_is_on) {
             m_utilization.push_back(((double) m_busy_time_counter_ns) / ((double) m_interval_ns));
 
             // This must match up
-            if (m_idle_time_counter_ns + m_busy_time_counter_ns != m_interval_ns) {
-                std::cout << m_idle_time_counter_ns << std::endl;
-                std::cout << m_busy_time_counter_ns << std::endl;
-                throw std::runtime_error("Must match up");
-            }
+            NS_ABORT_MSG_IF(m_idle_time_counter_ns + m_busy_time_counter_ns != m_interval_ns, "Not all time is accounted for");
 
             // Move to next interval
             m_idle_time_counter_ns = 0;
