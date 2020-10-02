@@ -254,11 +254,16 @@ namespace ns3 {
         NS_ABORT_MSG_UNLESS(fs.is_open(), "File isls.txt could not be opened");
 
         // Read ISL pair from each line
-        int32_t sat0_id;
-        int32_t sat1_id;
-        while(fs >> sat0_id >> sat1_id) {
-            Ptr<Satellite> sat0 = m_satellites[sat0_id];
-            Ptr<Satellite> sat1 = m_satellites[sat1_id];
+        std::string line;
+        int counter = 0;
+        while (std::getline(fs, line)) {
+            std::vector<std::string> res = split_string(line, " ", 2);
+
+            // Retrieve satellite identifiers
+            int32_t sat0_id = parse_positive_int64(res.at(0));
+            int32_t sat1_id = parse_positive_int64(res.at(1));
+            Ptr<Satellite> sat0 = m_satellites.at(sat0_id);
+            Ptr<Satellite> sat1 = m_satellites.at(sat1_id);
 
             // Install a p2p laser link between these two satellites
             NodeContainer c;
@@ -290,49 +295,13 @@ namespace ns3 {
                 m_islFromTo.push_back(std::make_pair(sat1_id, sat0_id));
             }
 
+            counter += 1;
         }
-
         fs.close();
-    }
 
-    void TopologySatelliteNetwork::CollectUtilizationStatistics() {
-        if (m_enable_isl_utilization_tracking) {
+        // Completed
+        std::cout << "    >> Created " << std::to_string(counter) << " ISL(s)" << std::endl;
 
-            // Open CSV file
-            FILE* file_utilization_csv = fopen((m_basicSimulation->GetLogsDir() + "/isl_utilization.csv").c_str(), "w+");
-
-            // Go over every ISL network device
-            for (size_t i = 0; i < m_islNetDevices.GetN(); i++) {
-                Ptr<PointToPointLaserNetDevice> dev = m_islNetDevices.Get(i)->GetObject<PointToPointLaserNetDevice>();
-                const std::vector<double> utilization = dev->FinalizeUtilization();
-                std::pair<int32_t, int32_t> src_dst = m_islFromTo[i];
-                int64_t interval_left_side_ns = 0;
-                for (size_t j = 0; j < utilization.size(); j++) {
-
-                    // Only write if it is the last one, or if the utilization is different from the next
-                    if (j == utilization.size() - 1 || utilization[j] != utilization[j + 1]) {
-
-                        // Write plain to the CSV file:
-                        // <src>,<dst>,<interval start (ns)>,<interval end (ns)>,<utilization 0.0-1.0>
-                        fprintf(file_utilization_csv,
-                                "%d,%d,%" PRId64 ",%" PRId64 ",%f\n",
-                                src_dst.first,
-                                src_dst.second,
-                                interval_left_side_ns,
-                                (j + 1) * m_isl_utilization_tracking_interval_ns,
-                                utilization[j]
-                        );
-
-                        interval_left_side_ns = (j + 1) * m_isl_utilization_tracking_interval_ns;
-
-                    }
-                }
-            }
-
-            // Close CSV file
-            fclose(file_utilization_csv);
-
-        }
     }
 
     void
@@ -412,7 +381,8 @@ namespace ns3 {
             m_ipv4_helper.NewNetwork();
 
             // Give a progress update if at an even 10%
-            if (((i + 1) % (int) (devices.GetN() / 10.0)) == 0 || (i + 1) == devices.GetN()) {
+            int update_interval = (int) std::ceil(devices.GetN() / 10.0);
+            if (((i + 1) % update_interval) == 0 || (i + 1) == devices.GetN()) {
                 int64_t now_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
                 printf("       - %.2f%% (t = %.2f s, update took %.2f s)\n",
                     (float) (i + 1) / (float) devices.GetN() * 100.0,
@@ -470,6 +440,46 @@ namespace ns3 {
 
         }
 
+    }
+
+    void TopologySatelliteNetwork::CollectUtilizationStatistics() {
+        if (m_enable_isl_utilization_tracking) {
+
+            // Open CSV file
+            FILE* file_utilization_csv = fopen((m_basicSimulation->GetLogsDir() + "/isl_utilization.csv").c_str(), "w+");
+
+            // Go over every ISL network device
+            for (size_t i = 0; i < m_islNetDevices.GetN(); i++) {
+                Ptr<PointToPointLaserNetDevice> dev = m_islNetDevices.Get(i)->GetObject<PointToPointLaserNetDevice>();
+                const std::vector<double> utilization = dev->FinalizeUtilization();
+                std::pair<int32_t, int32_t> src_dst = m_islFromTo[i];
+                int64_t interval_left_side_ns = 0;
+                for (size_t j = 0; j < utilization.size(); j++) {
+
+                    // Only write if it is the last one, or if the utilization is different from the next
+                    if (j == utilization.size() - 1 || utilization[j] != utilization[j + 1]) {
+
+                        // Write plain to the CSV file:
+                        // <src>,<dst>,<interval start (ns)>,<interval end (ns)>,<utilization 0.0-1.0>
+                        fprintf(file_utilization_csv,
+                                "%d,%d,%" PRId64 ",%" PRId64 ",%f\n",
+                                src_dst.first,
+                                src_dst.second,
+                                interval_left_side_ns,
+                                (j + 1) * m_isl_utilization_tracking_interval_ns,
+                                utilization[j]
+                        );
+
+                        interval_left_side_ns = (j + 1) * m_isl_utilization_tracking_interval_ns;
+
+                    }
+                }
+            }
+
+            // Close CSV file
+            fclose(file_utilization_csv);
+
+        }
     }
 
     uint32_t TopologySatelliteNetwork::GetNumSatellites() {

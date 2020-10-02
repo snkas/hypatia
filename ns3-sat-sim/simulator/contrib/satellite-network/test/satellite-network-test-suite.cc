@@ -6,6 +6,7 @@
 #include "manual-two-sat-two-gs-test.h"
 #include "satellite-info-test.h"
 #include "ground-station-info-test.h"
+#include "end-to-end-special-test.h"
 
 using namespace ns3;
 
@@ -15,6 +16,7 @@ public:
 
         // Running it complete with reading in files etc.
         AddTestCase(new EndToEndTestCase, TestCase::QUICK);
+        AddTestCase(new EndToEndSpecialTestCase, TestCase::QUICK);
 
         // Running it by creating every component manually (not using satellite-network.cc/h)
         AddTestCase(new ManualTwoSatTwoGsFirstTest, TestCase::QUICK);
