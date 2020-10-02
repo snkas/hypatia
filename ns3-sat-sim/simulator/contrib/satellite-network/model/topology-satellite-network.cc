@@ -472,12 +472,6 @@ namespace ns3 {
 
     }
 
-    void TopologySatelliteNetwork::SetNodeInterfaceBandwidth(int32_t node_id, int32_t if_id, double bandwidth) {
-        m_allNodes.Get(node_id)->GetObject<Ipv4>()->GetNetDevice(if_id)->GetObject<GSLNetDevice>()->SetDataRate(
-                DataRate (std::to_string(m_gsl_data_rate_megabit_per_s * bandwidth) + "Mbps")
-        );
-    }
-
     uint32_t TopologySatelliteNetwork::GetNumSatellites() {
         return m_satelliteNodes.GetN();
     }

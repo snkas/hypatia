@@ -22,6 +22,7 @@ public:
         AddTestCase(new ManualTwoSatTwoGsUpSharedUdpTest, TestCase::QUICK);
         AddTestCase(new ManualTwoSatTwoGsDownBothFullTest, TestCase::QUICK);
         AddTestCase(new ManualTwoSatTwoGsChangingForwardingTest, TestCase::QUICK);
+        AddTestCase(new ManualTwoSatTwoGsChangingRateTest, TestCase::QUICK);
 
         // Simple info wrappers
         AddTestCase(new SatelliteInfoTestCase, TestCase::QUICK);

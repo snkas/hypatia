@@ -1179,3 +1179,180 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////
+
+class ManualTwoSatTwoGsChangingRateTest : public ManualTwoSatTwoGsTest {
+public:
+    ManualTwoSatTwoGsChangingRateTest () : ManualTwoSatTwoGsTest ("manual-two-sat-two-gs changing-rate") {};
+
+    void DoRun () {
+
+        // Retrieve from config
+        int src_udp_id_1 = 2;
+        int dst_udp_id_1 = 3;
+        double burst_1_rate = 100.0;
+
+        const std::string temp_dir = ".tmp-manual-two-sat-two-gs-changing-rate-test";
+
+        // Create temporary run directory
+        mkdir_if_not_exists(temp_dir);
+        mkdir_if_not_exists(temp_dir + "/network_state");
+
+        // Configuration file
+        std::ofstream config_file;
+        config_file.open (temp_dir + "/config_ns3.properties");
+        config_file << "simulation_end_time_ns=4000000000" << std::endl; // 4s duration
+        config_file << "simulation_seed=987654321" << std::endl;
+        config_file << "dynamic_state_update_interval_ns=1000000000" << std::endl; // Every 1000ms
+        config_file << "satellite_network_routes_dir=network_state" << std::endl;
+        config_file << "satellite_network_force_static=false" << std::endl;
+        config_file << "gsl_data_rate_megabit_per_s=7.0" << std::endl;
+        config_file.close();
+
+        // Forwarding state files
+        std::ofstream fstate_file;
+
+        fstate_file.open (temp_dir + "/network_state/fstate_0.txt");
+        fstate_file << "2,3,0,0,1" << std::endl;
+        fstate_file << "0,3,1,0,0" << std::endl;
+        fstate_file << "1,3,3,1,0" << std::endl;
+        fstate_file.close();
+
+        fstate_file.open (temp_dir + "/network_state/fstate_1000000000.txt");
+        fstate_file << "0,3,-1,-1,-1" << std::endl;
+        fstate_file.close();
+
+        fstate_file.open (temp_dir + "/network_state/fstate_2000000000.txt");
+        fstate_file << "0,3,3,1,0" << std::endl;
+        fstate_file.close();
+
+        fstate_file.open (temp_dir + "/network_state/fstate_3000000000.txt");
+        fstate_file << "2,3,1,0,1" << std::endl;
+        fstate_file.close();
+
+        // Interface bandwidth files
+        std::ofstream gsl_if_bw_file;
+
+        gsl_if_bw_file.open (temp_dir + "/network_state/gsl_if_bandwidth_0.txt");
+        gsl_if_bw_file << "0,1,1.0" << std::endl;
+        gsl_if_bw_file << "1,1,0.4" << std::endl;
+        gsl_if_bw_file << "2,0,1.0" << std::endl;
+        gsl_if_bw_file << "3,0,1.0" << std::endl;
+        gsl_if_bw_file.close();
+
+        gsl_if_bw_file.open (temp_dir + "/network_state/gsl_if_bandwidth_1000000000.txt");
+        gsl_if_bw_file.close();
+
+        gsl_if_bw_file.open (temp_dir + "/network_state/gsl_if_bandwidth_2000000000.txt");
+        gsl_if_bw_file << "0,1,2.0" << std::endl;
+        gsl_if_bw_file << "2,0,2.0" << std::endl;
+        gsl_if_bw_file.close();
+
+        gsl_if_bw_file.open (temp_dir + "/network_state/gsl_if_bandwidth_3000000000.txt");
+        gsl_if_bw_file << "2,0,3.0" << std::endl;
+        gsl_if_bw_file << "1,1,3.0" << std::endl;
+        gsl_if_bw_file.close();
+
+        // Load basic simulation environment
+        Ptr<BasicSimulation> basicSimulation = CreateObject<BasicSimulation>(temp_dir);
+
+        // Install the scenario
+        setup_scenario(100.0);
+
+        // Load in the arbiter helper
+        ArbiterSingleForwardHelper arbiterHelper(basicSimulation, allNodes);
+
+        // Load in GSL interface bandwidth helper
+        GslIfBandwidthHelper gslIfBandwidthHelper(basicSimulation, allNodes);
+
+        // Get the arbiter of node 2
+        Ptr<Arbiter> arbiter = allNodes.Get(2)->GetObject<Ipv4>()->GetRoutingProtocol()->GetObject<Ipv4ArbiterRouting>()->GetArbiter();
+
+        // At the start
+        ASSERT_EQUAL(
+                arbiter->GetObject<ArbiterSingleForward>()->StringReprOfForwardingState(),
+                "Single-forward state of node 2\n"
+                "  -> 0: (-2, -2, -2)\n"
+                "  -> 1: (-2, -2, -2)\n"
+                "  -> 2: (-2, -2, -2)\n"
+                "  -> 3: (0, 1, 2)\n"
+        );
+
+        // Basic optimization
+        TcpOptimizer::OptimizeBasic(basicSimulation);
+
+        //////////////////////
+        // UDP application
+
+        // Install a UDP burst client on all
+        UdpBurstHelper udpBurstHelper(1026, basicSimulation->GetLogsDir());
+        ApplicationContainer udpApp = udpBurstHelper.Install(allNodes);
+        udpApp.Start(Seconds(0.0));
+
+        // UDP burst info entry
+        UdpBurstInfo udpBurstInfo1(
+                0,
+                src_udp_id_1,
+                dst_udp_id_1,
+                burst_1_rate, // Rate in Mbit/s
+                0,
+                100000000000, // Duration in ns // 100000000000
+                "abc",
+                "def"
+        );
+        udpApp.Get(src_udp_id_1)->GetObject<UdpBurstApplication>()->RegisterOutgoingBurst(
+                udpBurstInfo1,
+                InetSocketAddress(allNodes.Get(dst_udp_id_1)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 1026),
+                true
+        );
+        udpApp.Get(dst_udp_id_1)->GetObject<UdpBurstApplication>()->RegisterIncomingBurst(
+                udpBurstInfo1,
+                true
+        );
+
+        // Run simulation
+        basicSimulation->Run();
+
+        // At the end
+        ASSERT_EQUAL(
+                arbiter->GetObject<ArbiterSingleForward>()->StringReprOfForwardingState(),
+                "Single-forward state of node 2\n"
+                "  -> 0: (-2, -2, -2)\n"
+                "  -> 1: (-2, -2, -2)\n"
+                "  -> 2: (-2, -2, -2)\n"
+                "  -> 3: (1, 1, 2)\n"
+        );
+
+        // Incoming counting
+        int arrival_0s_to_1s = 0;
+        int arrival_1s_to_2s = 0;
+        int arrival_2s_to_3s = 0;
+        int arrival_3s_to_4s = 0;
+        std::vector<std::string> lines_precise_incoming_csv = read_file_direct(temp_dir + "/logs_ns3/udp_burst_0_incoming.csv");
+        for (std::string line : lines_precise_incoming_csv) {
+            std::vector <std::string> line_spl = split_string(line, ",");
+            int64_t timestamp = parse_positive_int64(line_spl[2]);
+            if (timestamp < 1000000000) {
+                arrival_0s_to_1s += 1;
+            } else if (timestamp < 2000000000) {
+                arrival_1s_to_2s += 1;
+            } else if (timestamp < 3000000000) {
+                arrival_2s_to_3s += 1;
+            } else if (timestamp < 4000000000) {
+                arrival_3s_to_4s += 1;
+            }
+        }
+
+        // Only an outage in interval [1s, 2s)
+        ASSERT_EQUAL_APPROX(arrival_0s_to_1s, 2.8 * 1000.0 * 1000.0 / 8.0 / 1500.0, 5);
+        ASSERT_EQUAL_APPROX(arrival_1s_to_2s, (2.8 / 4.0) * 100.0 + 100.0, 5); // 100 packets are still in the GSL queue, and then the ISL queue is put into the GSL queue at 2.8 Mbit/s (losing 1.2 Mbit/s)
+        ASSERT_EQUAL_APPROX(arrival_2s_to_3s, 14.0 * 1000.0 * 1000.0 / 8.0 / 1500.0, 5);
+        ASSERT_EQUAL_APPROX(arrival_3s_to_4s, 21.0 * 1000.0 * 1000.0 / 8.0 / 1500.0, 5);
+
+        // Finalize the simulation
+        basicSimulation->Finalize();
+
+    }
+
+};
+
+////////////////////////////////////////////////////////////////////////////////////////

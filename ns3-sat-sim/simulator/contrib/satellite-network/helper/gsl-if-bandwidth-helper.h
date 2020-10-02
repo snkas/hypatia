@@ -31,13 +31,14 @@ namespace ns3 {
     class GslIfBandwidthHelper
     {
     public:
-        GslIfBandwidthHelper(Ptr<BasicSimulation> basicSimulation, Ptr<TopologySatelliteNetwork> topology);
+        GslIfBandwidthHelper(Ptr<BasicSimulation> basicSimulation, NodeContainer nodes);
     private:
         void UpdateGslIfBandwidth(int64_t t);
 
         // Parameters
         Ptr<BasicSimulation> m_basicSimulation;
-        Ptr<TopologySatelliteNetwork> m_topology;
+        NodeContainer m_nodes;
+        double m_gsl_data_rate_megabit_per_s;
         int64_t m_dynamicStateUpdateIntervalNs;
 
     };

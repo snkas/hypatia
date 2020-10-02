@@ -21,10 +21,11 @@
 
 namespace ns3 {
 
-    GslIfBandwidthHelper::GslIfBandwidthHelper (Ptr<BasicSimulation> basicSimulation, Ptr<TopologySatelliteNetwork> topology) {
+    GslIfBandwidthHelper::GslIfBandwidthHelper (Ptr<BasicSimulation> basicSimulation, NodeContainer nodes) {
         std::cout << "SETUP GSL IF BANDWIDTH HELPER" << std::endl;
         m_basicSimulation = basicSimulation;
-        m_topology = topology;
+        m_nodes = nodes;
+        m_gsl_data_rate_megabit_per_s = parse_positive_double(m_basicSimulation->GetConfigParamOrFail("gsl_data_rate_megabit_per_s"));
 
         // Load first forwarding state
         m_dynamicStateUpdateIntervalNs = parse_positive_int64(m_basicSimulation->GetConfigParamOrFail("dynamic_state_update_interval_ns"));
@@ -64,10 +65,18 @@ namespace ns3 {
                 // Retrieve node identifiers
                 int64_t node_id = parse_positive_int64(comma_split[0]);
                 int64_t if_id = parse_positive_int64(comma_split[1]);
-                int64_t bandwidth = parse_positive_double(comma_split[2]);
+                double bandwidth_fraction = parse_positive_double(comma_split[2]);
 
-                // Add to forwarding state
-                m_topology->SetNodeInterfaceBandwidth(node_id, 1 + if_id, bandwidth); // Skip over loop-back interface
+                // Check the node
+                NS_ABORT_MSG_IF(node_id < 0 || node_id >= m_nodes.GetN(), "Invalid node id.");
+
+                // Check the interface
+                NS_ABORT_MSG_IF(if_id < 0 || if_id + 1 >= m_nodes.Get(node_id)->GetObject<Ipv4>()->GetNInterfaces(), "Invalid interface");
+
+                // Set data rate
+                m_nodes.Get(node_id)->GetObject<Ipv4>()->GetNetDevice(1 + if_id)->GetObject<GSLNetDevice>()->SetDataRate(
+                        DataRate (std::to_string(m_gsl_data_rate_megabit_per_s * bandwidth_fraction) + "Mbps")
+                );
 
                 // Next line
                 line_counter++;

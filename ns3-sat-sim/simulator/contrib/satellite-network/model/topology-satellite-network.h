@@ -72,9 +72,6 @@ namespace ns3 {
         bool IsValidEndpoint(int64_t node_id);
         const std::set<int64_t>& GetEndpoints();
 
-        // Setters
-        void SetNodeInterfaceBandwidth(int32_t node_id, int32_t if_id, double bandwidth);
-
         // Additional accessors
         uint32_t GetNumSatellites();
         uint32_t GetNumGroundStations();

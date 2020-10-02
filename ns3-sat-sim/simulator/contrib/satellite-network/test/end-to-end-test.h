@@ -45,7 +45,7 @@ public:
         // Read topology, and install routing arbiters
         Ptr<TopologySatelliteNetwork> topology = CreateObject<TopologySatelliteNetwork>(basicSimulation, Ipv4ArbiterRoutingHelper());
         ArbiterSingleForwardHelper arbiterHelper(basicSimulation, topology->GetNodes());
-        GslIfBandwidthHelper gslIfBandwidthHelper(basicSimulation, topology);
+        GslIfBandwidthHelper gslIfBandwidthHelper(basicSimulation, topology->GetNodes());
 
         // Schedule UDP bursts
         UdpBurstScheduler udpBurstScheduler(basicSimulation, topology); // Requires enable_udp_burst_scheduler=true
