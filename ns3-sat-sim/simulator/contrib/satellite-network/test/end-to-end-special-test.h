@@ -165,7 +165,39 @@ public:
         // Schedule UDP bursts
         UdpBurstScheduler udpBurstScheduler(basicSimulation, topology); // Requires enable_udp_burst_scheduler=true
 
-        // TODO: Check everything of the topology that it is installed correctly
+        // Check all the accessors of the topology if it was interpreted correctly
+        ASSERT_EQUAL(3, topology->GetNumSatellites());
+        ASSERT_EQUAL(4, topology->GetNumGroundStations());
+        ASSERT_EQUAL(7, topology->GetNodes().GetN());
+        ASSERT_EQUAL(7, topology->GetNumNodes());
+        NodeContainer satellite_nodes = topology->GetSatelliteNodes();
+        ASSERT_EQUAL(3, satellite_nodes.GetN());
+        for (size_t i = 0; i < satellite_nodes.GetN(); i++) {
+            ASSERT_EQUAL(i, satellite_nodes.Get(i)->GetId());
+        }
+        NodeContainer ground_station_nodes = topology->GetGroundStationNodes();
+        ASSERT_EQUAL(4, ground_station_nodes.GetN());
+        for (size_t i = 0; i < ground_station_nodes.GetN(); i++) {
+            ASSERT_EQUAL(3 + i, ground_station_nodes.Get(i)->GetId());
+        }
+        ASSERT_EXCEPTION(topology->IsSatelliteId(-1));
+        ASSERT_EXCEPTION(topology->IsSatelliteId(7));
+        ASSERT_EXCEPTION(topology->GetSatellite(3));
+        for (size_t i = 0; i < 7; i++) {
+            if (i < 3) {
+                ASSERT_TRUE(topology->IsSatelliteId(i));
+                ASSERT_FALSE(topology->IsGroundStationId(i));
+                ASSERT_TRUE(topology->GetSatellite(i) != 0);
+            } else {
+                ASSERT_FALSE(topology->IsSatelliteId(i));
+                ASSERT_TRUE(topology->IsGroundStationId(i));
+                ASSERT_EQUAL(topology->NodeToGroundStationId(i), i - 3);
+            }
+        }
+        ASSERT_EQUAL(3, topology->GetSatellites().size());
+        ASSERT_EQUAL(4, topology->GetGroundStations().size());
+
+        // TODO: Check network device components
 
         // Run simulation
         basicSimulation->Run();

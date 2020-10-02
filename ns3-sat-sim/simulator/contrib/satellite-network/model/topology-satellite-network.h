@@ -80,7 +80,7 @@ namespace ns3 {
         const std::vector<Ptr<GroundStation>>& GetGroundStations();
         const std::vector<Ptr<Satellite>>& GetSatellites();
         const Ptr<Satellite> GetSatellite(uint32_t sat_id);
-        uint32_t NodeToGroundStationID(uint32_t node_id);
+        uint32_t NodeToGroundStationId(uint32_t node_id);
         bool IsSatelliteId(uint32_t node_id);
         bool IsGroundStationId(uint32_t node_id);
 

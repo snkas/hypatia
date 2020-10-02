@@ -123,61 +123,45 @@ PointToPointLaserHelper::Install (Ptr<Node> a, Ptr<Node> b)
   ndqiB->GetTxQueue (0)->ConnectQueueTraces (queueB);
   devB->AggregateObject (ndqiB);
 
-  // If MPI is enabled, we need to see if both nodes have the same system id 
-  // (rank), and the rank is the same as this instance.  If both are true, 
-  //use a normal p2p channel, otherwise use a remote channel
-  bool useNormalChannel = true;
-  Ptr<PointToPointLaserChannel> channel = 0;
+  // Distributed mode
+  NS_ABORT_MSG_IF(MpiInterface::IsEnabled(), "Distributed mode is not currently supported for point-to-point lasers.");
 
-  if (MpiInterface::IsEnabled ()) {
-      uint32_t n1SystemId = a->GetSystemId ();
-      uint32_t n2SystemId = b->GetSystemId ();
-      uint32_t currSystemId = MpiInterface::GetSystemId ();
-      if (n1SystemId != currSystemId || n2SystemId != currSystemId) {
-          useNormalChannel = false;
-      }
-  }
-  if (useNormalChannel) {
-    channel = m_channelFactory.Create<PointToPointLaserChannel> ();
-  }
-  else {
-    channel = m_remoteChannelFactory.Create<PointToPointLaserRemoteChannel>();
-    Ptr<MpiReceiver> mpiRecA = CreateObject<MpiReceiver> ();
-    Ptr<MpiReceiver> mpiRecB = CreateObject<MpiReceiver> ();
-    mpiRecA->SetReceiveCallback (MakeCallback (&PointToPointLaserNetDevice::Receive, devA));
-    mpiRecB->SetReceiveCallback (MakeCallback (&PointToPointLaserNetDevice::Receive, devB));
-    devA->AggregateObject (mpiRecA);
-    devB->AggregateObject (mpiRecB);
-  }
+  // Distributed mode is not currently supported, enable the below if it is:
+//  // If MPI is enabled, we need to see if both nodes have the same system id
+//  // (rank), and the rank is the same as this instance.  If both are true,
+//  //use a normal p2p channel, otherwise use a remote channel
+//  bool useNormalChannel = true;
+//  Ptr<PointToPointLaserChannel> channel = 0;
+//
+//  if (MpiInterface::IsEnabled ()) {
+//      uint32_t n1SystemId = a->GetSystemId ();
+//      uint32_t n2SystemId = b->GetSystemId ();
+//      uint32_t currSystemId = MpiInterface::GetSystemId ();
+//      if (n1SystemId != currSystemId || n2SystemId != currSystemId) {
+//          useNormalChannel = false;
+//      }
+//  }
+//  if (useNormalChannel) {
+//    channel = m_channelFactory.Create<PointToPointLaserChannel> ();
+//  }
+//  else {
+//    channel = m_remoteChannelFactory.Create<PointToPointLaserRemoteChannel>();
+//    Ptr<MpiReceiver> mpiRecA = CreateObject<MpiReceiver> ();
+//    Ptr<MpiReceiver> mpiRecB = CreateObject<MpiReceiver> ();
+//    mpiRecA->SetReceiveCallback (MakeCallback (&PointToPointLaserNetDevice::Receive, devA));
+//    mpiRecB->SetReceiveCallback (MakeCallback (&PointToPointLaserNetDevice::Receive, devB));
+//    devA->AggregateObject (mpiRecA);
+//    devB->AggregateObject (mpiRecB);
+//  }
 
+  // Create and attach channel
+  Ptr<PointToPointLaserChannel> channel = m_channelFactory.Create<PointToPointLaserChannel> ();
   devA->Attach (channel);
   devB->Attach (channel);
   container.Add (devA);
   container.Add (devB);
 
   return container;
-}
-
-NetDeviceContainer 
-PointToPointLaserHelper::Install (Ptr<Node> a, std::string bName)
-{
-  Ptr<Node> b = Names::Find<Node> (bName);
-  return Install (a, b);
-}
-
-NetDeviceContainer 
-PointToPointLaserHelper::Install (std::string aName, Ptr<Node> b)
-{
-  Ptr<Node> a = Names::Find<Node> (aName);
-  return Install (a, b);
-}
-
-NetDeviceContainer 
-PointToPointLaserHelper::Install (std::string aName, std::string bName)
-{
-  Ptr<Node> a = Names::Find<Node> (aName);
-  Ptr<Node> b = Names::Find<Node> (bName);
-  return Install (a, b);
 }
 
 } // namespace ns3

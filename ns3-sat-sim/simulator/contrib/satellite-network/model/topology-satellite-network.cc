@@ -534,11 +534,12 @@ namespace ns3 {
         if (satellite_id >= m_satellites.size()) {
             throw std::runtime_error("Cannot retrieve satellite with an invalid satellite ID");
         }
-        Ptr<Satellite> satellite = m_satellites[satellite_id];
+        Ptr<Satellite> satellite = m_satellites.at(satellite_id);
         return satellite;
     }
 
-    uint32_t TopologySatelliteNetwork::NodeToGroundStationID(uint32_t node_id){
+    uint32_t TopologySatelliteNetwork::NodeToGroundStationId(uint32_t node_id) {
+        EnsureValidNodeId(node_id);
         return node_id - GetNumSatellites();
     }
 

@@ -42,7 +42,6 @@ public:
 
   // Constructors
   PointToPointLaserHelper ();
-  virtual ~PointToPointLaserHelper () {}
 
   // Set point-to-point laser device and channel attributes
   void SetQueue (std::string type,
@@ -56,9 +55,6 @@ public:
   // Installers
   NetDeviceContainer Install (NodeContainer c);
   NetDeviceContainer Install (Ptr<Node> a, Ptr<Node> b);
-  NetDeviceContainer Install (Ptr<Node> a, std::string bName);
-  NetDeviceContainer Install (std::string aName, Ptr<Node> b);
-  NetDeviceContainer Install (std::string aNode, std::string bNode);
 
 private:
   ObjectFactory m_queueFactory;         //!< Queue Factory
