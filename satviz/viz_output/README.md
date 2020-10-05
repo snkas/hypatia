@@ -1,0 +1,1 @@
+This is the default output folder for all visualization scripts.

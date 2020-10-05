@@ -86,6 +86,9 @@ city_detail_file = "../../paper/satellite_networks_state/input_data/ground_stati
 GEN_TIME=10000  #ms
 
 # Input data files; Generated during simulation
+# City IDs are available in the city_detail_file.
+# If city ID is X (for Paris X = 24) and constellation is Starlink_550 (1584 satellites),
+# then offset ID is 1584 + 24 = 1608.
 path_file = "../../paper/satgenpy_analysis/data/kuiper_630_isls_plus_grid_ground_stations_top_100_algorithm_free_one_only_over_isls/100ms_for_200s/manual/data/networkx_path_1193_to_1243.txt"
 IN_UTIL_FILE = "../../paper/ns3_experiments/traffic_matrix/runs/run_general_tm_pairing_kuiper_isls_moving/logs_ns3/isl_utilization.csv"
 

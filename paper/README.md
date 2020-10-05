@@ -50,7 +50,7 @@ Instructions can be found in `<hypatia>/paper/ns3_experiments/README.md`
 
 **Step 5: generating satviz figures**
 
-TODO: will be updated
+Instructions can be found in `<hypatia>/satviz/README.md` under `Visualizations in the paper`.
 
 **Step 6: plotting figures of the paper**
 
