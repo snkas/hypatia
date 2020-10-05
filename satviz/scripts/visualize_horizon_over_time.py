@@ -227,11 +227,14 @@ def generate_sat_obj_list():
 
 LOCATION = (59.9311, 30.3609)  # Saint Petersburg
 
+VIZ_TIME = 170  # Total time of visualization in seconds
+VIZ_GRAN = 5  # Granularity of visualization in seconds
+
 generate_sat_obj_list()
 plt.ion()
 cntr=1
 # for sec in range(3000, 3000 + 60*60, 10):
-for sec in range(0, 170, 5):
+for sec in range(0, VIZ_TIME, VIZ_GRAN):
     X, Y, S = find_horizon(sat_objs, sec, LOCATION)
     # print(X, Y)
     plt.clf()
