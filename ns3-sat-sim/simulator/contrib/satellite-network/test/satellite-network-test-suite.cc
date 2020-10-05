@@ -20,6 +20,7 @@ public:
 
         // Running it by creating every component manually (not using satellite-network.cc/h)
         AddTestCase(new ManualTwoSatTwoGsFirstTest, TestCase::QUICK);
+        AddTestCase(new ManualTwoSatTwoGsDifferentPropSpeedTest, TestCase::QUICK);
         AddTestCase(new ManualTwoSatTwoGsUpSharedTest, TestCase::QUICK);
         AddTestCase(new ManualTwoSatTwoGsUpSharedUdpTest, TestCase::QUICK);
         AddTestCase(new ManualTwoSatTwoGsDownBothFullTest, TestCase::QUICK);
