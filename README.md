@@ -35,7 +35,12 @@ by Simon Kassing*, Debopam Bhattacherjee*, André Baptista Águas, Jens Eirik Sa
 
 BibTeX citation:
 ```
-To be announced.
+@inproceedings {hypatia,
+    author = {Kassing, Simon and Bhattacherjee, Debopam and Águas, André Baptista and Saethre, Jens Eirik and Singla, Ankit},
+    title = {{Exploring the “Internet from space” with Hypatia}},
+    booktitle = {{ACM IMC}},
+    year = {2020}
+}
 ```
 
 ## Getting started
