@@ -460,47 +460,42 @@ bool
 GSLNetDevice::IsBroadcast (void) const
 {
   NS_LOG_FUNCTION (this);
-  return true;
+  return true; // We return true such that the normal Internet stack can be installed, because ARP needs true here
 }
 
-//
-// We don't really need any addressing information since this is a 
-// point-to-point device.  The base class NetDevice wants us to return a
-// broadcast address, so we make up something reasonable.
-//
 Address
 GSLNetDevice::GetBroadcast (void) const
 {
   NS_LOG_FUNCTION (this);
-  return Mac48Address ("ff:ff:ff:ff:ff:ff");
+  throw std::runtime_error("Broadcast not supported (only ARP would use broadcast, whose cache should have already been filled).");
 }
 
 bool
 GSLNetDevice::IsMulticast (void) const
 {
   NS_LOG_FUNCTION (this);
-  return true;
+  return false;
 }
 
 Address
 GSLNetDevice::GetMulticast (Ipv4Address multicastGroup) const
 {
   NS_LOG_FUNCTION (this);
-  return Mac48Address ("01:00:5e:00:00:00");
+  throw std::runtime_error("Multicast not supported.");
 }
 
 Address
 GSLNetDevice::GetMulticast (Ipv6Address addr) const
 {
   NS_LOG_FUNCTION (this << addr);
-  return Mac48Address ("33:33:00:00:00:00");
+  throw std::runtime_error("Multicast not supported.");
 }
 
 bool
 GSLNetDevice::IsPointToPoint (void) const
 {
   NS_LOG_FUNCTION (this);
-  return true;
+  return false;
 }
 
 bool
