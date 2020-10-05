@@ -22,6 +22,7 @@
 #include "ns3/gsl-if-bandwidth-helper.h"
 #include "ns3/tcp-flow-scheduler.h"
 #include "ns3/gsl-channel.h"
+#include "ns3/point-to-point-laser-channel.h"
 
 #include "ns3/test.h"
 #include "test-helpers.h"
@@ -126,6 +127,33 @@ public:
         tch_uninstaller.Uninstall(netDevices.Get(1));
 
         //////////////////////
+        // Checks about what was installed until now
+
+        // The ISL devices
+        for (uint32_t i = 0; i < netDevices.GetN(); i++) {
+            Ptr<PointToPointLaserNetDevice> islNetDevice = netDevices.Get(i)->GetObject<PointToPointLaserNetDevice>();
+            ASSERT_TRUE(islNetDevice->IsBroadcast());
+            islNetDevice->GetBroadcast();
+            ASSERT_TRUE(islNetDevice->IsMulticast());
+            islNetDevice->GetMulticast(Ipv4Address());
+            islNetDevice->GetMulticast(Ipv6Address());
+            ASSERT_TRUE(islNetDevice->IsPointToPoint());
+            ASSERT_FALSE(islNetDevice->IsBridge());
+            ASSERT_FALSE(islNetDevice->SupportsSendFrom());
+            ASSERT_EQUAL(islNetDevice->GetIfIndex(), 1);
+            ASSERT_EQUAL(islNetDevice->GetChannel()->GetNDevices(), 2);
+            if (i == 0) {
+                ASSERT_EQUAL(islNetDevice->GetDestinationNode()->GetId(), 1);
+            } else {
+                ASSERT_EQUAL(islNetDevice->GetDestinationNode()->GetId(), 0);
+            }
+            Ptr<DropTailQueue<Packet>> queue = islNetDevice->GetQueue()->GetObject<DropTailQueue<Packet>>();
+            QueueSize qs = queue->GetMaxSize();
+            ASSERT_EQUAL(qs.GetUnit(), ns3::PACKETS);
+            ASSERT_EQUAL(qs.GetValue(), 100);
+        }
+
+        //////////////////////
         // GSLs
 
         // Link helper
@@ -165,6 +193,35 @@ public:
         // Remove the traffic control layer (must be done here, else the Ipv4 helper will assign a default one)
         TrafficControlHelper tch_gsl_uninstaller;
         tch_gsl_uninstaller.Uninstall(devices);
+
+        //////////////////////
+        // Checks about what was installed until now
+
+        // The GSL devices
+        for (uint32_t i = 0; i < devices.GetN(); i++) {
+            Ptr<GSLNetDevice> gslNetDevice = devices.Get(i)->GetObject<GSLNetDevice>();
+            ASSERT_TRUE(gslNetDevice->IsBroadcast());
+            ASSERT_EXCEPTION(gslNetDevice->GetBroadcast());
+            ASSERT_FALSE(gslNetDevice->IsMulticast());
+            ASSERT_EXCEPTION(gslNetDevice->GetMulticast(Ipv4Address()));
+            ASSERT_EXCEPTION(gslNetDevice->GetMulticast(Ipv6Address()));
+            ASSERT_FALSE(gslNetDevice->IsPointToPoint());
+            ASSERT_FALSE(gslNetDevice->IsBridge());
+            ASSERT_FALSE(gslNetDevice->SupportsSendFrom());
+            if (i == 0) {
+                ASSERT_EQUAL(gslNetDevice->GetIfIndex(), 2);
+            } else if (i == 1) {
+                ASSERT_EQUAL(gslNetDevice->GetIfIndex(), 2);
+            } else if (i == 2) {
+                ASSERT_EQUAL(gslNetDevice->GetIfIndex(), 1);
+            } else if (i == 3) {
+                ASSERT_EQUAL(gslNetDevice->GetIfIndex(), 1);
+            }
+            Ptr<DropTailQueue<Packet>> queue = gslNetDevice->GetQueue()->GetObject<DropTailQueue<Packet>>();
+            QueueSize qs = queue->GetMaxSize();
+            ASSERT_EQUAL(qs.GetUnit(), ns3::PACKETS);
+            ASSERT_EQUAL(qs.GetValue(), 100);
+        }
 
         // Some small checks about what was installed
         ASSERT_EQUAL(4, allNodes.Get(2)->GetObject<Ipv4>()->GetNetDevice(1)->GetChannel()->GetObject<GSLChannel>()->GetNDevices());
