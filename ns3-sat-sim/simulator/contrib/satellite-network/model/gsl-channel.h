@@ -69,9 +69,10 @@ public:
 protected:
   Time GetDelay (Ptr<MobilityModel> senderMobility, Ptr<MobilityModel> receiverMobility) const;
 
-  Time   m_initialDelay;                      //!< Propagation delay at the initial distance
-                                              //   used to give a delay estimate to the
+  Time   m_lowerBoundDelay;                   //!< Propagation delay which is
+                                              //   used to give a minimum lookahead time to the
                                               //   distributed simulator (if it were enabled).
+                                              //   See also: distributed-simulator-impl.cc (line 173 onwards)
 
   double m_propagationSpeedMetersPerSecond;   //!< Propagation speed on the channel (used to live calculate the delay
                                               //   for each packet which is sent over this channel.

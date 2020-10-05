@@ -40,11 +40,13 @@ GSLChannel::GetTypeId (void)
     .SetParent<Channel> ()
     .SetGroupName ("GSL")
     .AddConstructor<GSLChannel> ()
-    .AddAttribute ("Delay", "Initial propagation delay through the channel",
+    .AddAttribute ("Delay",
+                   "The lower-bound propagation delay through the channel (it is accessed by the distributed simulator to determine lookahead time)",
                    TimeValue (Seconds (0)),
-                   MakeTimeAccessor (&GSLChannel::m_initialDelay),
+                   MakeTimeAccessor (&GSLChannel::m_lowerBoundDelay),
                    MakeTimeChecker ())
-    .AddAttribute ("PropagationSpeed", "Propagation speed through the channel in m/s",
+    .AddAttribute ("PropagationSpeed",
+                   "Propagation speed through the channel in m/s (default is the speed of light)",
                    DoubleValue (299792458.0), // Default is speed of light
                    MakeDoubleAccessor (&GSLChannel::m_propagationSpeedMetersPerSecond),
                    MakeDoubleChecker<double> ())
