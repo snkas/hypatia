@@ -37,7 +37,7 @@ public:
 
     ManualTwoSatTwoGsTest(std::string s) : TestCase(s) {};
 
-    void setup_scenario(double distance_multiplier) {
+    void setup_scenario(double distance_multiplier, bool new_prop_speed, double new_prop_speed_m_per_s) {
 
         // Clear all nodes
         allNodes = NodeContainer();
@@ -129,7 +129,10 @@ public:
         // GSLs
 
         // Link helper
-        GSLHelper gsl_helper;;
+        GSLHelper gsl_helper;
+        if (new_prop_speed) {
+            gsl_helper.SetChannelAttribute ( "PropagationSpeed", DoubleValue(new_prop_speed_m_per_s));
+        }
         gsl_helper.SetQueue("ns3::DropTailQueue<Packet>", "MaxSize", QueueSizeValue(QueueSize("100p")));
         gsl_helper.SetDeviceAttribute ("DataRate", DataRateValue (DataRate ("7Mbps")));
 
@@ -345,7 +348,7 @@ public:
         Ptr<BasicSimulation> basicSimulation = CreateObject<BasicSimulation>(temp_dir);
 
         // Install the scenario
-        setup_scenario(1000000.0);
+        setup_scenario(1000000.0, false, 0.0);
 
         //////////////////////
         // Arbiter routing
@@ -450,6 +453,159 @@ public:
 
             double hop_c_distance_m = std::sqrt(std::pow(1000000 - (1000000), 2) + std::pow(-1000000 - (-1000000), 2) + std::pow(-1000000 - (1000000), 2));
             double hop_c_latency_ns = hop_c_distance_m / (299792458.0 / 1000000000.0);
+
+            double time_one_way_latency_ns = hop_a_latency_ns + hop_b_latency_ns + hop_c_latency_ns;
+
+            // std::cout << " Hop A: " << hop_a_distance_m << " m gives latency " << hop_a_latency_ns << " ns" << std::endl;
+            // std::cout << " Hop B: " << hop_b_distance_m << " m gives latency " << hop_b_latency_ns << " ns" << std::endl;
+            // std::cout << " Hop C: " << hop_c_distance_m << " m gives latency " << hop_c_latency_ns << " ns" << std::endl;
+
+            // At most 10 nanoseconds off due to rounding on the way
+            ASSERT_EQUAL_APPROX(
+                    parse_positive_int64(line_spl[2]) - sent_timestamps[j],
+                    time_one_way_latency_ns + (1502 / (0.000125 * 7.0)) + (1502.0 / (0.000125 * 4.0)) + (1502.0 / (0.000125 * 7.0)),
+                    10
+            );
+
+            j += 1;
+        }
+
+        // Finalize the simulation
+        basicSimulation->Finalize();
+
+    }
+
+};
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+class ManualTwoSatTwoGsDifferentPropSpeedTest : public ManualTwoSatTwoGsTest {
+public:
+    ManualTwoSatTwoGsDifferentPropSpeedTest () : ManualTwoSatTwoGsTest ("manual-two-sat-two-gs different-prop-speed") {};
+
+    void DoRun () {
+
+        const std::string temp_dir = ".tmp-manual-two-sat-two-gs-different-prop-speed-test";
+
+        // Create temporary run directory
+        mkdir_if_not_exists(temp_dir);
+
+        // A configuration file
+        std::ofstream config_file;
+        config_file.open (temp_dir + "/config_ns3.properties");
+        config_file << "simulation_end_time_ns=1000000000" << std::endl; // 1s
+        config_file << "simulation_seed=987654321" << std::endl;
+        config_file.close();
+
+        // Load basic simulation environment
+        Ptr<BasicSimulation> basicSimulation = CreateObject<BasicSimulation>(temp_dir);
+
+        // Install the scenario
+        setup_scenario(1000000.0, true, 100000711.0);
+
+        //////////////////////
+        // Arbiter routing
+
+        Ptr<ArbiterCustom> arbiter;
+
+        arbiter = CreateObject<ArbiterCustom>(allNodes.Get(0), allNodes);
+        allNodes.Get(0)->GetObject<Ipv4>()->GetRoutingProtocol()->GetObject<Ipv4ArbiterRouting>()->SetArbiter(arbiter);
+
+        arbiter = CreateObject<ArbiterCustom>(allNodes.Get(1), allNodes);
+        allNodes.Get(1)->GetObject<Ipv4>()->GetRoutingProtocol()->GetObject<Ipv4ArbiterRouting>()->SetArbiter(arbiter);
+
+        arbiter = CreateObject<ArbiterCustom>(allNodes.Get(2), allNodes);
+        allNodes.Get(2)->GetObject<Ipv4>()->GetRoutingProtocol()->GetObject<Ipv4ArbiterRouting>()->SetArbiter(arbiter);
+
+        arbiter = CreateObject<ArbiterCustom>(allNodes.Get(3), allNodes);
+        allNodes.Get(3)->GetObject<Ipv4>()->GetRoutingProtocol()->GetObject<Ipv4ArbiterRouting>()->SetArbiter(arbiter);
+
+        //////////////////////
+        // UDP application
+
+        // Install a UDP burst client on all
+        UdpBurstHelper udpBurstHelper(1026, basicSimulation->GetLogsDir());
+        ApplicationContainer udpApp = udpBurstHelper.Install(allNodes);
+        udpApp.Start(Seconds(0.0));
+
+        // UDP burst info entry
+        UdpBurstInfo udpBurstInfo(
+                0,
+                2,
+                3,
+                3, // Rate in Mbit/s
+                0,
+                100000000000, // Duration in ns // 100000000000
+                "abc",
+                "def"
+        );
+
+        // Register all bursts being sent from there and being received
+        udpApp.Get(2)->GetObject<UdpBurstApplication>()->RegisterOutgoingBurst(
+                udpBurstInfo,
+                InetSocketAddress(allNodes.Get(3)->GetObject<Ipv4>()->GetAddress(1,0).GetLocal(), 1026),
+                true
+        );
+        udpApp.Get(3)->GetObject<UdpBurstApplication>()->RegisterIncomingBurst(
+                udpBurstInfo,
+                true
+        );
+
+        // Run simulation
+        basicSimulation->Run();
+
+        // Check UDP burst completion information
+        std::vector<std::tuple<UdpBurstInfo, uint64_t>> outgoing_2_info = udpApp.Get(2)->GetObject<UdpBurstApplication>()->GetOutgoingBurstsInformation();
+        std::vector<std::tuple<UdpBurstInfo, uint64_t>> outgoing_3_info = udpApp.Get(3)->GetObject<UdpBurstApplication>()->GetOutgoingBurstsInformation();
+        std::vector<std::tuple<UdpBurstInfo, uint64_t>> incoming_2_info = udpApp.Get(2)->GetObject<UdpBurstApplication>()->GetIncomingBurstsInformation();
+        std::vector<std::tuple<UdpBurstInfo, uint64_t>> incoming_3_info = udpApp.Get(3)->GetObject<UdpBurstApplication>()->GetIncomingBurstsInformation();
+
+        // Node 2 sends out
+        ASSERT_EQUAL(outgoing_2_info.size(), 1);
+        ASSERT_EQUAL(std::get<0>(outgoing_2_info.at(0)).GetUdpBurstId(), 0);
+        double expected_sent = 3.0 * 1000 * 1000 / 8.0 / 1500.0;
+        ASSERT_EQUAL_APPROX((double) std::get<1>(outgoing_2_info.at(0)), expected_sent, 0.00001);
+
+        // Node 2 does not receive
+        ASSERT_EQUAL(incoming_2_info.size(), 0);
+
+        // Node 3 does not send
+        ASSERT_EQUAL(outgoing_3_info.size(), 0);
+
+        // Node 3 does receive
+        ASSERT_EQUAL(incoming_3_info.size(), 1);
+        ASSERT_EQUAL(std::get<0>(incoming_3_info.at(0)).GetUdpBurstId(), 0);
+        double expected_received = 3.0 * 1000 * 1000 / 8.0 / 1500.0;
+        ASSERT_EQUAL_APPROX((double) std::get<1>(incoming_3_info.at(0)), expected_received, 20);
+
+        // Check the RTTs
+
+        // Outgoing
+        std::vector<std::string> lines_precise_outgoing_csv = read_file_direct(temp_dir + "/logs_ns3/udp_burst_0_outgoing.csv");
+        ASSERT_EQUAL_APPROX(lines_precise_outgoing_csv.size(), expected_sent, 0.00001);
+        int j = 0;
+        std::vector<int64_t> sent_timestamps;
+        for (std::string line : lines_precise_outgoing_csv) {
+            std::vector <std::string> line_spl = split_string(line, ",");
+            ASSERT_EQUAL(parse_positive_int64(line_spl[2]), j * std::ceil(1500.0 / (3.0 / 8000.0)));
+            sent_timestamps.push_back(parse_positive_int64(line_spl[2]));
+            j += 1;
+        }
+
+        // Incoming
+        std::vector<std::string> lines_precise_incoming_csv = read_file_direct(temp_dir + "/logs_ns3/udp_burst_0_incoming.csv");
+        ASSERT_EQUAL_APPROX(lines_precise_incoming_csv.size(), std::get<1>(incoming_3_info.at(0)), 0.00001);
+        j = 0;
+        for (std::string line : lines_precise_incoming_csv) {
+            std::vector <std::string> line_spl = split_string(line, ",");
+            double hop_a_distance_m = std::sqrt(std::pow(1000000 - (-1000000), 2) + std::pow(1000000 - (-1000000), 2) + std::pow(-1000000 - (-1000000), 2));
+            double hop_a_latency_ns = hop_a_distance_m / (100000711.0 / 1000000000.0);
+
+            double hop_b_distance_m = std::sqrt(std::pow(-1000000 - (1000000), 2) + std::pow(-1000000 - (-1000000), 2) + std::pow(-1000000 - (-1000000), 2));
+            double hop_b_latency_ns = hop_b_distance_m / (299792458.0 / 1000000000.0);
+
+            double hop_c_distance_m = std::sqrt(std::pow(1000000 - (1000000), 2) + std::pow(-1000000 - (-1000000), 2) + std::pow(-1000000 - (1000000), 2));
+            double hop_c_latency_ns = hop_c_distance_m / (100000711.0 / 1000000000.0);
 
             double time_one_way_latency_ns = hop_a_latency_ns + hop_b_latency_ns + hop_c_latency_ns;
 
@@ -624,7 +780,7 @@ public:
         TcpOptimizer::OptimizeBasic(basicSimulation);
 
         // Install the scenario
-        setup_scenario(1000000.0);
+        setup_scenario(1000000.0, false, 0.0);
 
         //////////////////////
         // Arbiter routing
@@ -801,7 +957,7 @@ public:
             TcpOptimizer::OptimizeBasic(basicSimulation);
 
             // Install the scenario
-            setup_scenario(1000000.0);
+            setup_scenario(1000000.0, false, 0.0);
 
             //////////////////////
             // Arbiter routing
@@ -926,7 +1082,7 @@ public:
         TcpOptimizer::OptimizeBasic(basicSimulation);
 
         // Install the scenario
-        setup_scenario(1000000.0);
+        setup_scenario(1000000.0, false, 0.0);
 
         //////////////////////
         // Arbiter routing
@@ -1080,7 +1236,7 @@ public:
         Ptr<BasicSimulation> basicSimulation = CreateObject<BasicSimulation>(temp_dir);
 
         // Install the scenario
-        setup_scenario(100.0);
+        setup_scenario(100.0, false, 0.0);
 
         // Load in the arbiter helper
         ArbiterSingleForwardHelper arbiterHelper(basicSimulation, allNodes);
@@ -1256,7 +1412,7 @@ public:
         Ptr<BasicSimulation> basicSimulation = CreateObject<BasicSimulation>(temp_dir);
 
         // Install the scenario
-        setup_scenario(100.0);
+        setup_scenario(100.0, false, 0.0);
 
         // Load in the arbiter helper
         ArbiterSingleForwardHelper arbiterHelper(basicSimulation, allNodes);

@@ -99,7 +99,6 @@ GSLHelper::Install (NodeContainer satellites, NodeContainer ground_stations, std
     }
 
     // Ground station network devices
-    double min_distance_m = std::numeric_limits<double>::max();
     size_t satellites_offset = satellites.GetN();
     for (size_t gid = 0; gid < ground_stations.GetN(); gid++)  {
 
@@ -112,25 +111,13 @@ GSLHelper::Install (NodeContainer satellites, NodeContainer ground_stations, std
             allNetDevices.Add(Install(gs_node, channel));
         }
 
-        // Update the minimum distance between any ground station and satellite
-        Ptr<MobilityModel> gs_mobility = gs_node->GetObject<MobilityModel>();
-        for (size_t sid = 0; sid < satellites.GetN(); sid++)  {
-            min_distance_m = std::min(
-                    min_distance_m,
-                    gs_mobility->GetDistanceFrom(satellites.Get(sid)->GetObject<MobilityModel>())
-            );
-        }
     }
 
-    // Use the min possible delay as the reference for the lookahead
-    double propagation_speed(299792458.0);
-    double delay_s = min_distance_m / propagation_speed;
-    channel->SetAttribute("Delay", StringValue(std::to_string(delay_s) + "s"));
-
-    // Print delay
-//    TimeValue del;
-//    channel->GetAttribute ("Delay", del);
-//    std::cout << "  > Minimum delay set: " << del << std::endl;
+    // The lower bound for the GSL channel must be set to facilitate distributed simulation.
+    // However, this is challenging, as delays vary over time based on the movement.
+    // As such, for now this delay = lookahead time is set to 0.
+    // (see also the Delay attribute in gsl-channel.cc)
+    channel->SetAttribute("Delay", TimeValue(Seconds(0)));
 
     return allNetDevices;
 }
@@ -151,7 +138,8 @@ GSLHelper::Install (Ptr<Node> node, Ptr<GSLChannel> channel) {
     Ptr<Queue<Packet> > queue = m_queueFactory.Create<Queue<Packet>>();
     dev->SetQueue (queue);
 
-    // Aggregate NetDeviceQueueInterface objects // TODO: Why?
+    // Aggregate NetDeviceQueueInterface objects to connect
+    // the device queue to the interface (used by traffic control layer)
     Ptr<NetDeviceQueueInterface> ndqi = CreateObject<NetDeviceQueueInterface>();
     ndqi->GetTxQueue (0)->ConnectQueueTraces (queue);
     dev->AggregateObject (ndqi);

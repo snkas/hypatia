@@ -403,10 +403,9 @@ namespace ns3 {
         }
         std::cout << "    >> Finished removing GSL queueing disciplines" << std::endl;
 
-        // Check that the sum is equal
-        if (total_num_gsl_ifs != devices.GetN()) {
-            throw std::runtime_error("Not the expected amount of interfaces has been created.");
-        }
+        // Check that all interfaces were created
+        NS_ABORT_MSG_IF(total_num_gsl_ifs != devices.GetN(), "Not the expected amount of interfaces has been created.");
+
         std::cout << "    >> GSL interfaces are setup" << std::endl;
 
     }
