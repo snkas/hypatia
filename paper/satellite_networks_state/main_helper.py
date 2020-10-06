@@ -72,9 +72,9 @@ class MainHelper:
 
         # Create output directories
         if not os.path.isdir(output_generated_data_dir):
-            os.makedirs(output_generated_data_dir)
+            os.makedirs(output_generated_data_dir, exist_ok=True)
         if not os.path.isdir(output_generated_data_dir + "/" + name):
-            os.makedirs(output_generated_data_dir + "/" + name)
+            os.makedirs(output_generated_data_dir + "/" + name, exist_ok=True)
 
         # Ground stations
         print("Generating ground stations...")
