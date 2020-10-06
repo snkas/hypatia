@@ -57,8 +57,9 @@ def read_tles(filename_tles):
 
             # Fetch and check the epoch from the TLES data
             # In the TLE, the epoch is given with a Julian data of yyddd.fraction
-            # ddd is actually zero-based, meaning e.g. 18001 is 1st of January, or 2018-01-01 00:00.
+            # ddd is actually one-based, meaning e.g. 18001 is 1st of January, or 2018-01-01 00:00.
             # As such, to convert it to Astropy Time, we add (ddd - 1) days to it
+            # See also: https://www.celestrak.com/columns/v04n03/#FAQ04
             epoch_year = tles_line_2[18:20]
             epoch_day = float(tles_line_2[20:32])
             epoch = Time("20" + epoch_year + "-01-01 00:00:00", scale="tdb") + (epoch_day - 1) * u.day

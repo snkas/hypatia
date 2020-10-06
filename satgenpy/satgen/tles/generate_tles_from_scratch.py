@@ -67,7 +67,7 @@ def generate_tles_from_scratch_with_sgp(
                 mean_anomaly_degree = orbit_wise_shift + (n_sat * 360 / num_sats_per_orbit)
 
                 # Epoch is set to the year 2000
-                # This conveniently in TLE format gives 00000.00000000
+                # This conveniently in TLE format gives 00001.00000000
                 # for the epoch year and Julian day fraction entry
                 jd, fr = jday(2000, 1, 1, 0, 0, 0)
 
@@ -107,6 +107,7 @@ def generate_tles_from_scratch_with_sgp(
                 # designator, and the Julian date is not respected
                 # As such, we set our own bogus international designator 00000ABC
                 # and we set our own epoch date as 1 January, 2000
+                # Why it's 00001.00000000: https://www.celestrak.com/columns/v04n03/#FAQ04
                 tle_line1 = line1[:7] + "U 00000ABC 00001.00000000 " + line1[33:]
                 tle_line1 = tle_line1[:68] + str(calculate_tle_line_checksum(tle_line1[:68]))
                 tle_line2 = line2
@@ -167,6 +168,7 @@ def generate_tles_from_scratch_manual(
                 mean_anomaly_degree = orbit_wise_shift + (n_sat * 360 / num_sats_per_orbit)
 
                 # Epoch is 2000-01-01 00:00:00, which is 00001 in ddyyy format
+                # See also: https://www.celestrak.com/columns/v04n03/#FAQ04
                 tle_line1 = "1 %05dU 00000ABC 00001.00000000  .00000000  00000-0  00000+0 0    0" % (
                     satellite_counter + 1
                 )
