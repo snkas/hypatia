@@ -41,6 +41,16 @@ There are currently three dynamic state algorithms implemented:
   station relays). Ground stations and satellites have exactly one interface which
   does not change bandwidth. This interface can send to any other GSL interface ("free").
   
+* `algorithm_free_gs_one_sat_many_only_over_isls` : Only runs for scenarios where there are ISLs.
+  It calculates the shortest paths from each ground station / satellite to every ground
+  station. It only uses paths which are GS-(SAT)+-GS (in other words, no ground
+  station relays). Ground stations have exactly one GSL interface which
+  does not change bandwidth, and satellites have `# of ground stations` GSL interfaces.
+  Importantly, if the satellite sends to a specific ground
+  station, it sends from the specific interface on it allocated for that ground station.
+  This means that if a satellite is used to reach two ground stations, they will not 
+  be bottlenecked by the satellite GSL interface.
+  
 * `algorithm_paired_many_over_isls` : Only runs for scenarios where there are ISLs.
    It calculates the shortest paths from each ground station / satellite to every ground
    station. It only uses paths which are GS-(SAT)+-GS (in other words, no ground
