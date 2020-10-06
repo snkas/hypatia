@@ -49,6 +49,7 @@ def construct_graph_with_distances(epoch, time_since_epoch_ns, satellites, groun
         observer = get_ground_station_observer(
             lat=ground_station['latitude'],
             lon=ground_station['longitude'],
+            elev=ground_station['elevation'],
             epoch=str(epoch),
             date=str(time)
         )
@@ -95,6 +96,7 @@ def compute_path_length_without_graph(path, epoch, time_since_epoch_ns, satellit
             observer = get_ground_station_observer(
                 lat=ground_station['latitude'],
                 lon=ground_station['longitude'],
+                elev=ground_station['elevation'],
                 epoch=str(epoch),
                 date=str(time)
             )
@@ -111,6 +113,7 @@ def compute_path_length_without_graph(path, epoch, time_since_epoch_ns, satellit
             observer = get_ground_station_observer(
                 lat=ground_station['latitude'],
                 lon=ground_station['longitude'],
+                elev=ground_station['elevation'],
                 epoch=str(epoch),
                 date=str(time)
             )
