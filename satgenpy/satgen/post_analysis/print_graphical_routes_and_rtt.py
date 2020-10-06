@@ -202,37 +202,38 @@ def print_graphical_routes_and_rtt(
                     )
                 
                 # Lines between
-                for v in range(1, len(current_path)):
-                    from_node_id = current_path[v - 1]
-                    to_node_id = current_path[v]
-                    
-                    # From coordinates
-                    if from_node_id < len(satellites):
-                        ephem_body = satellites[from_node_id]
-                        ephem_body.compute(time_moment_str)
-                        from_latitude_deg = math.degrees(ephem_body.sublat)
-                        from_longitude_deg = math.degrees(ephem_body.sublong)
-                    else:
-                        from_latitude_deg = ground_stations[from_node_id - len(satellites)]["latitude"]
-                        from_longitude_deg = ground_stations[from_node_id - len(satellites)]["longitude"]
+                if current_path is not None:
+                    for v in range(1, len(current_path)):
+                        from_node_id = current_path[v - 1]
+                        to_node_id = current_path[v]
 
-                    # To coordinates
-                    if to_node_id < len(satellites):
-                        ephem_body = satellites[to_node_id]
-                        ephem_body.compute(time_moment_str)
-                        to_latitude_deg = math.degrees(ephem_body.sublat)
-                        to_longitude_deg = math.degrees(ephem_body.sublong)
-                    else:
-                        to_latitude_deg = ground_stations[to_node_id - len(satellites)]["latitude"]
-                        to_longitude_deg = ground_stations[to_node_id - len(satellites)]["longitude"]
+                        # From coordinates
+                        if from_node_id < len(satellites):
+                            ephem_body = satellites[from_node_id]
+                            ephem_body.compute(time_moment_str)
+                            from_latitude_deg = math.degrees(ephem_body.sublat)
+                            from_longitude_deg = math.degrees(ephem_body.sublong)
+                        else:
+                            from_latitude_deg = ground_stations[from_node_id - len(satellites)]["latitude"]
+                            from_longitude_deg = ground_stations[from_node_id - len(satellites)]["longitude"]
 
-                    # Plot the line
-                    plt.plot(
-                        [from_longitude_deg, to_longitude_deg],
-                        [from_latitude_deg, to_latitude_deg],
-                        color=ISL_COLOR, linewidth=2, marker='',
-                        transform=ccrs.Geodetic(),
-                    )
+                        # To coordinates
+                        if to_node_id < len(satellites):
+                            ephem_body = satellites[to_node_id]
+                            ephem_body.compute(time_moment_str)
+                            to_latitude_deg = math.degrees(ephem_body.sublat)
+                            to_longitude_deg = math.degrees(ephem_body.sublong)
+                        else:
+                            to_latitude_deg = ground_stations[to_node_id - len(satellites)]["latitude"]
+                            to_longitude_deg = ground_stations[to_node_id - len(satellites)]["longitude"]
+
+                        # Plot the line
+                        plt.plot(
+                            [from_longitude_deg, to_longitude_deg],
+                            [from_latitude_deg, to_latitude_deg],
+                            color=ISL_COLOR, linewidth=2, marker='',
+                            transform=ccrs.Geodetic(),
+                        )
 
                 # Across all points, we need to find the latitude / longitude to zoom into
                 min_latitude = min(
@@ -253,47 +254,48 @@ def print_graphical_routes_and_rtt(
                 )
 
                 # Points
-                for v in range(0, len(current_path)):
-                    node_id = current_path[v]
-                    if node_id < len(satellites):
-                        ephem_body = satellites[node_id]
-                        ephem_body.compute(time_moment_str)
-                        latitude_deg = math.degrees(ephem_body.sublat)
-                        longitude_deg = math.degrees(ephem_body.sublong)
-                        min_latitude = min(min_latitude, latitude_deg)
-                        max_latitude = max(max_latitude, latitude_deg)
-                        min_longitude = min(min_longitude, longitude_deg)
-                        max_longitude = max(max_longitude, longitude_deg)
-                        # Satellite
-                        plt.plot(
-                            longitude_deg,
-                            latitude_deg,
-                            color=SATELLITE_USED_COLOR,
-                            marker='^',
-                        )
-                    else:
-                        latitude_deg = ground_stations[node_id - len(satellites)]["latitude"]
-                        longitude_deg = ground_stations[node_id - len(satellites)]["longitude"]
-                        min_latitude = min(min_latitude, latitude_deg)
-                        max_latitude = max(max_latitude, latitude_deg)
-                        min_longitude = min(min_longitude, longitude_deg)
-                        max_longitude = max(max_longitude, longitude_deg)
-                        if v == 0 or v == len(current_path) - 1:
-                            # Endpoint (start or finish) ground station
+                if current_path is not None:
+                    for v in range(0, len(current_path)):
+                        node_id = current_path[v]
+                        if node_id < len(satellites):
+                            ephem_body = satellites[node_id]
+                            ephem_body.compute(time_moment_str)
+                            latitude_deg = math.degrees(ephem_body.sublat)
+                            longitude_deg = math.degrees(ephem_body.sublong)
+                            min_latitude = min(min_latitude, latitude_deg)
+                            max_latitude = max(max_latitude, latitude_deg)
+                            min_longitude = min(min_longitude, longitude_deg)
+                            max_longitude = max(max_longitude, longitude_deg)
+                            # Satellite
                             plt.plot(
                                 longitude_deg,
                                 latitude_deg,
-                                color=GROUND_STATION_USED_COLOR,
-                                marker='o',
+                                color=SATELLITE_USED_COLOR,
+                                marker='^',
                             )
                         else:
-                            # Intermediary ground station
-                            plt.plot(
-                                longitude_deg,
-                                latitude_deg,
-                                color=GROUND_STATION_USED_COLOR,
-                                marker='o',
-                            )
+                            latitude_deg = ground_stations[node_id - len(satellites)]["latitude"]
+                            longitude_deg = ground_stations[node_id - len(satellites)]["longitude"]
+                            min_latitude = min(min_latitude, latitude_deg)
+                            max_latitude = max(max_latitude, latitude_deg)
+                            min_longitude = min(min_longitude, longitude_deg)
+                            max_longitude = max(max_longitude, longitude_deg)
+                            if v == 0 or v == len(current_path) - 1:
+                                # Endpoint (start or finish) ground station
+                                plt.plot(
+                                    longitude_deg,
+                                    latitude_deg,
+                                    color=GROUND_STATION_USED_COLOR,
+                                    marker='o',
+                                )
+                            else:
+                                # Intermediary ground station
+                                plt.plot(
+                                    longitude_deg,
+                                    latitude_deg,
+                                    color=GROUND_STATION_USED_COLOR,
+                                    marker='o',
+                                )
 
                 # Zoom into region
                 ax.set_extent([
