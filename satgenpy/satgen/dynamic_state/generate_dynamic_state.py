@@ -108,14 +108,15 @@ def generate_dynamic_state_at(
         print("  > Absolute time.......... " + str(time))
 
     # Graphs
-    sat_net_graph_without_gs = nx.Graph()
-    sat_net_graph_only_gs = nx.Graph()
+    sat_net_graph_only_satellites_with_isls = nx.Graph()
+    sat_net_graph_all_with_only_gsls = nx.Graph()
 
     # Information
     for i in range(len(satellites)):
-        sat_net_graph_without_gs.add_node(i)
+        sat_net_graph_only_satellites_with_isls.add_node(i)
+        sat_net_graph_all_with_only_gsls.add_node(i)
     for i in range(len(satellites) + len(ground_stations)):
-        sat_net_graph_only_gs.add_node(i)
+        sat_net_graph_all_with_only_gsls.add_node(i)
     if enable_verbose_logs:
         print("  > Satellites............. " + str(len(satellites)))
         print("  > Ground stations........ " + str(len(ground_stations)))
@@ -137,7 +138,7 @@ def generate_dynamic_state_at(
         # Only ISLs which are close enough are considered
         sat_distance_m = sat_distance(satellites[a], satellites[b], str(time))
         if sat_distance_m <= max_isl_length_m:
-            sat_net_graph_without_gs.add_edge(
+            sat_net_graph_only_satellites_with_isls.add_edge(
                 a, b, weight=sat_distance_m
             )
             isls_valid += 1
@@ -185,6 +186,7 @@ def generate_dynamic_state_at(
         observer = get_ground_station_observer(
             lat=ground_station['latitude'],
             lon=ground_station['longitude'],
+            elev=ground_station['elevation'],
             epoch=str(epoch),
             date=str(time)
         )
@@ -197,7 +199,7 @@ def generate_dynamic_state_at(
             distance_m = satellite.range
             if distance_m <= max_gsl_length_m:
                 satellites_in_range.append((distance_m, sid))
-                sat_net_graph_only_gs.add_edge(
+                sat_net_graph_all_with_only_gsls.add_edge(
                     sid, len(satellites) + ground_station["gid"], weight=distance_m
                 )
 
@@ -224,7 +226,7 @@ def generate_dynamic_state_at(
             time_since_epoch_ns,
             satellites,
             ground_stations,
-            sat_net_graph_without_gs,
+            sat_net_graph_only_satellites_with_isls,
             ground_station_satellites_in_range,
             num_isls_per_sat,
             sat_neighbor_to_if,
@@ -240,7 +242,7 @@ def generate_dynamic_state_at(
             time_since_epoch_ns,
             satellites,
             ground_stations,
-            sat_net_graph_without_gs,
+            sat_net_graph_only_satellites_with_isls,
             ground_station_satellites_in_range,
             num_isls_per_sat,
             sat_neighbor_to_if,
@@ -256,7 +258,7 @@ def generate_dynamic_state_at(
             time_since_epoch_ns,
             satellites,
             ground_stations,
-            sat_net_graph_only_gs,
+            sat_net_graph_all_with_only_gsls,
             num_isls_per_sat,
             list_gsl_interfaces_info,
             prev_output,
@@ -270,7 +272,7 @@ def generate_dynamic_state_at(
             time_since_epoch_ns,
             satellites,
             ground_stations,
-            sat_net_graph_without_gs,
+            sat_net_graph_only_satellites_with_isls,
             ground_station_satellites_in_range,
             num_isls_per_sat,
             sat_neighbor_to_if,
@@ -304,12 +306,13 @@ def sat_distance(sat1, sat2, date):
     return math.sqrt(sat1.range ** 2 + sat2.range ** 2 - (2 * sat1.range * sat2.range * math.cos(angle)))
 
 
-def get_ground_station_observer(lat, lon, epoch, date):
+def get_ground_station_observer(lat, lon, elev, epoch, date):
     """
     Get a pyephem observer at a ground station, to compute distances and angles.
 
     :param lat:     Latitude of the ground station
     :param lon:     Longitude of the ground station
+    :param elev:    Elevation of the ground station
     :param epoch:   The epoch of the observer (unclear if this has any effect)
     :param date:    The time instant when calculations will be made
 
@@ -318,7 +321,7 @@ def get_ground_station_observer(lat, lon, epoch, date):
     observer = ephem.Observer()
     observer.lat = str(lat)
     observer.lon = str(lon)
-    observer.elevation = 0
+    observer.elevation = elev
     observer.epoch = epoch
     observer.date = date
     return observer

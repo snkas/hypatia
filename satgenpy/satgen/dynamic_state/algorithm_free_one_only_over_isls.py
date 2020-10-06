@@ -20,8 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import networkx as nx
-import math
+from .fstate_calculation import *
 
 
 def algorithm_free_one_only_over_isls(
@@ -29,7 +28,7 @@ def algorithm_free_one_only_over_isls(
         time_since_epoch_ns,
         satellites,
         ground_stations,
-        sat_net_graph_without_gs,
+        sat_net_graph_only_satellites_with_isls,
         ground_station_satellites_in_range,
         num_isls_per_sat,
         sat_neighbor_to_if,
@@ -54,23 +53,16 @@ def algorithm_free_one_only_over_isls(
     stations relay. This means that every path looks like:
     (src gs) - (sat) - (sat) - ... - (sat) - (dst gs)
 
-    As such, it should only be used to answer questions of:
-    (a) reachability / RTT over time,
-    (b) accurate bandwidth if only having a single communication pair.
-
-    If this is not respected, it is e.g. possible that a ground station can only send at
-    for example 10G, but all satellites in range can send to him in
-    be used for questions of a single pair of communicating
     """
 
     if enable_verbose_logs:
         print("\nALGORITHM: FREE ONE ONLY OVER ISLS")
 
     # Check the graph
-    if sat_net_graph_without_gs.number_of_nodes() != len(satellites):
+    if sat_net_graph_only_satellites_with_isls.number_of_nodes() != len(satellites):
         raise ValueError("Number of nodes in the graph does not match the number of satellites")
     for sid in range(len(satellites)):
-        for n in sat_net_graph_without_gs.neighbors(sid):
+        for n in sat_net_graph_only_satellites_with_isls.neighbors(sid):
             if n >= len(satellites):
                 raise ValueError("Graph cannot contain satellite-to-ground-station links")
 
@@ -96,110 +88,28 @@ def algorithm_free_one_only_over_isls(
     # FORWARDING STATE
     #
 
-    # Calculate shortest paths
-    if enable_verbose_logs:
-        print("  > Calculating Floyd-Warshall for graph without ground-station relays")
-    # (Note: Numpy has a deprecation warning here because of how networkx uses matrices)
-    dist_sat_net_without_gs = nx.floyd_warshall_numpy(sat_net_graph_without_gs)
-
-    # Forwarding state
-    fstate = {}
+    # Previous forwarding state (to only write delta)
     prev_fstate = None
     if prev_output is not None:
         prev_fstate = prev_output["fstate"]
 
-    # Now write state to file for complete graph
-    output_filename = output_dynamic_state_dir + "/fstate_" + str(time_since_epoch_ns) + ".txt"
-    if enable_verbose_logs:
-        print("  > Writing forwarding state to: " + output_filename)
-    with open(output_filename, "w+") as f_out:
+    # GID to satellite GSL interface index
+    gid_to_sat_gsl_if_idx = [0] * len(ground_stations)  # (Only one GSL interface per satellite, so the first)
 
-        # Satellites to ground stations
-        # From the satellites attached to the destination ground station,
-        # select the one which promises the shortest path to the destination ground station (getting there + last hop)
-        dist_satellite_to_ground_station = {}
-        for curr in range(len(satellites)):
-            for dst_gs in range(len(ground_stations)):
-                dst_gs_node_id = len(satellites) + dst_gs
-
-                # The satellite this ground station is match
-                possible_dst_sats = ground_station_satellites_in_range[dst_gs]
-                possibilities = []
-                for b in possible_dst_sats:
-                    if not math.isinf(dist_sat_net_without_gs[(curr, b[1])]):  # Must be reachable
-                        possibilities.append(
-                            (
-                                dist_sat_net_without_gs[(curr, b[1])] + b[0],
-                                b[1]
-                            )
-                        )
-                possibilities = list(sorted(possibilities))
-
-                # By default, if there is no satellite in range for the
-                # destination ground station, it will be dropped (indicated by -1)
-                next_hop_decision = (-1, -1, -1)
-                distance_to_ground_station_m = float("inf")
-                if len(possibilities) > 0:
-                    dst_sat = possibilities[0][1]
-                    distance_to_ground_station_m = possibilities[0][0]
-
-                    # If the current node is not that satellite, determine how to get to the satellite
-                    if curr != dst_sat:
-
-                        # Among its neighbors, find the one which promises the
-                        # lowest distance to reach the destination satellite
-                        best_dist = 1000000000000000
-                        for n in sat_net_graph_without_gs.neighbors(curr):
-                            if dist_sat_net_without_gs[(curr, n)] + dist_sat_net_without_gs[(n, dst_sat)] < best_dist:
-                                next_hop_decision = (n, sat_neighbor_to_if[(curr, n)], sat_neighbor_to_if[(n, curr)])
-                                best_dist = dist_sat_net_without_gs[(curr, n)] + dist_sat_net_without_gs[(n, dst_sat)]
-
-                    else:
-                        # This is the destination satellite, as such the next hop is the ground station itself
-                        next_hop_decision = (dst_gs_node_id, num_isls_per_sat[dst_sat], 0)
-
-                # Write to forwarding state
-                dist_satellite_to_ground_station[(curr, dst_gs_node_id)] = distance_to_ground_station_m
-                if not prev_fstate or prev_fstate[(curr, dst_gs_node_id)] != next_hop_decision:
-                    f_out.write("%d,%d,%d,%d,%d\n"
-                                % (curr, dst_gs_node_id,
-                                   next_hop_decision[0], next_hop_decision[1], next_hop_decision[2]))
-                fstate[(curr, dst_gs_node_id)] = next_hop_decision
-
-        # Ground stations to ground stations
-        # Choose the source satellite which promises the shortest path
-        for src_gid in range(len(ground_stations)):
-            for dst_gid in range(len(ground_stations)):
-                if src_gid != dst_gid:
-                    src_gs_node_id = len(satellites) + src_gid
-                    dst_gs_node_id = len(satellites) + dst_gid
-
-                    possible_src_sats = ground_station_satellites_in_range[src_gid]
-                    possibilities = []
-                    for a in possible_src_sats:
-                        best_distance_offered_m = dist_satellite_to_ground_station[(a[1], dst_gs_node_id)]
-                        if not math.isinf(best_distance_offered_m):
-                            possibilities.append(
-                                (
-                                    a[0] + best_distance_offered_m,
-                                    a[1]
-                                )
-                            )
-                    possibilities = sorted(possibilities)
-
-                    # By default, if there is no satellite in range for one of the
-                    # ground stations, it will be dropped (indicated by -1)
-                    next_hop_decision = (-1, -1, -1)
-                    if len(possibilities) > 0:
-                        src_sat_id = possibilities[0][1]
-                        next_hop_decision = (src_sat_id, 0, num_isls_per_sat[src_sat_id])
-
-                    # Update forwarding state
-                    if not prev_fstate or prev_fstate[(src_gs_node_id, dst_gs_node_id)] != next_hop_decision:
-                        f_out.write("%d,%d,%d,%d,%d\n"
-                                    % (src_gs_node_id, dst_gs_node_id,
-                                       next_hop_decision[0], next_hop_decision[1], next_hop_decision[2]))
-                    fstate[(src_gs_node_id, dst_gs_node_id)] = next_hop_decision
+    # Forwarding state using shortest paths
+    fstate = calculate_fstate_shortest_path_without_gs_relaying(
+        output_dynamic_state_dir,
+        time_since_epoch_ns,
+        len(satellites),
+        len(ground_stations),
+        sat_net_graph_only_satellites_with_isls,
+        num_isls_per_sat,
+        gid_to_sat_gsl_if_idx,
+        ground_station_satellites_in_range,
+        sat_neighbor_to_if,
+        prev_fstate,
+        enable_verbose_logs
+    )
 
     if enable_verbose_logs:
         print("")

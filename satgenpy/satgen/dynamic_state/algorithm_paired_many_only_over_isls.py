@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import networkx as nx
+from .fstate_calculation import *
 
 
 def algorithm_paired_many_only_over_isls(
@@ -52,9 +52,6 @@ def algorithm_paired_many_only_over_isls(
     It only considers paths which go over the inter-satellite network, and does not make use of ground
     stations relay. This means that every path looks like:
     (src gs) - (sat) - (sat) - ... - (sat) - (dst gs)
-
-    It can be used to answer questions about the effect of reordering caused by the satellite network
-    on more complicated traffic matrices.
     """
 
     print("\nALGORITHM: PAIRED MANY ONLY OVER ISLS")
@@ -82,201 +79,135 @@ def algorithm_paired_many_only_over_isls(
             raise ValueError("Aggregate max. bandwidth is not equal to 1.0")
     print("  > Interface conditions are met")
 
-    # Free spots
-    node_free_ifs = []
-    node_if_count_list = list(map(
-        lambda x: x["number_of_interfaces"],
-        list_gsl_interfaces_info
-    ))
-    for i in range(len(satellites)):
-        node_free_ifs.append(list(range(num_isls_per_sat[i], num_isls_per_sat[i] + node_if_count_list[i])))
-    for i in range(len(satellites), len(satellites) + len(ground_stations)):
-        node_free_ifs.append(list(range(node_if_count_list[i])))
+    ###########################################################
+    # Select the nearest satellite for each ground station
+    #
 
-    # The GSL mapping is very simple: each ground station has one interface, and connects it
-    # in the forwarding state to the nearest satellite. Every satellite has <number of ground stations>
-    # interfaces, so there is always a free interface spot on the satellite.
-    gsl_mapping = {}
-    frequency_satellite_chosen = [0] * len(satellites)
+    # Keep track of which satellite GSL interfaces (it has <n of ground stations> interfaces) are paired
+    # because it is the closest satellite to a ground station
+    satellite_gsl_ifs_paired = []
+    for sid in range(len(satellites)):
+        satellite_gsl_ifs_paired.append([])
+
+    # Go over each ground station
+    ground_station_satellites_in_range_select_one_at_most = []
     for gid in range(len(ground_stations)):
+
+        # Find the closest satellite
         chosen_sid = -1
         best_distance_m = 1000000000000000
         for (distance_m, sid) in ground_station_satellites_in_range[gid]:
             if distance_m < best_distance_m:
                 chosen_sid = sid
                 best_distance_m = distance_m
-        frequency_satellite_chosen[chosen_sid] += 1
-        gsl_mapping[(gid, chosen_sid)] = {
-            "distance_m": best_distance_m,
-            "sat_if_idx": num_isls_per_sat[chosen_sid] + gid,
-            "gs_if_idx": 0
-        }
-        node_free_ifs[chosen_sid].remove(gsl_mapping[(gid, chosen_sid)]["sat_if_idx"])
-        node_free_ifs[len(satellites) + gid].remove(gsl_mapping[(gid, chosen_sid)]["gs_if_idx"])
-    print("  > Created pairing of each ground station to its nearest satellite")
 
-    # Set the assigned bandwidth
-    for (gid, sid) in gsl_mapping:
-        gsl_mapping[(gid, sid)]["bandwidth"] = 1.0 / float(frequency_satellite_chosen[sid])
+        # It is possible that a ground station does not have a single satellite in-range
+        if chosen_sid == -1:
+            ground_station_satellites_in_range_select_one_at_most.append([])
+        else:
+            ground_station_satellites_in_range_select_one_at_most.append([(best_distance_m, chosen_sid)])
+            satellite_gsl_ifs_paired[chosen_sid].append(gid)
 
-    # Make a note of how many ground stations have switched
-    if prev_output is not None:
-        print("  > Ground stations that switched: %d" %
-              len(set(gsl_mapping.keys()).difference(set(prev_output["gsl_mapping"].keys()))))
-
-    #################################
+    ##################################################
+    # Determine the new GSL interface bandwidth state
+    #
 
     # Bandwidth state
     gsl_if_bandwidth_state = {}
-    for (gid, sid) in gsl_mapping:
-        gsl_if_bandwidth_state[(sid, gsl_mapping[(gid, sid)]["sat_if_idx"])] = gsl_mapping[(gid, sid)]["bandwidth"]
-        gsl_if_bandwidth_state[(len(satellites) + gid, gsl_mapping[(gid, sid)]["gs_if_idx"])] = \
-            gsl_mapping[(gid, sid)]["bandwidth"]
-    for i in range(len(satellites) + len(ground_stations)):
-        for f in node_free_ifs[i]:
-            # Unmatched interfaces receive 100% of bandwidth of the interface to get rid of whatever remains
-            # in its queue
-            gsl_if_bandwidth_state[(i, f)] = list_gsl_interfaces_info[i]["aggregate_max_bandwidth"]
 
-    # And now finally, we write the state:
-    gsl_if_bandwidth_changes = 0
+    # For the satellite
+    for sid in range(len(satellites)):
+
+        # The paired GSL interfaces share the total bandwidth
+        # The other ones are not in use, but still need to flush out existing packets
+        satellite_frequency_chosen = len(satellite_gsl_ifs_paired[sid])
+        for gsl_if_idx in range(len(ground_stations)):
+
+            # If it is paired, it gets its fair share
+            if gsl_if_idx in satellite_gsl_ifs_paired[sid]:
+                gsl_if_bandwidth_state[(sid, num_isls_per_sat[sid] + gsl_if_idx)] = (
+                        1.0 / float(satellite_frequency_chosen)
+                )
+
+            # Else, it get the full bandwidth to get rid of the packets in it (it can also be kept, but then
+            # you cannot parallelize this generation process)
+            else:
+                gsl_if_bandwidth_state[(sid, num_isls_per_sat[sid] + gsl_if_idx)] = 1.0
+
+    # For the ground stations, the same principle applies
+    for gid in range(len(ground_stations)):
+
+        # Check if it is paired
+        if len(ground_station_satellites_in_range_select_one_at_most[gid]) == 1:
+
+            # Find the satellite it is paired to, and then only get its fair share
+            paired_satellite_id = ground_station_satellites_in_range_select_one_at_most[gid][0][1]
+            satellite_frequency_chosen = len(satellite_gsl_ifs_paired[paired_satellite_id])
+            gsl_if_bandwidth_state[(len(satellites) + gid, 0)] = 1.0 / float(satellite_frequency_chosen)
+
+        # If not paired, flush out the packets (it can also be kept, but then
+        # you cannot parallelize this generation process)
+        else:
+            gsl_if_bandwidth_state[(len(satellites) + gid, 0)] = 1.0
+
+    ######################################################
+    # Write the new GSL interface bandwidth state (delta)
+    #
+
+    # Previous GSL interface bandwidth state (to only write delta)
+    prev_gsl_if_bandwidth_state = None
+    if prev_output is not None:
+        prev_gsl_if_bandwidth_state = prev_output["gsl_if_bandwidth_state"]
+
     output_filename = output_dynamic_state_dir + "/gsl_if_bandwidth_" + str(time_since_epoch_ns) + ".txt"
     print("  > Writing interface bandwidth state to: " + output_filename)
     with open(output_filename, "w+") as f_out:
         for (node_id, if_id) in gsl_if_bandwidth_state:
 
             # Only delta if have previous bandwidth state
-            write = True
-            if prev_output is not None:
-                write = prev_output["gsl_if_bandwidth_state"][(node_id, if_id)] \
-                        != gsl_if_bandwidth_state[(node_id, if_id)]
-
-            # Write to file
-            if write:
-                f_out.write("%d,%d,%f\n" % (node_id, if_id, gsl_if_bandwidth_state[(node_id, if_id)]))
-                gsl_if_bandwidth_changes += 1
-    print("  > Interface bandwidth deltas... " + str(gsl_if_bandwidth_changes))
+            if (
+                    prev_gsl_if_bandwidth_state is None
+                    or
+                    prev_gsl_if_bandwidth_state[(node_id, if_id)] != gsl_if_bandwidth_state[(node_id, if_id)]
+            ):
+                f_out.write("%d,%d,%f\n" % (
+                    node_id,
+                    if_id,
+                    gsl_if_bandwidth_state[(node_id, if_id)]
+                ))
 
     #################################
 
     print("\nFORWARDING STATE")
 
-    # Ground station
-    ground_station_to_up_links = {}
-    for gid in range(len(ground_stations)):
-        ground_station_to_up_links[gid] = []
-    list_gsls_node_ids = []
-    for (gid, sid) in gsl_mapping:
-        ground_station_to_up_links[gid].append({
-            "sid": sid,
-            "sat_if_idx": gsl_mapping[(gid, sid)]["sat_if_idx"],
-            "gs_if_idx": gsl_mapping[(gid, sid)]["gs_if_idx"],
-            "distance_m": gsl_mapping[(gid, sid)]["distance_m"],
-        })
-        list_gsls_node_ids.append((len(satellites) + gid, sid))
-
-    # Calculate shortest paths
-    print("  > Calculating Floyd-Warshall for ISL satellite network only")
-    dist_sat_net_without_gs = nx.floyd_warshall_numpy(sat_net_graph_without_gs)
-
-    # Forwarding state variable
-    fstate = {}
+    # Previous forwarding state (to only write delta)
     prev_fstate = None
     if prev_output is not None:
         prev_fstate = prev_output["fstate"]
 
-    # Now write state to file for complete graph
-    output_filename = output_dynamic_state_dir + "/fstate_" + str(time_since_epoch_ns) + ".txt"
-    print("  > Writing forwarding state to: " + output_filename)
-    with open(output_filename, "w+") as f_out:
+    # GID to satellite GSL interface index
+    # Each ground station has a GSL interface on every
+    # satellite allocated only for itself
+    gid_to_sat_gsl_if_idx = list(range(len(ground_stations)))
 
-        # Ground stations to ground stations
-        # Choose the source satellite which promises the shortest path
-        for src_gid in range(len(ground_stations)):
-            for dst_gid in range(len(ground_stations)):
-                if src_gid != dst_gid:
-                    src_gs_node_id = len(satellites) + src_gid
-                    dst_gs_node_id = len(satellites) + dst_gid
-
-                    up_links = ground_station_to_up_links[src_gid]
-                    down_links = ground_station_to_up_links[dst_gid]
-                    cartesian_product_combinations = []
-                    for i in range(len(up_links)):
-                        a = up_links[i]
-                        for b in down_links:
-                            cartesian_product_combinations.append(
-                                (
-                                    a["distance_m"] + dist_sat_net_without_gs[(a["sid"], b["sid"])] + b["distance_m"],
-                                    i
-                                )
-                            )
-                    cartesian_product_combinations = sorted(cartesian_product_combinations)
-
-                    # By default, if there is no satellite in ra1nge for one of the
-                    # ground stations, it will be dropped (indicated by (-1, -1, -1) meaning no next hop, no interfaces)
-                    decision = (-1, -1, -1)
-                    if len(cartesian_product_combinations) > 0:
-                        chosen = cartesian_product_combinations[0][1]
-                        up_link = up_links[chosen]
-                        decision = (up_link["sid"], up_link["gs_if_idx"], up_link["sat_if_idx"])
-
-                    # Update forwarding state
-                    if prev_fstate is None or prev_fstate[(src_gs_node_id, dst_gs_node_id)] != decision:
-                        f_out.write("%d,%d,%d,%d,%d\n" % (src_gs_node_id, dst_gs_node_id,
-                                                          decision[0], decision[1], decision[2]))
-                    fstate[(src_gs_node_id, dst_gs_node_id)] = decision
-
-        # Satellites to ground stations
-        # Find the satellite which is the closest to the destination ground station
-        for curr in range(len(satellites)):
-            for dst_gid in range(len(ground_stations)):
-                dst_gs_node_id = len(satellites) + dst_gid
-
-                # The satellite this ground station
-                down_links = ground_station_to_up_links[dst_gid]
-                possibilities = []
-                for j in range(len(down_links)):
-                    b = down_links[j]
-                    possibilities.append(
-                        (
-                            dist_sat_net_without_gs[(curr, b["sid"])] + b["distance_m"],
-                            j
-                        )
-                    )
-                possibilities = sorted(possibilities)
-
-                # By default, if there is no satellite in range for the
-                # destination ground station, it will be dropped (indicated by -1)
-                decision = (-1, -1, -1)
-                if len(possibilities) > 0:
-                    chosen = possibilities[0][1]
-                    down_link = down_links[chosen]
-
-                    # If the current node is not that satellite, determine how to get to the satellite
-                    if curr != down_link["sid"]:
-
-                        # Among its neighbors, find the one which promises the
-                        # lowest distance to reach the destination satellite
-                        best_distance = 1000000000000000
-                        for n in sat_net_graph_without_gs.neighbors(curr):
-                            d = dist_sat_net_without_gs[(curr, n)] + dist_sat_net_without_gs[(n, down_link["sid"])]
-                            if d < best_distance:
-                                decision = (n, sat_neighbor_to_if[(curr, n)], sat_neighbor_to_if[(n, curr)])
-                                best_distance = d
-
-                    else:
-                        # This is the destination satellite, as such the next hop is the ground station itself
-                        decision = (dst_gs_node_id, down_link["sat_if_idx"], down_link["gs_if_idx"])
-
-                # Update forwarding state
-                if prev_fstate is None or prev_fstate[(curr, dst_gs_node_id)] != decision:
-                    f_out.write("%d,%d,%d,%d,%d\n" % (curr, dst_gs_node_id, decision[0], decision[1], decision[2]))
-                fstate[(curr, dst_gs_node_id)] = decision
+    # Forwarding state using shortest paths
+    fstate = calculate_fstate_shortest_path_without_gs_relaying(
+        output_dynamic_state_dir,
+        time_since_epoch_ns,
+        len(satellites),
+        len(ground_stations),
+        sat_net_graph_without_gs,
+        num_isls_per_sat,
+        gid_to_sat_gsl_if_idx,
+        ground_station_satellites_in_range_select_one_at_most,
+        sat_neighbor_to_if,
+        prev_fstate,
+        enable_verbose_logs
+    )
 
     print("")
 
     return {
         "fstate": fstate,
-        "gsl_mapping": gsl_mapping,
         "gsl_if_bandwidth_state": gsl_if_bandwidth_state
     }
