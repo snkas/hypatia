@@ -12,6 +12,10 @@ sudo apt-get update || exit 1
 echo "Installing dependencies for satgenpy..."
 pip install numpy astropy ephem networkx sgp4 geopy matplotlib || exit 1
 sudo apt-get install libproj-dev proj-data proj-bin libgeos-dev || exit 1
+# Mac alternatives (to be able to pip install cartopy)
+# brew install proj geos
+# export CFLAGS=-stdlib=libc++
+# MACOSX_DEPLOYMENT_TARGET=10.14
 pip install git+https://github.com/snkas/exputilpy.git || exit 1
 pip install cartopy || exit 1
 
