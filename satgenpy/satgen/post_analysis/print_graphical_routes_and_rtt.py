@@ -128,8 +128,8 @@ def print_graphical_routes_and_rtt(
 
                 # Background
                 ax.add_feature(cartopy.feature.OCEAN, zorder=0)
-                ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor='black', linewidth=0.5)
-                ax.add_feature(cartopy.feature.BORDERS, edgecolor='gray', linewidth=0.5)
+                ax.add_feature(cartopy.feature.LAND, zorder=0, edgecolor='black', linewidth=0.2)
+                ax.add_feature(cartopy.feature.BORDERS, edgecolor='gray', linewidth=0.2)
                 
                 # Time moment
                 time_moment_str = str(epoch + t * u.ns)
@@ -147,8 +147,16 @@ def print_graphical_routes_and_rtt(
                         latitude_deg,
                         color=SATELLITE_UNUSED_COLOR,
                         fillstyle='none',
-                        markeredgewidth=0.5,
+                        markeredgewidth=0.1,
+                        markersize=0.5,
                         marker='^',
+                    )
+                    plt.text(
+                        longitude_deg + 0.5,
+                        latitude_deg,
+                        str(node_id),
+                        color=SATELLITE_UNUSED_COLOR,
+                        fontdict={"size": 1}
                     )
 
                 # # ISLs
@@ -197,7 +205,8 @@ def print_graphical_routes_and_rtt(
                         latitude_deg,
                         color=GROUND_STATION_UNUSED_COLOR,
                         fillstyle='none',
-                        markeredgewidth=0.5,
+                        markeredgewidth=0.2,
+                        markersize=1.0,
                         marker='o',
                     )
                 
@@ -231,27 +240,27 @@ def print_graphical_routes_and_rtt(
                         plt.plot(
                             [from_longitude_deg, to_longitude_deg],
                             [from_latitude_deg, to_latitude_deg],
-                            color=ISL_COLOR, linewidth=2, marker='',
+                            color=ISL_COLOR, linewidth=0.5, marker='',
                             transform=ccrs.Geodetic(),
                         )
 
                 # Across all points, we need to find the latitude / longitude to zoom into
-                min_latitude = min(
-                    ground_stations[src - len(satellites)]["latitude"],
-                    ground_stations[dst - len(satellites)]["latitude"]
-                )
-                max_latitude = max(
-                    ground_stations[src - len(satellites)]["latitude"],
-                    ground_stations[dst - len(satellites)]["latitude"]
-                )
-                min_longitude = min(
-                    ground_stations[src - len(satellites)]["longitude"],
-                    ground_stations[dst - len(satellites)]["longitude"]
-                )
-                max_longitude = max(
-                    ground_stations[src - len(satellites)]["longitude"],
-                    ground_stations[dst - len(satellites)]["longitude"]
-                )
+                # min_latitude = min(
+                #     ground_stations[src - len(satellites)]["latitude"],
+                #     ground_stations[dst - len(satellites)]["latitude"]
+                # )
+                # max_latitude = max(
+                #     ground_stations[src - len(satellites)]["latitude"],
+                #     ground_stations[dst - len(satellites)]["latitude"]
+                # )
+                # min_longitude = min(
+                #     ground_stations[src - len(satellites)]["longitude"],
+                #     ground_stations[dst - len(satellites)]["longitude"]
+                # )
+                # max_longitude = max(
+                #     ground_stations[src - len(satellites)]["longitude"],
+                #     ground_stations[dst - len(satellites)]["longitude"]
+                # )
 
                 # Points
                 if current_path is not None:
@@ -262,24 +271,31 @@ def print_graphical_routes_and_rtt(
                             ephem_body.compute(time_moment_str)
                             latitude_deg = math.degrees(ephem_body.sublat)
                             longitude_deg = math.degrees(ephem_body.sublong)
-                            min_latitude = min(min_latitude, latitude_deg)
-                            max_latitude = max(max_latitude, latitude_deg)
-                            min_longitude = min(min_longitude, longitude_deg)
-                            max_longitude = max(max_longitude, longitude_deg)
+                            # min_latitude = min(min_latitude, latitude_deg)
+                            # max_latitude = max(max_latitude, latitude_deg)
+                            # min_longitude = min(min_longitude, longitude_deg)
+                            # max_longitude = max(max_longitude, longitude_deg)
                             # Satellite
                             plt.plot(
                                 longitude_deg,
                                 latitude_deg,
                                 color=SATELLITE_USED_COLOR,
                                 marker='^',
+                                markersize=0.65,
+                            )
+                            plt.text(
+                                longitude_deg + 0.9,
+                                latitude_deg,
+                                str(node_id),
+                                fontdict={"size": 2, "weight": "bold"}
                             )
                         else:
                             latitude_deg = ground_stations[node_id - len(satellites)]["latitude"]
                             longitude_deg = ground_stations[node_id - len(satellites)]["longitude"]
-                            min_latitude = min(min_latitude, latitude_deg)
-                            max_latitude = max(max_latitude, latitude_deg)
-                            min_longitude = min(min_longitude, longitude_deg)
-                            max_longitude = max(max_longitude, longitude_deg)
+                            # min_latitude = min(min_latitude, latitude_deg)
+                            # max_latitude = max(max_latitude, latitude_deg)
+                            # min_longitude = min(min_longitude, longitude_deg)
+                            # max_longitude = max(max_longitude, longitude_deg)
                             if v == 0 or v == len(current_path) - 1:
                                 # Endpoint (start or finish) ground station
                                 plt.plot(
@@ -287,6 +303,7 @@ def print_graphical_routes_and_rtt(
                                     latitude_deg,
                                     color=GROUND_STATION_USED_COLOR,
                                     marker='o',
+                                    markersize=0.9,
                                 )
                             else:
                                 # Intermediary ground station
@@ -295,15 +312,16 @@ def print_graphical_routes_and_rtt(
                                     latitude_deg,
                                     color=GROUND_STATION_USED_COLOR,
                                     marker='o',
+                                    markersize=0.9,
                                 )
 
                 # Zoom into region
-                ax.set_extent([
-                    min_longitude - 5,
-                    max_longitude + 5,
-                    min_latitude - 5,
-                    max_latitude + 5,
-                ])
+                # ax.set_extent([
+                #     min_longitude - 5,
+                #     max_longitude + 5,
+                #     min_latitude - 5,
+                #     max_latitude + 5,
+                # ])
 
                 # Legend
                 ax.legend(
@@ -323,5 +341,3 @@ def print_graphical_routes_and_rtt(
 
                 # Save final PDF figure
                 f.savefig(pdf_filename, bbox_inches='tight')
-
-
