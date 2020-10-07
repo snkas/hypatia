@@ -364,7 +364,7 @@ class TestEndToEnd(unittest.TestCase):
                                 lowest_rtt_ns = min(a_rtt, lowest_rtt_ns)
                                 highest_rtt_ns = max(a_rtt, highest_rtt_ns)
                             self.assertEqual(a_time, b_time)
-                            self.assertAlmostEqual(a_rtt, b_rtt, places=6)
+                            self.assertAlmostEqual(a_rtt, b_rtt, places=5)
 
                 # Save RTTs
                 if src < dst:
