@@ -19,8 +19,7 @@ This repository enables you to do so.
 
    ```
    pip install numpy astropy ephem networkx sgp4 geopy matplotlib
-   sudo apt-get install libproj-dev proj-data proj-bin
-   sudo apt-get install libgeos-dev 
+   sudo apt-get install libproj-dev proj-data proj-bin libgeos-dev
    pip install cartopy
    pip install git+https://github.com/snkas/exputilpy.git
    ```
