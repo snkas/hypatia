@@ -295,6 +295,7 @@ def generate_dynamic_state_at(
 def sat_distance(sat1, sat2, date):
     """
     Computes the distance between two satellites in meters.
+    # TODO: Add epoch here
 
     :param sat1: The first satellite
     :param sat2: The other satellite
