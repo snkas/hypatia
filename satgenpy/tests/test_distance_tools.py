@@ -33,7 +33,7 @@ from satgen.distance_tools import *
 from satgen.ground_stations import *
 
 
-class TestDynamicState(unittest.TestCase):
+class TestDistanceTools(unittest.TestCase):
 
     def test_distance_between_satellites(self):
         kuiper_satellite_0 = ephem.readtle(
