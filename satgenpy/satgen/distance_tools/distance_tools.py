@@ -23,7 +23,6 @@
 import math
 import ephem
 from geopy.distance import great_circle
-import pyproj
 
 
 def distance_m_between_satellites(sat1, sat2, epoch_str, date_str):
