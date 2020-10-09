@@ -34,11 +34,11 @@ def extend_ground_stations(filename_ground_stations_basic_in, filename_ground_st
                 ground_station["elevation_m_float"]
             )
             f_out.write(
-                "%d,%s,%s,%s,%f,%f,%f,%f\n" % (
+                "%d,%s,%f,%f,%f,%f,%f,%f\n" % (
                     ground_station["gid"],
                     ground_station["name"],
-                    ground_station["latitude_degrees_str"],
-                    ground_station["longitude_degrees_str"],
+                    float(ground_station["latitude_degrees_str"]),
+                    float(ground_station["longitude_degrees_str"]),
                     ground_station["elevation_m_float"],
                     cartesian[0],
                     cartesian[1],
