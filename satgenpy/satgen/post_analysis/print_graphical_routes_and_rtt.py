@@ -136,7 +136,11 @@ def print_graphical_routes_and_rtt(
 
                 # Other satellites
                 for node_id in range(len(satellites)):
-                    shadow_ground_station = create_basic_ground_station_for_satellite_shadow(satellites[node_id], time_moment_str)
+                    shadow_ground_station = create_basic_ground_station_for_satellite_shadow(
+                        satellites[node_id],
+                        str(epoch),
+                        time_moment_str
+                    )
                     latitude_deg = float(shadow_ground_station["latitude_degrees_str"])
                     longitude_deg = float(shadow_ground_station["longitude_degrees_str"])
 
@@ -217,21 +221,37 @@ def print_graphical_routes_and_rtt(
 
                         # From coordinates
                         if from_node_id < len(satellites):
-                            shadow_ground_station = create_basic_ground_station_for_satellite_shadow(satellites[node_id], time_moment_str)
+                            shadow_ground_station = create_basic_ground_station_for_satellite_shadow(
+                                satellites[node_id],
+                                str(epoch),
+                                time_moment_str
+                            )
                             from_latitude_deg = float(shadow_ground_station["latitude_degrees_str"])
                             from_longitude_deg = float(shadow_ground_station["longitude_degrees_str"])
                         else:
-                            from_latitude_deg = float(ground_stations[from_node_id - len(satellites)]["latitude_degrees_str"])
-                            from_longitude_deg = float(ground_stations[from_node_id - len(satellites)]["longitude_degrees_str"])
+                            from_latitude_deg = float(
+                                ground_stations[from_node_id - len(satellites)]["latitude_degrees_str"]
+                            )
+                            from_longitude_deg = float(
+                                ground_stations[from_node_id - len(satellites)]["longitude_degrees_str"]
+                            )
 
                         # To coordinates
                         if to_node_id < len(satellites):
-                            shadow_ground_station = create_basic_ground_station_for_satellite_shadow(satellites[node_id], time_moment_str)
+                            shadow_ground_station = create_basic_ground_station_for_satellite_shadow(
+                                satellites[node_id],
+                                str(epoch),
+                                time_moment_str
+                            )
                             to_latitude_deg = float(shadow_ground_station["latitude_degrees_str"])
                             to_longitude_deg = float(shadow_ground_station["longitude_degrees_str"])
                         else:
-                            to_latitude_deg = float(ground_stations[to_node_id - len(satellites)]["latitude_degrees_str"])
-                            to_longitude_deg = float(ground_stations[to_node_id - len(satellites)]["longitude_degrees_str"])
+                            to_latitude_deg = float(
+                                ground_stations[to_node_id - len(satellites)]["latitude_degrees_str"]
+                            )
+                            to_longitude_deg = float(
+                                ground_stations[to_node_id - len(satellites)]["longitude_degrees_str"]
+                            )
 
                         # Plot the line
                         plt.plot(
@@ -264,7 +284,11 @@ def print_graphical_routes_and_rtt(
                     for v in range(0, len(current_path)):
                         node_id = current_path[v]
                         if node_id < len(satellites):
-                            shadow_ground_station = create_basic_ground_station_for_satellite_shadow(satellites[node_id], time_moment_str)
+                            shadow_ground_station = create_basic_ground_station_for_satellite_shadow(
+                                satellites[node_id],
+                                str(epoch),
+                                time_moment_str
+                            )
                             latitude_deg = float(shadow_ground_station["latitude_degrees_str"])
                             longitude_deg = float(shadow_ground_station["longitude_degrees_str"])
                             # min_latitude = min(min_latitude, latitude_deg)
