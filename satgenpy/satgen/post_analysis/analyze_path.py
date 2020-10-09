@@ -234,5 +234,3 @@ def analyze_path(
         f_out.write("\n")
 
     print("Done")
-
-

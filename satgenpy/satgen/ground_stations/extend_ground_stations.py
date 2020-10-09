@@ -20,37 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import math
+from satgen.distance_tools import *
 from .read_ground_stations import *
-
-
-def geodetic2cartesian(lat, lon, ele):
-
-    #
-    # Adapted from: https://github.com/andykee/pygeodesy/blob/master/pygeodesy/transform.py
-    #
-
-    # WGS72 value,
-    # Source: https://geographiclib.sourceforge.io/html/NET/NETGeographicLib_8h_source.html
-    a = 6378135.0
-
-    # Ellipsoid flattening factor; WGS72 value
-    # Taken from https://geographiclib.sourceforge.io/html/NET/NETGeographicLib_8h_source.html
-    f = 1.0 / 298.26
-
-    # First numerical eccentricity of ellipsoid
-    e = math.sqrt(2.0 * f - f * f)
-    lat = lat * (math.pi / 180.0)
-    lon = lon * (math.pi / 180.0)
-
-    # Radius of curvature in the prime vertical of the surface of the geodetic ellipsoid
-    v = a / math.sqrt(1.0 - e * e * math.sin(lat) * math.sin(lat))
-
-    x = (v + ele) * math.cos(lat) * math.cos(lon)
-    y = (v + ele) * math.cos(lat) * math.sin(lon)
-    z = (v * (1.0 - e * e) + ele) * math.sin(lat)
-
-    return x, y, z
 
 
 def extend_ground_stations(filename_ground_stations_basic_in, filename_ground_stations_out):
@@ -58,17 +29,17 @@ def extend_ground_stations(filename_ground_stations_basic_in, filename_ground_st
     with open(filename_ground_stations_out, "w+") as f_out:
         for ground_station in ground_stations:
             cartesian = geodetic2cartesian(
-                ground_station['latitude'],
-                ground_station['longitude'],
-                ground_station['elevation']
+                float(ground_station["latitude_degrees_str"]),
+                float(ground_station["longitude_degrees_str"]),
+                ground_station["elevation_m_float"]
             )
             f_out.write(
-                "%d,%s,%f,%f,%f,%f,%f,%f\n" % (
+                "%d,%s,%s,%s,%f,%f,%f,%f\n" % (
                     ground_station["gid"],
                     ground_station["name"],
-                    ground_station["latitude"],
-                    ground_station["longitude"],
-                    ground_station["elevation"],
+                    ground_station["latitude_degrees_str"],
+                    ground_station["longitude_degrees_str"],
+                    ground_station["elevation_m_float"],
                     cartesian[0],
                     cartesian[1],
                     cartesian[2]

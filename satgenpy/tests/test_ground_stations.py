@@ -31,16 +31,16 @@ class TestGroundStations(unittest.TestCase):
 
         # Write basic ground stations
         with open("ground_stations.temp.txt", "w+") as f_out:
-            f_out.write("0,abc,33,11,77")
+            f_out.write("0,abc,33,11.0,77")
 
         # Read basic and compare
         ground_stations = satgen.read_ground_stations_basic("ground_stations.temp.txt")
         self.assertEqual(1, len(ground_stations))
         self.assertEqual(0, ground_stations[0]["gid"])
         self.assertEqual("abc", ground_stations[0]["name"])
-        self.assertEqual(33.0, ground_stations[0]["latitude"])
-        self.assertEqual(11.0, ground_stations[0]["longitude"])
-        self.assertEqual(77.0, ground_stations[0]["elevation"])
+        self.assertEqual("33", ground_stations[0]["latitude_degrees_str"])
+        self.assertEqual("11.0", ground_stations[0]["longitude_degrees_str"])
+        self.assertEqual(77.0, ground_stations[0]["elevation_m_float"])
         self.assertTrue("cartesian_x" not in ground_stations[0])
         self.assertTrue("cartesian_y" not in ground_stations[0])
         self.assertTrue("cartesian_z" not in ground_stations[0])
@@ -51,9 +51,9 @@ class TestGroundStations(unittest.TestCase):
         self.assertEqual(1, len(ground_stations_extended))
         self.assertEqual(0, ground_stations_extended[0]["gid"])
         self.assertEqual("abc", ground_stations_extended[0]["name"])
-        self.assertEqual(33.0, ground_stations_extended[0]["latitude"])
-        self.assertEqual(11.0, ground_stations_extended[0]["longitude"])
-        self.assertEqual(77.0, ground_stations_extended[0]["elevation"])
+        self.assertEqual("33", ground_stations_extended[0]["latitude_degrees_str"])
+        self.assertEqual("11.0", ground_stations_extended[0]["longitude_degrees_str"])
+        self.assertEqual(77.0, ground_stations_extended[0]["elevation_m_float"])
         self.assertTrue("cartesian_x" in ground_stations_extended[0])
         self.assertTrue("cartesian_y" in ground_stations_extended[0])
         self.assertTrue("cartesian_z" in ground_stations_extended[0])

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from satgen.dynamic_state import *
+from satgen.distance_tools import *
 import networkx as nx
 from astropy import units as u
 
@@ -38,7 +38,7 @@ def construct_graph_with_distances(epoch, time_since_epoch_ns, satellites, groun
     for (a, b) in list_isls:
 
         # Only ISLs which are close enough are considered
-        sat_distance_m = sat_distance(satellites[a], satellites[b], str(time))
+        sat_distance_m = distance_m_between_satellites(satellites[a], satellites[b], str(epoch), str(time))
         if sat_distance_m <= max_isl_length_m:
             sat_net_graph_with_gs.add_edge(
                 a, b, weight=sat_distance_m
@@ -46,19 +46,10 @@ def construct_graph_with_distances(epoch, time_since_epoch_ns, satellites, groun
 
     # GSLs
     for ground_station in ground_stations:
-        observer = get_ground_station_observer(
-            lat=ground_station['latitude'],
-            lon=ground_station['longitude'],
-            elev=ground_station['elevation'],
-            epoch=str(epoch),
-            date=str(time)
-        )
 
         # Find satellites in range
         for sid in range(len(satellites)):
-            satellite = satellites[sid]
-            satellite.compute(observer)
-            distance_m = satellite.range
+            distance_m = distance_m_ground_station_to_satellite(ground_station, satellites[sid], str(epoch), str(time))
             if distance_m <= max_gsl_length_m:
                 sat_net_graph_with_gs.add_edge(len(satellites) + ground_station["gid"], sid, weight=distance_m)
 
@@ -84,7 +75,12 @@ def compute_path_length_without_graph(path, epoch, time_since_epoch_ns, satellit
         
         # Satellite to satellite
         if from_node_id < len(satellites) and to_node_id < len(satellites):
-            sat_distance_m = sat_distance(satellites[from_node_id], satellites[to_node_id], str(time))
+            sat_distance_m = distance_m_between_satellites(
+                satellites[from_node_id],
+                satellites[to_node_id],
+                str(epoch),
+                str(time)
+            )
             if sat_distance_m > max_isl_length_m \
                     or ((to_node_id, from_node_id) not in list_isls and (from_node_id, to_node_id) not in list_isls):
                 raise ValueError("Invalid ISL hop")
@@ -93,15 +89,12 @@ def compute_path_length_without_graph(path, epoch, time_since_epoch_ns, satellit
         # Ground station to satellite
         elif from_node_id >= len(satellites) and to_node_id < len(satellites):
             ground_station = ground_stations[from_node_id - len(satellites)]
-            observer = get_ground_station_observer(
-                lat=ground_station['latitude'],
-                lon=ground_station['longitude'],
-                elev=ground_station['elevation'],
-                epoch=str(epoch),
-                date=str(time)
+            distance_m = distance_m_ground_station_to_satellite(
+                ground_station,
+                satellites[to_node_id],
+                str(epoch),
+                str(time)
             )
-            satellites[to_node_id].compute(observer)
-            distance_m = satellites[to_node_id].range
             if distance_m > max_gsl_length_m:
                 raise ValueError("Invalid GSL hop from " + str(from_node_id) + " to " + str(to_node_id)
                                  + " (" + str(distance_m) + " larger than " + str(max_gsl_length_m) + ")")
@@ -110,15 +103,12 @@ def compute_path_length_without_graph(path, epoch, time_since_epoch_ns, satellit
         # Satellite to ground station
         elif from_node_id < len(satellites) and to_node_id >= len(satellites):
             ground_station = ground_stations[to_node_id - len(satellites)]
-            observer = get_ground_station_observer(
-                lat=ground_station['latitude'],
-                lon=ground_station['longitude'],
-                elev=ground_station['elevation'],
-                epoch=str(epoch),
-                date=str(time)
+            distance_m = distance_m_ground_station_to_satellite(
+                ground_station,
+                satellites[from_node_id],
+                str(epoch),
+                str(time)
             )
-            satellites[from_node_id].compute(observer)
-            distance_m = satellites[from_node_id].range
             if distance_m > max_gsl_length_m:
                 raise ValueError("Invalid GSL hop from " + str(from_node_id) + " to " + str(to_node_id)
                                  + " (" + str(distance_m) + " larger than " + str(max_gsl_length_m) + ")")

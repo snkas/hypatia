@@ -22,7 +22,6 @@
 
 import satgen
 import unittest
-from math import floor
 import os
 
 

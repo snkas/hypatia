@@ -20,9 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import math
-import ephem
+from satgen.distance_tools import *
 from astropy import units as u
+import math
 import networkx as nx
 import numpy as np
 from .algorithm_free_one_only_gs_relays import algorithm_free_one_only_gs_relays
@@ -138,7 +138,7 @@ def generate_dynamic_state_at(
         # TODO: Technically, they can (could just be ignored by forwarding state calculation),
         # TODO: but practically, defining a permanent ISL between two satellites which
         # TODO: can go out of distance is generally unwanted
-        sat_distance_m = sat_distance(satellites[a], satellites[b], str(time))
+        sat_distance_m = distance_m_between_satellites(satellites[a], satellites[b], str(epoch), str(time))
         if sat_distance_m > max_isl_length_m:
             raise ValueError(
                 "The distance between two satellites (%d and %d) "
@@ -190,20 +190,15 @@ def generate_dynamic_state_at(
     # What satellites can a ground station see
     ground_station_satellites_in_range = []
     for ground_station in ground_stations:
-        observer = get_ground_station_observer(
-            lat=ground_station['latitude'],
-            lon=ground_station['longitude'],
-            elev=ground_station['elevation'],
-            epoch=str(epoch),
-            date=str(time)
-        )
-
         # Find satellites in range
         satellites_in_range = []
         for sid in range(len(satellites)):
-            satellite = satellites[sid]
-            satellite.compute(observer)
-            distance_m = satellite.range
+            distance_m = distance_m_ground_station_to_satellite(
+                ground_station,
+                satellites[sid],
+                str(epoch),
+                str(time)
+            )
             if distance_m <= max_gsl_length_m:
                 satellites_in_range.append((distance_m, sid))
                 sat_net_graph_all_with_only_gsls.add_edge(
@@ -287,49 +282,6 @@ def generate_dynamic_state_at(
             prev_output,
             enable_verbose_logs
         )
-    
+
     else:
         raise ValueError("Unknown dynamic state algorithm: " + str(dynamic_state_algorithm))
-
-
-def sat_distance(sat1, sat2, date):
-    """
-    Computes the distance between two satellites in meters.
-    # TODO: Add epoch here
-
-    :param sat1: The first satellite
-    :param sat2: The other satellite
-    :param date: The time instant when the distance should be measured
-
-    :return: The distance between the satellites in meters
-    """
-    observer = ephem.Observer()
-    observer.date = date
-    observer.lat = 0
-    observer.lon = 0
-    observer.elevation = 0
-    sat1.compute(observer)
-    sat2.compute(observer)
-    angle = float(repr(ephem.separation(sat1, sat2)))
-    return math.sqrt(sat1.range ** 2 + sat2.range ** 2 - (2 * sat1.range * sat2.range * math.cos(angle)))
-
-
-def get_ground_station_observer(lat, lon, elev, epoch, date):
-    """
-    Get a pyephem observer at a ground station, to compute distances and angles.
-
-    :param lat:     Latitude of the ground station
-    :param lon:     Longitude of the ground station
-    :param elev:    Elevation of the ground station
-    :param epoch:   The epoch of the observer (unclear if this has any effect)
-    :param date:    The time instant when calculations will be made
-
-    :return: An observer at a ground station
-    """
-    observer = ephem.Observer()
-    observer.lat = str(lat)
-    observer.lon = str(lon)
-    observer.elevation = elev
-    observer.epoch = epoch
-    observer.date = date
-    return observer

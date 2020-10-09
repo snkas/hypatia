@@ -41,9 +41,9 @@ def read_ground_stations_basic(filename_ground_stations_basic):
             ground_station_basic = {
                 "gid": gid,
                 "name": split[1],
-                "latitude": float(split[2]),
-                "longitude": float(split[3]),
-                "elevation": float(split[4]),
+                "latitude_degrees_str": split[2],
+                "longitude_degrees_str": split[3],
+                "elevation_m_float": float(split[4]),
             }
             ground_stations_basic.append(ground_station_basic)
             gid += 1
@@ -70,9 +70,9 @@ def read_ground_stations_extended(filename_ground_stations_extended):
             ground_station_basic = {
                 "gid": gid,
                 "name": split[1],
-                "latitude": float(split[2]),
-                "longitude": float(split[3]),
-                "elevation": float(split[4]),
+                "latitude_degrees_str": split[2],
+                "longitude_degrees_str": split[3],
+                "elevation_m_float": float(split[4]),
                 "cartesian_x": float(split[5]),
                 "cartesian_y": float(split[6]),
                 "cartesian_z": float(split[7]),

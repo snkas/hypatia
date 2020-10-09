@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 from .graph_tools import *
+from satgen.distance_tools import *
 from satgen.isls import *
 from satgen.ground_stations import *
 from satgen.tles import *
@@ -28,11 +29,8 @@ import exputil
 import numpy as np
 from .print_routes_and_rtt import print_routes_and_rtt
 from statsmodels.distributions.empirical_distribution import ECDF
-from geopy.distance import great_circle
 
-# WGS72 value; taken from https://geographiclib.sourceforge.io/html/NET/NETGeographicLib_8h_source.html
-EARTH_RADIUS_M = 6378135.0
-EARTH_RADIUS_KM = 6378.135
+
 SPEED_OF_LIGHT_M_PER_S = 299792458.0
 
 GEODESIC_ECDF_PLOT_CUTOFF_KM = 500
@@ -139,12 +137,13 @@ def analyze_rtt(
             list_max_rtt_ns.append(max_rtt_ns)
             list_max_minus_min_rtt_ns.append(max_rtt_ns - min_rtt_ns)
             list_max_rtt_to_min_rtt_slowdown.append(max_rtt_slowdown)
-
-            geodesic_distance_m = great_circle(
-                (ground_stations[src]["latitude"], ground_stations[src]["longitude"]),
-                (ground_stations[dst]["latitude"], ground_stations[dst]["longitude"]),
-                radius=EARTH_RADIUS_KM
-            ).m
+            geodesic_distance_m = geodesic_distance_m_between_ground_stations(
+                ground_stations[src],
+                ground_stations[dst]
+            )
+            # If the geodesic is under 500km, we do not consider it,
+            # as one would use terrestrial networks vs. expending the effort to go up and down
+            # Especially if populated cities are very close to each other, would this give a large geodesic slow-down
             if geodesic_distance_m >= GEODESIC_ECDF_PLOT_CUTOFF_KM * 1000:
                 geodesic_rtt_ns = geodesic_distance_m * 2 * 1000000000.0 / SPEED_OF_LIGHT_M_PER_S
                 list_max_rtt_to_geodesic_slowdown.append(float(max_rtt_ns) / float(geodesic_rtt_ns))
@@ -234,5 +233,3 @@ def analyze_rtt(
         f_out.write("\n")
 
     print("Done")
-
-

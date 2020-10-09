@@ -136,10 +136,9 @@ def print_graphical_routes_and_rtt(
 
                 # Other satellites
                 for node_id in range(len(satellites)):
-                    ephem_body = satellites[node_id]
-                    ephem_body.compute(time_moment_str)
-                    latitude_deg = math.degrees(ephem_body.sublat)
-                    longitude_deg = math.degrees(ephem_body.sublong)
+                    shadow_ground_station = create_basic_ground_station_for_satellite_shadow(satellites[node_id], time_moment_str)
+                    latitude_deg = float(shadow_ground_station["latitude_degrees_str"])
+                    longitude_deg = float(shadow_ground_station["longitude_degrees_str"])
 
                     # Other satellite
                     plt.plot(
@@ -172,21 +171,21 @@ def print_graphical_routes_and_rtt(
                 #     to_longitude_deg = math.degrees(ephem_body.sublong)
                 #
                 #     # Plot the line
-                #     if ground_stations[src - len(satellites)]["longitude"] <= \
+                #     if ground_stations[src - len(satellites)]["longitude_degrees_str"] <= \
                 #        from_longitude_deg \
-                #        <= ground_stations[dst - len(satellites)]["longitude"] \
+                #        <= ground_stations[dst - len(satellites)]["longitude_degrees_str"] \
                 #        and \
-                #        ground_stations[src - len(satellites)]["latitude"] <= \
+                #        ground_stations[src - len(satellites)]["latitude_degrees_str"] <= \
                 #        from_latitude_deg \
-                #        <= ground_stations[dst - len(satellites)]["latitude"] \
+                #        <= ground_stations[dst - len(satellites)]["latitude_degrees_str"] \
                 #        and \
-                #        ground_stations[src - len(satellites)]["longitude"] <= \
+                #        ground_stations[src - len(satellites)]["longitude_degrees_str"] <= \
                 #        to_longitude_deg \
-                #        <= ground_stations[dst - len(satellites)]["longitude"] \
+                #        <= ground_stations[dst - len(satellites)]["longitude_degrees_str"] \
                 #        and \
-                #        ground_stations[src - len(satellites)]["latitude"] <= \
+                #        ground_stations[src - len(satellites)]["latitude_degrees_str"] <= \
                 #        to_latitude_deg \
-                #        <= ground_stations[dst - len(satellites)]["latitude"]:
+                #        <= ground_stations[dst - len(satellites)]["latitude_degrees_str"]:
                 #             plt.plot(
                 #         [from_longitude_deg, to_longitude_deg],
                 #         [from_latitude_deg, to_latitude_deg],
@@ -196,8 +195,8 @@ def print_graphical_routes_and_rtt(
 
                 # Other ground stations
                 for gid in range(len(ground_stations)):
-                    latitude_deg = ground_stations[gid]["latitude"]
-                    longitude_deg = ground_stations[gid]["longitude"]
+                    latitude_deg = float(ground_stations[gid]["latitude_degrees_str"])
+                    longitude_deg = float(ground_stations[gid]["longitude_degrees_str"])
 
                     # Other ground station
                     plt.plot(
@@ -218,23 +217,21 @@ def print_graphical_routes_and_rtt(
 
                         # From coordinates
                         if from_node_id < len(satellites):
-                            ephem_body = satellites[from_node_id]
-                            ephem_body.compute(time_moment_str)
-                            from_latitude_deg = math.degrees(ephem_body.sublat)
-                            from_longitude_deg = math.degrees(ephem_body.sublong)
+                            shadow_ground_station = create_basic_ground_station_for_satellite_shadow(satellites[node_id], time_moment_str)
+                            from_latitude_deg = float(shadow_ground_station["latitude_degrees_str"])
+                            from_longitude_deg = float(shadow_ground_station["longitude_degrees_str"])
                         else:
-                            from_latitude_deg = ground_stations[from_node_id - len(satellites)]["latitude"]
-                            from_longitude_deg = ground_stations[from_node_id - len(satellites)]["longitude"]
+                            from_latitude_deg = float(ground_stations[from_node_id - len(satellites)]["latitude_degrees_str"])
+                            from_longitude_deg = float(ground_stations[from_node_id - len(satellites)]["longitude_degrees_str"])
 
                         # To coordinates
                         if to_node_id < len(satellites):
-                            ephem_body = satellites[to_node_id]
-                            ephem_body.compute(time_moment_str)
-                            to_latitude_deg = math.degrees(ephem_body.sublat)
-                            to_longitude_deg = math.degrees(ephem_body.sublong)
+                            shadow_ground_station = create_basic_ground_station_for_satellite_shadow(satellites[node_id], time_moment_str)
+                            to_latitude_deg = float(shadow_ground_station["latitude_degrees_str"])
+                            to_longitude_deg = float(shadow_ground_station["longitude_degrees_str"])
                         else:
-                            to_latitude_deg = ground_stations[to_node_id - len(satellites)]["latitude"]
-                            to_longitude_deg = ground_stations[to_node_id - len(satellites)]["longitude"]
+                            to_latitude_deg = float(ground_stations[to_node_id - len(satellites)]["latitude_degrees_str"])
+                            to_longitude_deg = float(ground_stations[to_node_id - len(satellites)]["longitude_degrees_str"])
 
                         # Plot the line
                         plt.plot(
@@ -246,20 +243,20 @@ def print_graphical_routes_and_rtt(
 
                 # Across all points, we need to find the latitude / longitude to zoom into
                 # min_latitude = min(
-                #     ground_stations[src - len(satellites)]["latitude"],
-                #     ground_stations[dst - len(satellites)]["latitude"]
+                #     ground_stations[src - len(satellites)]["latitude_degrees_str"],
+                #     ground_stations[dst - len(satellites)]["latitude_degrees_str"]
                 # )
                 # max_latitude = max(
-                #     ground_stations[src - len(satellites)]["latitude"],
-                #     ground_stations[dst - len(satellites)]["latitude"]
+                #     ground_stations[src - len(satellites)]["latitude_degrees_str"],
+                #     ground_stations[dst - len(satellites)]["latitude_degrees_str"]
                 # )
                 # min_longitude = min(
-                #     ground_stations[src - len(satellites)]["longitude"],
-                #     ground_stations[dst - len(satellites)]["longitude"]
+                #     ground_stations[src - len(satellites)]["longitude_degrees_str"],
+                #     ground_stations[dst - len(satellites)]["longitude_degrees_str"]
                 # )
                 # max_longitude = max(
-                #     ground_stations[src - len(satellites)]["longitude"],
-                #     ground_stations[dst - len(satellites)]["longitude"]
+                #     ground_stations[src - len(satellites)]["longitude_degrees_str"],
+                #     ground_stations[dst - len(satellites)]["longitude_degrees_str"]
                 # )
 
                 # Points
@@ -267,10 +264,9 @@ def print_graphical_routes_and_rtt(
                     for v in range(0, len(current_path)):
                         node_id = current_path[v]
                         if node_id < len(satellites):
-                            ephem_body = satellites[node_id]
-                            ephem_body.compute(time_moment_str)
-                            latitude_deg = math.degrees(ephem_body.sublat)
-                            longitude_deg = math.degrees(ephem_body.sublong)
+                            shadow_ground_station = create_basic_ground_station_for_satellite_shadow(satellites[node_id], time_moment_str)
+                            latitude_deg = float(shadow_ground_station["latitude_degrees_str"])
+                            longitude_deg = float(shadow_ground_station["longitude_degrees_str"])
                             # min_latitude = min(min_latitude, latitude_deg)
                             # max_latitude = max(max_latitude, latitude_deg)
                             # min_longitude = min(min_longitude, longitude_deg)
@@ -290,8 +286,8 @@ def print_graphical_routes_and_rtt(
                                 fontdict={"size": 2, "weight": "bold"}
                             )
                         else:
-                            latitude_deg = ground_stations[node_id - len(satellites)]["latitude"]
-                            longitude_deg = ground_stations[node_id - len(satellites)]["longitude"]
+                            latitude_deg = float(ground_stations[node_id - len(satellites)]["latitude_degrees_str"])
+                            longitude_deg = float(ground_stations[node_id - len(satellites)]["longitude_degrees_str"])
                             # min_latitude = min(min_latitude, latitude_deg)
                             # max_latitude = max(max_latitude, latitude_deg)
                             # min_longitude = min(min_longitude, longitude_deg)
