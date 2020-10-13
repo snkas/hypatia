@@ -1,2 +1,2 @@
-from .read_gsl_interfaces_info import *
-from .generate_simple_gsl_interfaces_info import *
+from .read_gsl_interfaces_info import read_gsl_interfaces_info
+from .generate_simple_gsl_interfaces_info import generate_simple_gsl_interfaces_info
