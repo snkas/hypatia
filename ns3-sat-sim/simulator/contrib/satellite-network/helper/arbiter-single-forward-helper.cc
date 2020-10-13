@@ -112,8 +112,36 @@ void ArbiterSingleForwardHelper::UpdateForwardingState(int64_t t) {
             NS_ABORT_MSG_UNLESS(my_if_id == -1 || (my_if_id >= 0 && my_if_id + 1 < m_nodes.Get(current_node_id)->GetObject<Ipv4>()->GetNInterfaces()), "Invalid current interface");
             NS_ABORT_MSG_UNLESS(next_if_id == -1 || (next_if_id >= 0 && next_if_id + 1 < m_nodes.Get(next_hop_node_id)->GetObject<Ipv4>()->GetNInterfaces()), "Invalid next hop interface");
 
-            // TODO: If my_if_id is a GSL interface, the destination must also be a GSL interface
-            // TODO: If my_if_id is a p2p laser interface, the destination interface must be its counter-part
+            // Node id and interface id checks are only necessary for non-drops
+            if (next_hop_node_id != -1 && my_if_id != -1 && next_if_id != -1) {
+
+                // It must be either GSL or ISL
+                bool source_is_gsl = m_nodes.Get(current_node_id)->GetObject<Ipv4>()->GetNetDevice(1 + my_if_id)->GetObject<GSLNetDevice>() != 0;
+                bool source_is_isl = m_nodes.Get(current_node_id)->GetObject<Ipv4>()->GetNetDevice(1 + my_if_id)->GetObject<PointToPointLaserNetDevice>() != 0;
+                NS_ABORT_MSG_IF((!source_is_gsl) && (!source_is_isl), "Only GSL and ISL network devices are supported");
+
+                // If current is a GSL interface, the destination must also be a GSL interface
+                NS_ABORT_MSG_IF(
+                    source_is_gsl &&
+                    m_nodes.Get(next_hop_node_id)->GetObject<Ipv4>()->GetNetDevice(1 + next_if_id)->GetObject<GSLNetDevice>() == 0,
+                    "Destination interface must be attached to a GSL network device"
+                );
+
+                // If current is a p2p laser interface, the destination must match exactly its counter-part
+                NS_ABORT_MSG_IF(
+                    source_is_isl &&
+                    m_nodes.Get(next_hop_node_id)->GetObject<Ipv4>()->GetNetDevice(1 + next_if_id)->GetObject<PointToPointLaserNetDevice>() == 0,
+                    "Destination interface must be an ISL network device"
+                );
+                if (source_is_isl) {
+                    Ptr<NetDevice> device0 = m_nodes.Get(current_node_id)->GetObject<Ipv4>()->GetNetDevice(1 + my_if_id)->GetObject<PointToPointLaserNetDevice>()->GetChannel()->GetDevice(0);
+                    Ptr<NetDevice> device1 = m_nodes.Get(current_node_id)->GetObject<Ipv4>()->GetNetDevice(1 + my_if_id)->GetObject<PointToPointLaserNetDevice>()->GetChannel()->GetDevice(1);
+                    Ptr<NetDevice> other_device = device0->GetNode()->GetId() == current_node_id ? device1 : device0;
+                    NS_ABORT_MSG_IF(other_device->GetNode()->GetId() != next_hop_node_id, "Next hop node id across does not match");
+                    NS_ABORT_MSG_IF(other_device->GetIfIndex() != 1 + next_if_id, "Next hop interface id across does not match");
+                }
+
+            }
 
             // Add to forwarding state
             m_arbiters.at(current_node_id)->SetSingleForwardState(
