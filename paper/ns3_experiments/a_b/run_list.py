@@ -79,7 +79,7 @@ def get_pings_run_list():
     # TCP transport protocol does not matter for the ping run
     reduced_chosen_pairs = []
     for p in chosen_pairs:
-        if not (p[0], p[1], p[2]) in reduced_chosen_pairs:
+        if not (p[0], p[1], p[2], p[4]) in reduced_chosen_pairs:
             reduced_chosen_pairs.append((p[0], p[1], p[2], p[4]))  # Stripped out p[3] = transport protocol
 
     run_list = []
