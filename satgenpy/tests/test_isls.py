@@ -24,13 +24,14 @@ import satgen
 import unittest
 from math import floor
 import os
+import exputil
 
 
 class TestIsls(unittest.TestCase):
 
     def test_isls_empty(self):
         satgen.generate_empty_isls("isls_empty.txt.tmp")
-        isls_list = satgen.read_isls("isls_empty.txt.tmp")
+        isls_list = satgen.read_isls("isls_empty.txt.tmp", 0)
         self.assertEqual(0, len(isls_list))
         os.remove("isls_empty.txt.tmp")
 
@@ -40,7 +41,7 @@ class TestIsls(unittest.TestCase):
             num_sat_per_orbit = values[1]
             isl_shift = values[2]
             satgen.generate_plus_grid_isls("isls.txt.tmp", num_orbits, num_sat_per_orbit, isl_shift)
-            isls_list = satgen.read_isls("isls.txt.tmp")
+            isls_list = satgen.read_isls("isls.txt.tmp", num_orbits * num_sat_per_orbit)
             os.remove("isls.txt.tmp")
             self.assertEqual(len(isls_list), num_orbits * num_sat_per_orbit * 2)
             self.assertEqual(len(set(isls_list)), num_orbits * num_sat_per_orbit * 2)
@@ -85,3 +86,66 @@ class TestIsls(unittest.TestCase):
             self.fail()
         except ValueError:
             self.assertTrue(True)
+
+    def test_isls_invalid_file(self):
+        local_shell = exputil.LocalShell()
+
+        # Invalid left index
+        local_shell.write_file(
+            "isls.txt.tmp",
+            "2 3\n5 6\n9 0"
+        )
+        try:
+            satgen.read_isls("isls.txt.tmp", 9)
+            self.fail()
+        except ValueError:
+            self.assertTrue(True)
+        os.remove("isls.txt.tmp")
+
+        # Invalid right index
+        local_shell.write_file(
+            "isls.txt.tmp",
+            "2 3\n5 6\n6 9\n3 99"
+        )
+        try:
+            satgen.read_isls("isls.txt.tmp", 50)
+            self.fail()
+        except ValueError:
+            self.assertTrue(True)
+        os.remove("isls.txt.tmp")
+
+        # Invalid left index
+        local_shell.write_file(
+            "isls.txt.tmp",
+            "2 3\n5 6\n6 8\n-3 3"
+        )
+        try:
+            satgen.read_isls("isls.txt.tmp", 50)
+            self.fail()
+        except ValueError:
+            self.assertTrue(True)
+        os.remove("isls.txt.tmp")
+
+        # Invalid right index
+        local_shell.write_file(
+            "isls.txt.tmp",
+            "2 3\n5 6\n1 -3\n6 8"
+        )
+        try:
+            satgen.read_isls("isls.txt.tmp", 50)
+            self.fail()
+        except ValueError:
+            self.assertTrue(True)
+        os.remove("isls.txt.tmp")
+
+        # Duplicate
+        local_shell.write_file(
+            "isls.txt.tmp",
+            "2 3\n5 6\n3 9\n5 6\n2 9"
+        )
+        try:
+            satgen.read_isls("isls.txt.tmp", 10)
+            self.fail()
+        except ValueError:
+            self.assertTrue(True)
+        os.remove("isls.txt.tmp")

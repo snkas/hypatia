@@ -48,8 +48,8 @@ def print_routes_and_rtt(base_output_dir, satellite_network_dir, dynamic_state_u
     # Variables (load in for each thread such that they don't interfere)
     ground_stations = read_ground_stations_extended(satellite_network_dir + "/ground_stations.txt")
     tles = read_tles(satellite_network_dir + "/tles.txt")
-    list_isls = read_isls(satellite_network_dir + "/isls.txt")
     satellites = tles["satellites"]
+    list_isls = read_isls(satellite_network_dir + "/isls.txt", len(satellites))
     epoch = tles["epoch"]
     description = exputil.PropertiesConfig(satellite_network_dir + "/description.txt")
 

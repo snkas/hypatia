@@ -103,8 +103,8 @@ def help_dynamic_state(
         # Variables (load in for each thread such that they don't interfere)
         ground_stations = read_ground_stations_extended(output_generated_data_dir + "/" + name + "/ground_stations.txt")
         tles = read_tles(output_generated_data_dir + "/" + name + "/tles.txt")
-        list_isls = read_isls(output_generated_data_dir + "/" + name + "/isls.txt")
         satellites = tles["satellites"]
+        list_isls = read_isls(output_generated_data_dir + "/" + name + "/isls.txt", len(satellites))
         list_gsl_interfaces_info = read_gsl_interfaces_info(
             output_generated_data_dir + "/" + name + "/gsl_interfaces_info.txt",
             len(satellites),
