@@ -193,3 +193,6 @@ class TestDynamicState(unittest.TestCase):
                 self.assertEqual(gsl_if_bandwidth[(node_id, 1)], 1.0)
             else:
                 self.assertEqual(gsl_if_bandwidth[(node_id, 0)], 1.0)
+
+        # Clean up
+        local_shell.remove_force_recursive(temp_gen_data)
