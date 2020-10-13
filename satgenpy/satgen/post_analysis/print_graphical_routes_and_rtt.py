@@ -222,7 +222,7 @@ def print_graphical_routes_and_rtt(
                         # From coordinates
                         if from_node_id < len(satellites):
                             shadow_ground_station = create_basic_ground_station_for_satellite_shadow(
-                                satellites[node_id],
+                                satellites[from_node_id],
                                 str(epoch),
                                 time_moment_str
                             )
@@ -239,7 +239,7 @@ def print_graphical_routes_and_rtt(
                         # To coordinates
                         if to_node_id < len(satellites):
                             shadow_ground_station = create_basic_ground_station_for_satellite_shadow(
-                                satellites[node_id],
+                                satellites[to_node_id],
                                 str(epoch),
                                 time_moment_str
                             )
