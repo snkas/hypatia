@@ -138,6 +138,30 @@ class TestIsls(unittest.TestCase):
             self.assertTrue(True)
         os.remove("isls.txt.tmp")
 
+        # Left is larger than right
+        local_shell.write_file(
+            "isls.txt.tmp",
+            "6 5"
+        )
+        try:
+            satgen.read_isls("isls.txt.tmp", 10)
+            self.fail()
+        except ValueError:
+            self.assertTrue(True)
+        os.remove("isls.txt.tmp")
+
+        # Left is equal to right
+        local_shell.write_file(
+            "isls.txt.tmp",
+            "5 5"
+        )
+        try:
+            satgen.read_isls("isls.txt.tmp", 10)
+            self.fail()
+        except ValueError:
+            self.assertTrue(True)
+        os.remove("isls.txt.tmp")
+
         # Duplicate
         local_shell.write_file(
             "isls.txt.tmp",
