@@ -15,13 +15,17 @@ you can download and extract all (temporary) data which Hypatia generates for th
 
    Download link (password (if asked): "hypatia_paper"): 
    * (v1: preliminary) https://polybox.ethz.ch/index.php/s/Y35PwifNOKkcnvR
+   
+     SHA-256 checksum:
+     18d761a28706723b57772e0636fbc40b7d57161f4c54069eede0c8ae740cbe2d
+     
    * (Previous versions: v0)
    
 2. Double-check: the archive `<hypatia>/paper/hypatia_paper_temp_data.tar.gz` now exists.
 
 3. Make sure you have the `exputil` Python package installed:
    ```
-   pip install git+https://github.com/snkas/exputilpy.git
+   pip install git+https://github.com/snkas/exputilpy.git@v1.6
    ```
 
 4. Extract the temporary data:

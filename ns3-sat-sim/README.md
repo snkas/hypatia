@@ -28,7 +28,7 @@ granularity. It builds upon two ns-3 modules:
    sudo apt-get update
    sudo apt-get -y install mpic++ libopenmpi-dev lcov gnuplot
    pip install numpy statsmodels
-   pip install git+https://github.com/snkas/exputilpy.git
+   pip install git+https://github.com/snkas/exputilpy.git@v1.6
    git submodule update --init --recursive
    ```
 

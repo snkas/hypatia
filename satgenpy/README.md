@@ -21,7 +21,7 @@ This repository enables you to do so.
    pip install numpy astropy ephem networkx sgp4 geopy matplotlib
    sudo apt-get install libproj-dev proj-data proj-bin libgeos-dev
    pip install cartopy
-   pip install git+https://github.com/snkas/exputilpy.git
+   pip install git+https://github.com/snkas/exputilpy.git@v1.6
    ```
 
 ## Dynamic state algorithms

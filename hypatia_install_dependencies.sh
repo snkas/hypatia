@@ -16,14 +16,14 @@ sudo apt-get install libproj-dev proj-data proj-bin libgeos-dev || exit 1
 # brew install proj geos
 # export CFLAGS=-stdlib=libc++
 # MACOSX_DEPLOYMENT_TARGET=10.14
-pip install git+https://github.com/snkas/exputilpy.git || exit 1
+pip install git+https://github.com/snkas/exputilpy.git@v1.6 || exit 1
 pip install cartopy || exit 1
 
 # ns3-sat-sim
 echo "Installing dependencies for ns3-sat-sim..."
 sudo apt-get -y install mpic++ libopenmpi-dev lcov gnuplot || exit 1
 pip install numpy statsmodels || exit 1
-pip install git+https://github.com/snkas/exputilpy.git || exit 1
+pip install git+https://github.com/snkas/exputilpy.git@v1.6 || exit 1
 git submodule update --init --recursive || exit 1
 
 # satviz
@@ -32,7 +32,7 @@ echo "There are currently no dependencies for satviz."
 # paper
 echo "Installing dependencies for paper..."
 pip install numpy || exit 1
-pip install git+https://github.com/snkas/networkload.git || exit 1
+pip install git+https://github.com/snkas/networkload.git@v1.3 || exit 1
 
 # Confirmation dependencies are installed
 echo ""
