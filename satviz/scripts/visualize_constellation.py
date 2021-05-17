@@ -20,13 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from astropy import units as u
-from poliastro.bodies import Earth
-from poliastro.twobody import Orbit
-from astropy.time import Time
-from extractor import CZMLExtractor
+# from astropy import units as u
+# from poliastro.bodies import Earth
+# from poliastro.twobody import Orbit
+# from astropy.time import Time
+# from extractor import CZMLExtractor
+import math
+try:
+    from . import util
+except (ImportError, SystemError):
+    import util
 
-# Generate dynamic visualizations for entire constellation (multiple shells).
+# Generate static visualizations for entire constellation (multiple shells).
 
 EARTH_RADIUS = 6378135.0 # WGS72 value; taken from https://geographiclib.sourceforge.io/html/NET/NETGeographicLib_8h_source.html
 
@@ -37,9 +42,10 @@ PHASE_DIFF = True
 EPOCH = "2000-01-01 00:00:00"
 
 # Shell wise color codes
-COLOR = [[255, 0, 0, 200], [32, 128, 46, 200], [0, 0, 255, 200], [245, 66, 242, 200], [245, 126, 66, 200]]
-
+# COLOR = [[255, 0, 0, 200], [32, 128, 46, 200], [0, 0, 255, 200], [245, 66, 242, 200], [245, 126, 66, 200]]
+COLOR = ['CRIMSON', 'FORESTGREEN', 'DODGERBLUE', 'PERU', 'BLUEVIOLET', 'DARKMAGENTA']
 # CONSTELLATION SPECIFIC PARAMETERS
+
 
 # STARLINK
 NAME = "Starlink"
@@ -93,6 +99,7 @@ NUM_SATS_PER_ORB[4] = 75
 INCLINATION_DEGREE[4] = 70
 BASE_ID[4] = 3959
 ORB_WISE_IDS[4] = []
+
 
 """
 # TELESAT
@@ -174,57 +181,57 @@ bottomFile = "../static_html/bottom.html"
 
 # Output directory for creating visualization html files
 OUT_DIR = "../viz_output/"
-JSON_NAME  = NAME+"_5shell.json"
-OUT_JSON_FILE = OUT_DIR + JSON_NAME
-OUT_HTML_FILE = OUT_DIR + NAME + "_5shell.html"
+# JSON_NAME  = NAME+"_5shell.json"
+# OUT_JSON_FILE = OUT_DIR + JSON_NAME
+OUT_HTML_FILE = OUT_DIR + NAME + ".html"
 
-START = Time(EPOCH, scale="tdb")
-END = START + (10*60) * u.second
-sample_points = 10
-extractor = CZMLExtractor(START, END, sample_points)
+# START = Time(EPOCH, scale="tdb")
+# END = START + (10*60) * u.second
+# sample_points = 10
+# extractor = CZMLExtractor(START, END, sample_points)
 
 
 def generate_satellite_trajectories():
     """
-    Generates and adds satellite orbits to extractor.
-    :return: None
+    Generates and adds satellite orbits to visualization.
+    :return: viz_string
     """
-
+    viz_string = ""
     for i in range(0, SHELL_CNTR):
-
-        SEMI_MAJOR_AXIS = ((EARTH_RADIUS + ALTITUDE_M[i]) / 1000) * u.km
-        for orbit in range(0, NUM_ORBS[i]):
-            orbit_sat_ids = []
-            # Orbit-dependent
-            raan_degree = (orbit * 360.0 / NUM_ORBS[i]) * u.deg
-            orbit_wise_shift = 0
-            if orbit % 2 == 1:
-                if PHASE_DIFF:
-                    orbit_wise_shift = 360.0 / (NUM_SATS_PER_ORB[i] * 2.0)
-
-            # For each satellite in the orbit
-            for n_sat in range(0, NUM_SATS_PER_ORB[i]):
-                nu = (orbit_wise_shift + (n_sat * 360 / NUM_SATS_PER_ORB[i])) * u.deg
-                ss = Orbit.from_classical(Earth,
-                                          SEMI_MAJOR_AXIS,
-                                          ECCENTRICITY * u.one,
-                                          INCLINATION_DEGREE[i] * u.deg,
-                                          raan_degree,
-                                          ARG_OF_PERIGEE_DEGREE * u.deg,
-                                          nu,
-                                          epoch=START)
-                extractor.add_orbit(ss, label_text="",
-                                    path_show=False)  # path_color=[255, 255, 255, 10])  # path_show=False
-                orbit_sat_ids.append(orbit * NUM_SATS_PER_ORB[i] + n_sat + BASE_ID[i])
-                print("done for ", orbit, n_sat)
-            ORB_WISE_IDS[i].append(orbit_sat_ids)
-
-        for orb in ORB_WISE_IDS[i]:
-            for k in range(len(orb)):
-                if k < len(orb) - 1:
-                    extractor.add_link(orb[k], orb[k+1], START, END, color=COLOR[i], width=i*2.75+0.5)
-                else:
-                    extractor.add_link(orb[k], orb[0], START, END, color=COLOR[i], width=i*2.75+0.5)
+        sat_objs = util.generate_sat_obj_list(
+            NUM_ORBS[i],
+            NUM_SATS_PER_ORB[i],
+            EPOCH,
+            PHASE_DIFF,
+            INCLINATION_DEGREE[i],
+            ECCENTRICITY,
+            ARG_OF_PERIGEE_DEGREE,
+            MEAN_MOTION_REV_PER_DAY[i],
+            ALTITUDE_M[i]
+        )
+        for j in range(len(sat_objs)):
+            sat_objs[j]["sat_obj"].compute(EPOCH)
+            viz_string += "var redSphere = viewer.entities.add({name : '', position: Cesium.Cartesian3.fromDegrees(" \
+                          + str(math.degrees(sat_objs[j]["sat_obj"].sublong)) + ", " \
+                          + str(math.degrees(sat_objs[j]["sat_obj"].sublat)) + ", " + str(
+                sat_objs[j]["alt_km"] * 1000) + "), " \
+                          + "ellipsoid : {radii : new Cesium.Cartesian3(30000.0, 30000.0, 30000.0), " \
+                          + "material : Cesium.Color.BLACK.withAlpha(1),}});\n"
+        orbit_links = util.find_orbit_links(sat_objs, NUM_ORBS[i], NUM_SATS_PER_ORB[i])
+        for key in orbit_links:
+            sat1 = orbit_links[key]["sat1"]
+            sat2 = orbit_links[key]["sat2"]
+            viz_string += "viewer.entities.add({name : '', polyline: { positions: Cesium.Cartesian3.fromDegreesArrayHeights([" \
+                          + str(math.degrees(sat_objs[sat1]["sat_obj"].sublong)) + "," \
+                          + str(math.degrees(sat_objs[sat1]["sat_obj"].sublat)) + "," \
+                          + str(sat_objs[sat1]["alt_km"] * 1000) + "," \
+                          + str(math.degrees(sat_objs[sat2]["sat_obj"].sublong)) + "," \
+                          + str(math.degrees(sat_objs[sat2]["sat_obj"].sublat)) + "," \
+                          + str(sat_objs[sat2]["alt_km"] * 1000) + "]), " \
+                          + "width: 0.5, arcType: Cesium.ArcType.NONE, " \
+                          + "material: new Cesium.PolylineOutlineMaterialProperty({ " \
+                          + "color: Cesium.Color."+COLOR[i]+".withAlpha(0.4), outlineWidth: 0, outlineColor: Cesium.Color.BLACK})}});"
+    return viz_string
 
 
 def write_viz_files():
@@ -232,17 +239,14 @@ def write_viz_files():
     Writes JSON and TML files to the output folder
     :return: None
     """
-    writer_json = open(OUT_JSON_FILE, 'w')
     writer_html = open(OUT_HTML_FILE, 'w')
-    writer_json.write(str(extractor.packets) + "\n")
-    writer_json.close()
     with open(topFile, 'r') as fi:
         writer_html.write(fi.read())
-    writer_html.write("\nviewer.dataSources.add(Cesium.CzmlDataSource.load('"+JSON_NAME+"'));\n")
+    writer_html.write(viz_string)
     with open(bottomFile, 'r') as fb:
         writer_html.write(fb.read())
     writer_html.close()
 
 
-generate_satellite_trajectories()
+viz_string = generate_satelite_trajectories()
 write_viz_files()

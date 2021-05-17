@@ -21,7 +21,7 @@ a Cesium access token (via [https://cesium.com/]()).
 
 ## Script description
 
-1. `visualize_constellation.py`: Generates dynamic visualizations for entire constellation (multiple shells).
+1. `visualize_constellation.py`: Generates visualizations for entire constellation (multiple shells).
 
 2. `visualize_horizon_over_time.py`: Finds satellite positions (azimuth, altitude) over time for a static observer and plots them relative to the observer.
 
