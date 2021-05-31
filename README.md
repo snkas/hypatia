@@ -12,13 +12,21 @@ It consists of four main components:
 
 * `satgenpy` : Python framework to generate LEO satellite networks and generate 
   routing over time over a period of time. It additionally includes several 
-  analysis tools to study individual cases. 
+  analysis tools to study individual cases. It makes use of several Python modules
+  among which: numpy, astropy, ephem, networkx, sgp4, geopy, matplotlib, 
+  statsmodels, cartopy (and its dependent (data) packages: libproj-dev, proj-data,
+  proj-bin, libgeos-dev), and exputil.
+  More information can be found in `satgenpy/README.md`.
   (license: MIT)
 
 * `ns3-sat-sim` : ns-3 based framework which takes as input the state generated 
   by `satgenpy` to perform packet-level simulations over LEO satellite networks.
-  It makes use of the `satellite` ns-3 module by Pedro Silva to calculate
-  satellite locations over time.
+  It makes use of the [`satellite`](https://gitlab.inesctec.pt/pmms/ns3-satellite)
+  ns-3 module by Pedro Silva to calculate satellite locations over time.
+  It uses the [`basic-sim`](https://github.com/snkas/basic-sim/tree/3b32597c183e1039be7f0bede17d36d354696776) 
+  ns-3 module to make e.g., running end-to-end TCP flows easier, which makes use of several Python
+  modules (e.g., numpy, statsmodels, exputil) as well as several other packages (e.g., OpenMPI, lcov, gnuplot).
+  More information can be found in `ns3-sat-sim/README.md`.
   (license: GNU GPL version 2)
   
 * `satviz` : Cesium visualization pipeline to generate interactive satellite network
@@ -29,6 +37,9 @@ It consists of four main components:
 
 * `paper` : Experimental and plotting code to reproduce the experiments and 
   figures which are presented in the paper.
+  It makes use of several Python modules among which: satgenpy, numpy, networkload, and exputil.
+  It uses the gnuplot package for most of its plotting.
+  More information can be found in `paper/README.md`.
   (license: MIT)
   
 (there is a fifth folder called `integration_tests` which is used for integration testing purposes)

@@ -23,12 +23,19 @@ you can download and extract all (temporary) data which Hypatia generates for th
    
 2. Double-check: the archive `<hypatia>/paper/hypatia_paper_temp_data.tar.gz` now exists.
 
-3. Make sure you have the `exputil` Python package installed:
+3. Make sure you have the `numpy`, `exputil` and `networkload` Python packages installed:
    ```
+   pip install numpy
    pip install git+https://github.com/snkas/exputilpy.git@v1.6
+   pip install git+https://github.com/snkas/networkload.git@v1.3
+   ```
+   
+4. Make sure gnuplot is installed:
+   ```
+   sudo apt-get install gnuplot
    ```
 
-4. Extract the temporary data:
+5. Extract the temporary data:
    ```
    cd paper
    python extract_temp_data.py

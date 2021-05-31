@@ -18,7 +18,11 @@ granularity. It builds upon two ns-3 modules:
   
   https://github.com/snkas/basic-sim
   
-  It is added as git submodule at: simulator/contrib/basic-sim
+  It is added as git submodule (commit: 3b32597) at: simulator/contrib/basic-sim
+  
+  The git submodule refers to:
+  
+  https://github.com/snkas/basic-sim/tree/3b32597c183e1039be7f0bede17d36d354696776
 
 
 ## Getting started
@@ -26,7 +30,7 @@ granularity. It builds upon two ns-3 modules:
 1. Install dependencies (inherited from `basic-sim` ns-3 module):
    ```
    sudo apt-get update
-   sudo apt-get -y install mpic++ libopenmpi-dev lcov gnuplot
+   sudo apt-get -y install openmpi-bin openmpi-common openmpi-doc libopenmpi-dev lcov gnuplot
    pip install numpy statsmodels
    pip install git+https://github.com/snkas/exputilpy.git@v1.6
    git submodule update --init --recursive
