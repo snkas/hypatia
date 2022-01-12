@@ -17,7 +17,7 @@ sudo apt-get install libproj-dev proj-data proj-bin libgeos-dev || exit 1
 # export CFLAGS=-stdlib=libc++
 # MACOSX_DEPLOYMENT_TARGET=10.14
 pip install git+https://github.com/snkas/exputilpy.git@v1.6 || exit 1
-pip install cartopy || exit 1
+pip install cartopy==0.19.0.post1 || exit 1
 
 # ns3-sat-sim
 echo "Installing dependencies for ns3-sat-sim..."
