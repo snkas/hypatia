@@ -62,10 +62,10 @@ int main(int argc, char *argv[]) {
     Ptr<BasicSimulation> basicSimulation = CreateObject<BasicSimulation>(run_dir);
 
     // Setting socket type
-    Config::SetDefault ("ns3::TcpL4Protocol::SocketType", StringValue ("ns3::" + basicSimulation->GetConfigParamOrFail("tcp_socket_type")));
+    // Config::SetDefault ("ns3::TcpL4Protocol::SocketType", StringValue ("ns3::" + basicSimulation->GetConfigParamOrFail("tcp_socket_type")));
 
     // Optimize TCP
-    TcpOptimizer::OptimizeBasic(basicSimulation);
+    // TcpOptimizer::OptimizeBasic(basicSimulation);
 
     // Read topology, and install routing arbiters
     Ptr<TopologySatelliteNetwork> topology = CreateObject<TopologySatelliteNetwork>(basicSimulation, Ipv4ArbiterRoutingHelper());
@@ -73,25 +73,25 @@ int main(int argc, char *argv[]) {
     GslIfBandwidthHelper gslIfBandwidthHelper(basicSimulation, topology->GetNodes());
 
     // Schedule flows
-    TcpFlowScheduler tcpFlowScheduler(basicSimulation, topology); // Requires enable_tcp_flow_scheduler=true
+    // TcpFlowScheduler tcpFlowScheduler(basicSimulation, topology); // Requires enable_tcp_flow_scheduler=true
 
     // Schedule UDP bursts
     UdpBurstScheduler udpBurstScheduler(basicSimulation, topology); // Requires enable_udp_burst_scheduler=true
 
     // Schedule pings
-    PingmeshScheduler pingmeshScheduler(basicSimulation, topology); // Requires enable_pingmesh_scheduler=true
+    // PingmeshScheduler pingmeshScheduler(basicSimulation, topology); // Requires enable_pingmesh_scheduler=true
 
     // Run simulation
     basicSimulation->Run();
 
     // Write flow results
-    tcpFlowScheduler.WriteResults();
+    // tcpFlowScheduler.WriteResults();
 
     // Write UDP burst results
     udpBurstScheduler.WriteResults();
 
     // Write pingmesh results
-    pingmeshScheduler.WriteResults();
+    // pingmeshScheduler.WriteResults();
 
     // Collect utilization statistics
     topology->CollectUtilizationStatistics();
