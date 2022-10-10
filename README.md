@@ -1,7 +1,5 @@
 # Hypatia
 
-[![Build Status](https://travis-ci.com/snkas/hypatia.svg?branch=master)](https://travis-ci.com/snkas/hypatia)
-
 Hypatia is a low earth orbit (LEO) satellite network simulation framework. It pre-calculates network state over time, enables packet-level simulations using ns-3 and provides visualizations to aid understanding.
 
 <a href="#"><img alt="Kuiper side-view" src="https://raw.githubusercontent.com/leosatsim/leosatsim.github.io/master/images/Kuiper_side_view.png" width="20%" /></a>

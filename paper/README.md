@@ -13,8 +13,8 @@ you can download and extract all (temporary) data which Hypatia generates for th
 
 1. Download `hypatia_paper_temp_data.tar.gz` and put it into `<hypatia>/paper/`.
 
-   Download link (password (if asked): "hypatia_paper"): 
-   * (v1: preliminary) https://polybox.ethz.ch/index.php/s/Y35PwifNOKkcnvR
+   The data is hosted on GitHub in the releases section: 
+   * (v1: preliminary) https://github.com/snkas/hypatia/releases
    
      SHA-256 checksum:
      18d761a28706723b57772e0636fbc40b7d57161f4c54069eede0c8ae740cbe2d
