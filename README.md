@@ -59,7 +59,7 @@ BibTeX citation:
 ## Getting started
 
 1. System setup:
-   - Python version 3.7+
+   - Python version 3.7+ but less than python 3.10
    - Recent Linux operating system (e.g., Ubuntu 18+)
 
 2. Install dependencies:
