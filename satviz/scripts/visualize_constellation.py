@@ -247,6 +247,6 @@ def write_viz_files():
         writer_html.write(fb.read())
     writer_html.close()
 
-
-viz_string = generate_satelite_trajectories()
+#generate_satellite   两个ll
+viz_string = generate_satellite_trajectories()
 write_viz_files()
