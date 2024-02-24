@@ -20,34 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import sys
-from satgen.post_analysis.print_routes_and_rtt import print_routes_and_rtt
-
-
-def main():
-    args = sys.argv[1:]
-    if len(args) != 6:
-        print("Must supply exactly six arguments")
-        print("Usage: python -m satgen.post_analysis.main_print_routes_and_rtt [data_dir] [satellite_network_dir] "
-              "[dynamic_state_update_interval_ms] [end_time_s] [src] [dst]")
-        exit(1)
-    else:
-        core_network_folder_name = args[1].split("/")[-1]
-        base_output_dir = "%s/%s/%dms_for_%ds/manual" % (
-            args[0], core_network_folder_name, int(args[2]), int(args[3])
-        )
-        print("Data dir: " + args[0])
-        print("Used data dir to form base output dir: " + base_output_dir)
-        print_routes_and_rtt(
-            base_output_dir,
-            args[1],
-            int(args[2]),
-            int(args[3]),
-            int(args[4]),
-            int(args[5]),
-            ""  # Must be executed in satgenpy directory
-        )
-
-
-if __name__ == "__main__":
-    main()
+def parse_failure_file(failure_file):
+    failure_table = {}
+    with open(failure_file, "r") as f:
+        for line in f:
+            node_id, failure_start_time, failure_end_time = line.split(",")
+            failure_table[int(node_id)] = (int(float(failure_start_time) * 1_000_000_000), int(float(failure_end_time) * 1_000_000_000))
+    return failure_table
