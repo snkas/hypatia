@@ -1,3 +1,6 @@
 .idea
 *.pyc
 dev_testing/
+*.pdf
+!failure_config_*.txt
+!*.basic.txt

@@ -1,5 +1,15 @@
 # Hypatia
 
+## Steps to run on ARM Mac running Ubuntu
+
+1. Generate dynamic state:
+    - `cd hypatia/paper/satellite_networks_state`
+    - Run main_starlink_500.py and see file for how to run in command line
+
+2. Analyze and visualize routes:
+    - `cd hypatia/satgenpy`
+    - Run methods in satgen/post_analysis which have instructions running in command line
+
 Hypatia is a low earth orbit (LEO) satellite network simulation framework. It pre-calculates network state over time, enables packet-level simulations using ns-3 and provides visualizations to aid understanding.
 
 <a href="#"><img alt="Kuiper side-view" src="https://raw.githubusercontent.com/leosatsim/leosatsim.github.io/master/images/Kuiper_side_view.png" width="20%" /></a>

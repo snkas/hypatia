@@ -121,13 +121,14 @@ def compute_path_length_without_graph(path, epoch, time_since_epoch_ns, satellit
 
 
 def get_path(src, dst, forward_state):
-
-    if forward_state[(src, dst)] == -1:  # No path exists
+    if (src, dst) not in forward_state or forward_state[(src, dst)] == -1:
         return None
 
     curr = src
     path = [src]
     while curr != dst:
+        if (curr, dst) not in forward_state or forward_state[(curr, dst)] == -1:
+            return None  # No path exists
         next_hop = forward_state[(curr, dst)]
         path.append(next_hop)
         curr = next_hop
