@@ -2,5 +2,5 @@
 *.pyc
 dev_testing/
 *.pdf
-*.txt
+!failure_config_*.txt
 !*.basic.txt

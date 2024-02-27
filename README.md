@@ -2,7 +2,7 @@
 
 ## Steps to run on ARM Mac running Ubuntu
 
-1. Generate forwarding state:
+1. Generate dynamic state:
     - `cd hypatia/paper/satellite_networks_state`
     - Run main_starlink_500.py and see file for how to run in command line
 
