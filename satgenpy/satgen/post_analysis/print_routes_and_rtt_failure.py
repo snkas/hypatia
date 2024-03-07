@@ -29,7 +29,7 @@ import tempfile
 
 
 def print_routes_and_rtt_failure(base_output_dir, satellite_network_dir, dynamic_state_update_interval_ms,
-                         simulation_end_time_s, src, dst, satgenpy_dir_with_ending_slash, failure_table):
+                         simulation_end_time_s, src, dst, satgenpy_dir_with_ending_slash):
 
     # Local shell
     local_shell = exputil.LocalShell()

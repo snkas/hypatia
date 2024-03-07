@@ -40,17 +40,13 @@ def main():
         print("Data dir: " + args[0])
         print("Used data dir to form base output dir: " + base_output_dir)
 
-        print("Parsing failure file...")
-        failure_table = parse_failure_file("/home/skapoor68/hypatia/paper/satellite_networks_state/input_data/failure_config_1.txt")
-
         print_graphical_routes_and_rtt_failure(
             base_output_dir,
             args[1],
             int(args[2]),
             int(args[3]),
             int(args[4]),
-            int(args[5]),
-            failure_table
+            int(args[5])
         )
 
 

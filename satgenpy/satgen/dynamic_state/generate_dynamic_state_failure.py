@@ -115,14 +115,24 @@ def generate_dynamic_state_at_failure(
     sat_net_graph_all_with_only_gsls = nx.Graph()
 
     # Active nodes
-    active_satellite_ids = list(range(len(satellites))) # 0 to 1583
-    active_ground_station_ids = list(range(len(satellites), len(satellites) + len(ground_stations))) # 1584 to 1584 + len(ground_stations)
-    for failed_node in failure_table:
-        if failure_table[failed_node][0] <= time_since_epoch_ns <= failure_table[failed_node][1]:
-            if failed_node < len(satellites):
-                active_satellite_ids.remove(failed_node)
-            else:
-                active_ground_station_ids.remove(failed_node)
+    active_satellite_ids = set(range(len(satellites))) # 0 to 1583
+    active_ground_station_ids = set(range(len(satellites), len(satellites) + len(ground_stations))) # 1584 to 1584 + len(ground_stations)
+    active_isls = list_isls.copy()
+
+    # Check for failed satellites
+    for failed_sat in failure_table['SAT']:
+        if failure_table['SAT'][failed_sat][0] <= time_since_epoch_ns <= failure_table['SAT'][failed_sat][1]:
+            active_satellite_ids.remove(failed_sat)
+
+    # Check for failed ground stations
+    for failed_gs in failure_table['GS']:
+        if failure_table['GS'][failed_gs][0] <= time_since_epoch_ns <= failure_table['GS'][failed_gs][1]:
+            active_ground_station_ids.remove(failed_gs)
+
+    # Check for failed ISLs
+    for failed_isl in failure_table['ISL']:
+        if failure_table['ISL'][failed_isl][0] <= time_since_epoch_ns <= failure_table['ISL'][failed_isl][1]:
+            active_isls.remove(failed_isl)
 
     # Information
     # Add all nodes but don't add edges among failed nodes
@@ -147,7 +157,12 @@ def generate_dynamic_state_at_failure(
     num_isls_per_sat = [0] * len(satellites)
     sat_neighbor_to_if = {}
     for (a, b) in list_isls:
-        if a not in set(active_satellite_ids) or b not in set(active_satellite_ids):
+        # Failed satellites
+        if a not in active_satellite_ids or b not in active_satellite_ids:
+            continue
+
+        # Failed ISLs
+        if (a, b) not in active_isls:
             continue
 
         # ISLs are not permitted to exceed their maximum distance

@@ -268,7 +268,7 @@ class MainHelper:
         
         # Failure file
         print("Parsing failure file...")
-        failure_table = satgen.parse_failure_file("input_data/failure_config_2.txt")
+        failure_table = satgen.parse_failure_file("input_data/failure_config_3.txt")
 
         # Forwarding state
         print("Generating forwarding state...")

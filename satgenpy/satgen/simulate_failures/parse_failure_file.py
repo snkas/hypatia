@@ -21,9 +21,15 @@
 # SOFTWARE.
 
 def parse_failure_file(failure_file):
-    failure_table = {}
+    failure_table = {'SAT': {}, 'ISL': {}, 'GS': {}}
     with open(failure_file, "r") as f:
         for line in f:
-            node_id, failure_start_time, failure_end_time = line.split(",")
-            failure_table[int(node_id)] = (int(float(failure_start_time) * 1_000_000_000), int(float(failure_end_time) * 1_000_000_000))
+            parts = line.strip().split(",")
+            device = parts[0]
+            if device == 'SAT' or device == 'GS':
+                node_id, failure_start_time, failure_end_time = parts[1:]
+                failure_table[device][int(node_id)] = (int(float(failure_start_time) * 1_000_000_000), int(float(failure_end_time) * 1_000_000_000))
+            elif device == 'ISL':
+                sat1, sat2, failure_start_time, failure_end_time = parts[1:]
+                failure_table[device][(int(sat1), int(sat2))] = (int(float(failure_start_time) * 1_000_000_000), int(float(failure_end_time) * 1_000_000_000))
     return failure_table

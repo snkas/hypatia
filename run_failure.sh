@@ -12,11 +12,11 @@ algorithm="free_one_only_over_isls"  # "free_one_only_gs_relays" or "free_one_on
 num_threads=5
 src=0 # Paris
 dest=76 # Moscow
-constellation_base_name="starlink_550_failure_2"
+constellation_base_name="starlink_550_failure_3"
 constellation_name="${constellation_base_name}_${isls_choice}_ground_stations_${gs_choice}_algorithm_${algorithm}"
 
 cd paper/satellite_networks_state
-# python main_starlink_550_failure.py "$duration" "$timestep" "$isls_choice" "ground_stations_$gs_choice" "algorithm_$algorithm" "$num_threads"
+python main_starlink_550_failure.py "$duration" "$timestep" "$isls_choice" "ground_stations_$gs_choice" "algorithm_$algorithm" "$num_threads"
 
 cd ../../satgenpy
-python -m satgen.post_analysis.main_print_routes_and_rtt_failure ../out ../paper/satellite_networks_state/gen_data/$constellation_name $timestep $duration $(($src + 1584)) $(($dest + 1584))
+python -m satgen.post_analysis.main_print_graphical_routes_and_rtt_failure ../out ../paper/satellite_networks_state/gen_data/$constellation_name $timestep $duration $(($src + 1584)) $(($dest + 1584))

@@ -41,7 +41,7 @@ ISL_COLOR = "#eb6b38"
 def print_graphical_routes_and_rtt_failure(
         base_output_dir, satellite_network_dir,
         dynamic_state_update_interval_ms,
-        simulation_end_time_s, src, dst, failure_table
+        simulation_end_time_s, src, dst
 ):
 
     # Local shell
@@ -136,9 +136,6 @@ def print_graphical_routes_and_rtt_failure(
 
                 # Other satellites
                 for node_id in range(len(satellites)):
-                    if node_id in failure_table:
-                        continue
-
                     shadow_ground_station = create_basic_ground_station_for_satellite_shadow(
                         satellites[node_id],
                         str(epoch),
@@ -202,9 +199,6 @@ def print_graphical_routes_and_rtt_failure(
 
                 # Other ground stations
                 for gid in range(len(ground_stations)):
-                    if gid in failure_table:
-                        continue
-
                     latitude_deg = float(ground_stations[gid]["latitude_degrees_str"])
                     longitude_deg = float(ground_stations[gid]["longitude_degrees_str"])
 
