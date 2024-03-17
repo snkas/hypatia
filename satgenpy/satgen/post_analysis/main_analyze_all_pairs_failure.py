@@ -21,14 +21,14 @@
 # SOFTWARE.
 
 import sys
-from satgen.post_analysis.print_routes_and_rtt_failure import print_routes_and_rtt_failure
+from satgen.post_analysis.analyze_all_pairs_failure import analyze_all_pairs_failure
 
 def main():
     args = sys.argv[1:]
-    if len(args) != 6:
-        print("Must supply exactly six arguments")
-        print("Usage: python -m satgen.post_analysis.main_print_routes_and_rtt_failure [data_dir] [satellite_network_dir] "
-              "[dynamic_state_update_interval_ms] [end_time_s] [src] [dst]")
+    if len(args) != 4:
+        print("Must supply exactly 4 arguments")
+        print("Usage: python -m satgen.post_analysis.main_analyze_all_pairs_failure [data_dir] [satellite_network_dir] "
+              "[dynamic_state_update_interval_ms] [end_time_s]")
         exit(1)
     else:
         core_network_folder_name = args[1].split("/")[-1]
@@ -38,13 +38,11 @@ def main():
         print("Data dir: " + args[0])
         print("Used data dir to form base output dir: " + base_output_dir)
         
-        print_routes_and_rtt_failure(
+        analyze_all_pairs_failure(
             base_output_dir,
             args[1],
             int(args[2]),
             int(args[3]),
-            int(args[4]),
-            int(args[5]),
             "", # Must be executed in satgenpy directory
         )
 

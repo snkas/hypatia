@@ -201,6 +201,11 @@ class MainHelper:
                 "input_data/ground_stations_paris_moscow_grid.basic.txt",
                 output_generated_data_dir + "/" + name + "/ground_stations.txt"
             )
+        elif gs_selection == "ground_stations_starlink_550":
+            satgen.extend_ground_stations(
+                "input_data/ground_stations_starlink_550.basic.txt",
+                output_generated_data_dir + "/" + name + "/ground_stations.txt"
+            )
         else:
             raise ValueError("Unknown ground station selection: " + gs_selection)
 
@@ -268,7 +273,7 @@ class MainHelper:
         
         # Failure file
         print("Parsing failure file...")
-        failure_table = satgen.parse_failure_file("input_data/failure_config_3.txt")
+        failure_table = satgen.parse_failure_file("input_data/failure_config_0.txt")
 
         # Forwarding state
         print("Generating forwarding state...")

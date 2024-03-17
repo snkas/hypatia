@@ -29,8 +29,8 @@ EARTH_RADIUS = 6378135.0
 
 # GENERATION CONSTANTS
 
-BASE_NAME = "starlink_550_failure_3"
-NICE_NAME = "Starlink-550_failure_3"
+BASE_NAME = "starlink_550_failure_0"
+NICE_NAME = "Starlink-550_failure_0"
 
 # STARLINK 550
 

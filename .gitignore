@@ -4,3 +4,4 @@ dev_testing/
 *.pdf
 !failure_config_*.txt
 !*.basic.txt
+networkx_*.txt
