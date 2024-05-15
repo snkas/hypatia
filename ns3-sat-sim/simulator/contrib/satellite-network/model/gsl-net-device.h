@@ -25,6 +25,8 @@
 
 #include <cstring>
 #include <queue>
+#include <vector>
+
 #include "ns3/address.h"
 #include "ns3/node.h"
 #include "ns3/net-device.h"
@@ -36,10 +38,10 @@
 #include "ns3/ptr.h"
 #include "ns3/mac48-address.h"
 #include "ns3/node-container.h"
+#include "ns3/queue.h"
 
 namespace ns3 {
 
-template <typename Item> class Queue;
 class GSLChannel;
 class ErrorModel;
 
@@ -308,7 +310,7 @@ private:
    * and it has the responsibility for deletion.
    * \see class DropTailQueue
    */
-  Ptr<Queue<Packet> > m_queue;
+  Ptr<Queue<Packet>> m_queue;
 
     /**
      * The FIFO queue for the destination MAC addresses

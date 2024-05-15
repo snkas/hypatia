@@ -275,7 +275,7 @@ int main(int argc, char* argv[]) {
   const std::string usage = "<header | source> path";
   std::ofstream out;
   std::ifstream leap, eop;
-  std::string filename, base_path = "src/satellite/model/data/";
+  std::string filename, base_path = "data/";
   std::vector<uint32_t> leap_seconds;
   std::vector<EopParameters> eop_params;
 

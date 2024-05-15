@@ -50,11 +50,11 @@ int main(int argc, char *argv[]) {
     // Retrieve run directory
     CommandLine cmd;
     std::string run_dir = "";
-    cmd.Usage("Usage: ./waf --run=\"main_satnet --run_dir='<path/to/run/directory>'\"");
+    cmd.Usage("Usage: ./ns3 run \"main_satnet --run_dir='<path/to/run/directory>'\"");
     cmd.AddValue("run_dir",  "Run directory", run_dir);
     cmd.Parse(argc, argv);
     if (run_dir.compare("") == 0) {
-        printf("Usage: ./waf --run=\"main_satnet --run_dir='<path/to/run/directory>'\"");
+        printf("Usage: ./ns3 run \"main_satnet --run_dir='<path/to/run/directory>'\"");
         return 0;
     }
 

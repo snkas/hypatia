@@ -1,3 +1,4 @@
-[submodule "ns3-sat-sim/simulator/contrib/basic-sim"]
-	path = ns3-sat-sim/simulator/contrib/basic-sim
-	url = https://github.com/snkas/basic-sim
+[submodule "satviz/viz_output/cesium-webpack-example"]
+	path = satviz/viz_output/cesium-webpack-example
+	url = https://github.com/CesiumGS/cesium-webpack-example.git
+	ignore = dirty

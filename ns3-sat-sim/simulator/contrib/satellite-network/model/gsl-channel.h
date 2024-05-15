@@ -27,8 +27,9 @@
 #include "ns3/channel.h"
 #include "ns3/data-rate.h"
 #include "ns3/mobility-model.h"
-#include "ns3/sgi-hashmap.h"
 #include "ns3/mac48-address.h"
+
+#include "sgi-hashmap.h"
 
 namespace ns3 {
 

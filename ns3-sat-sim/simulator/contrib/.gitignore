@@ -1,3 +1,2 @@
-/*
-!satellite-network
-!basic-sim
+# Include specific files that should be tracked by Git
+!.gitignore

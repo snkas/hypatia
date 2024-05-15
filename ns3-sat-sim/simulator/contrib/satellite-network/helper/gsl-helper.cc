@@ -135,7 +135,7 @@ GSLHelper::Install (Ptr<Node> node, Ptr<GSLChannel> channel) {
     node->AddDevice (dev);
 
     // Set device queue
-    Ptr<Queue<Packet> > queue = m_queueFactory.Create<Queue<Packet>>();
+    Ptr<Queue<Packet>> queue = m_queueFactory.Create<Queue<Packet>>();
     dev->SetQueue (queue);
 
     // Aggregate NetDeviceQueueInterface objects to connect

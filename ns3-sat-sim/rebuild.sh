@@ -3,4 +3,5 @@
 cd simulator || exit 1
 
 # Rebuild whichever build is configured right now
-./waf -j4 || exit 1
+./ns3 clean || exit 1
+./ns3 build || exit 1

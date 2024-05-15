@@ -28,7 +28,6 @@
 #include "ns3/point-to-point-laser-net-device.h"
 #include "ns3/point-to-point-laser-channel.h"
 #include "ns3/point-to-point-laser-remote-channel.h"
-#include "ns3/queue.h"
 #include "ns3/net-device-queue-interface.h"
 #include "ns3/config.h"
 #include "ns3/packet.h"
@@ -36,6 +35,7 @@
 #include "ns3/string.h"
 #include "ns3/mpi-interface.h"
 #include "ns3/mpi-receiver.h"
+#include "ns3/queue.h"
 
 #include "ns3/trace-helper.h"
 #include "point-to-point-laser-helper.h"

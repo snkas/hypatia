@@ -187,7 +187,7 @@ public:
             if (i < 3) {
                 ASSERT_TRUE(topology->IsSatelliteId(i));
                 ASSERT_FALSE(topology->IsGroundStationId(i));
-                ASSERT_TRUE(topology->GetSatellite(i) != 0);
+                ASSERT_EQUAL(!topology->GetSatellite(i), 0);
             } else {
                 ASSERT_FALSE(topology->IsSatelliteId(i));
                 ASSERT_TRUE(topology->IsGroundStationId(i));

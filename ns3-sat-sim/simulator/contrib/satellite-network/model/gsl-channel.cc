@@ -129,7 +129,7 @@ void
 GSLChannel::Attach (Ptr<GSLNetDevice> device)
 {
     NS_LOG_FUNCTION (this << device);
-    NS_ABORT_MSG_IF (device == 0, "Cannot add zero pointer network device.");
+    NS_ABORT_MSG_IF (!device, "Cannot add zero pointer network device.");
 
     Mac48Address address48 = Mac48Address::ConvertFrom (device->GetAddress());
     m_link[address48] = device;

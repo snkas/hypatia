@@ -82,7 +82,7 @@ GSLNetDevice::GetTypeId (void)
                    "A queue to use as the transmit queue in the device.",
                    PointerValue (),
                    MakePointerAccessor (&GSLNetDevice::m_queue),
-                   MakePointerChecker<Queue<Packet> > ())
+                   MakePointerChecker<Queue<Packet>> ())
 
     //
     // Trace sources at the "top" of the net device, where packets transition
@@ -287,13 +287,13 @@ GSLNetDevice::TransmitComplete (const Address dest)
   NS_ASSERT_MSG (m_txMachineState == BUSY, "Must be BUSY if transmitting");
   m_txMachineState = READY;
 
-  NS_ASSERT_MSG (m_currentPkt != 0, "GSLNetDevice::TransmitComplete(): m_currentPkt zero");
+  NS_ASSERT_MSG (m_currentPkt, "GSLNetDevice::TransmitComplete(): m_currentPkt zero");
 
   m_phyTxEndTrace (m_currentPkt);
   m_currentPkt = 0;
 
   Ptr<Packet> p = m_queue->Dequeue ();
-  if (p == 0)
+  if (!p)
     {
       NS_LOG_LOGIC ("No pending packets in device queue after tx complete");
       return;
@@ -395,7 +395,7 @@ GSLNetDevice::Receive (Ptr<Packet> packet)
     }
 }
 
-Ptr<Queue<Packet> >
+Ptr<Queue<Packet>>
 GSLNetDevice::GetQueue (void) const
 { 
   NS_LOG_FUNCTION (this);

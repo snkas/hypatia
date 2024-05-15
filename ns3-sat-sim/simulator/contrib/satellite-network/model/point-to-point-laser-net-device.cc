@@ -23,8 +23,8 @@
 
 
 #include "ns3/log.h"
-#include "ns3/queue.h"
 #include "ns3/simulator.h"
+#include "ns3/queue.h"
 #include "ns3/mac48-address.h"
 #include "ns3/llc-snap-header.h"
 #include "ns3/error-model.h"
@@ -32,6 +32,7 @@
 #include "ns3/uinteger.h"
 #include "ns3/pointer.h"
 #include "ns3/ppp-header.h"
+#include "ns3/queue.h"
 #include "point-to-point-laser-net-device.h"
 #include "point-to-point-laser-channel.h"
 
@@ -82,7 +83,7 @@ PointToPointLaserNetDevice::GetTypeId (void)
                    "A queue to use as the transmit queue in the device.",
                    PointerValue (),
                    MakePointerAccessor (&PointToPointLaserNetDevice::m_queue),
-                   MakePointerChecker<Queue<Packet> > ())
+                   MakePointerChecker<Queue<Packet>> ())
 
     //
     // Trace sources at the "top" of the net device, where packets transition
@@ -283,14 +284,14 @@ PointToPointLaserNetDevice::TransmitComplete (void)
   NS_ASSERT_MSG (m_txMachineState == BUSY, "Must be BUSY if transmitting");
   m_txMachineState = READY;
 
-  NS_ASSERT_MSG (m_currentPkt != 0, "PointToPointLaserNetDevice::TransmitComplete(): m_currentPkt zero");
+  NS_ASSERT_MSG (m_currentPkt, "PointToPointLaserNetDevice::TransmitComplete(): m_currentPkt zero");
 
   m_phyTxEndTrace (m_currentPkt);
   TrackUtilization(false);
   m_currentPkt = 0;
 
   Ptr<Packet> p = m_queue->Dequeue ();
-  if (p == 0)
+  if (!p)
     {
       NS_LOG_LOGIC ("No pending packets in device queue after tx complete");
       return;
@@ -323,7 +324,7 @@ PointToPointLaserNetDevice::Attach (Ptr<PointToPointLaserChannel> ch)
 }
 
 void
-PointToPointLaserNetDevice::SetQueue (Ptr<Queue<Packet> > q)
+PointToPointLaserNetDevice::SetQueue (Ptr<Queue<Packet>> q)
 {
   NS_LOG_FUNCTION (this << q);
   m_queue = q;
@@ -386,7 +387,7 @@ PointToPointLaserNetDevice::Receive (Ptr<Packet> packet)
     }
 }
 
-Ptr<Queue<Packet> >
+Ptr<Queue<Packet>>
 PointToPointLaserNetDevice::GetQueue (void) const
 { 
   NS_LOG_FUNCTION (this);

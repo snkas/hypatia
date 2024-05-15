@@ -1,0 +1,35 @@
+# Ubuntu 18.04
+os: linux
+dist: bionic
+
+language: cpp
+
+# Command(s) to install dependencies
+before_install:
+  - test -n $CC && unset CC
+  - test -n $CXX && unset CXX
+  - pyenv global 3.7
+  - sudo apt-get update
+  - sudo apt-get -y install mpic++
+  - sudo apt-get -y install libopenmpi-dev
+  - sudo apt-get -y install lcov
+  - sudo apt-get -y install gnuplot
+  - pip install numpy
+  - pip install statsmodels
+  - pip install git+https://github.com/snkas/exputilpy.git
+
+# Command(s) to build
+install:
+  - cd build
+  - bash build.sh
+
+# Command(s) to run tests and examples
+script:
+  - bash test.sh
+  - bash tutorial.sh
+  - bash example.sh
+
+# Command(s) to calculate coverage
+after_success:
+  - cd coverage_report
+  - bash <(curl -s https://codecov.io/bash) -f coverage.info
