@@ -6,11 +6,11 @@ if [ "$1" == "--help" ]; then
   exit 0
 fi
 
-# Extract copy of ns-3
-echo "Unzipping clean ns-3 (no overwrites)"
-unzip ${NS3_VERSION}.zip || exit 1
-cp -r ${NS3_VERSION}/* simulator/ || exit 1
-rm -r ${NS3_VERSION} || exit 1
+# # Extract copy of ns-3
+# echo "Unzipping clean ns-3 (no overwrites)"
+# unzip ${NS3_VERSION}.zip || exit 1
+# cp -r ${NS3_VERSION}/* simulator/ || exit 1
+# rm -r ${NS3_VERSION} || exit 1
 cd simulator || exit 1
 
 # Update the basic-sim module

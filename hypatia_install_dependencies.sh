@@ -8,6 +8,19 @@ echo ""
 # General
 sudo apt-get update || exit 1
 
+# Python and Pip
+
+# create symbolic link for Python 3
+if [ ! -e /usr/bin/python ]; then
+    echo "No existing Python link found. Creating symbolic link for Python 3..."
+    sudo ln -s /usr/bin/python3 /usr/bin/python || exit 1
+else
+    echo "Symbolic link for Python already exists. Skipping creation."
+fi
+
+echo "Installing pip for Python 3..."
+sudo apt-get -y install python3-pip || exit 1
+
 # satgenpy
 echo "Installing dependencies for satgenpy..."
 pip install numpy astropy ephem networkx sgp4 geopy matplotlib statsmodels || exit 1
@@ -34,7 +47,8 @@ echo "Installing dependencies for paper..."
 pip install numpy || exit 1
 pip install git+https://github.com/snkas/exputilpy.git@v1.6 || exit 1
 pip install git+https://github.com/snkas/networkload.git@v1.3 || exit 1
-sudo apt-get install gnuplot
+sudo apt-get install gnuplot || exit 1
+sudo apt-get install screen || exit 1
 
 # Confirmation dependencies are installed
 echo ""
