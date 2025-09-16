@@ -36,7 +36,7 @@ namespace ns3 {
 class GSLNetDevice;
 class Packet;
 
-class Mac48AddressHash : public std::unary_function<Mac48Address, size_t> {
+class Mac48AddressHash {
 public:
   size_t operator()(Mac48Address const &x) const;
 };

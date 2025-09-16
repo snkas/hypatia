@@ -12,7 +12,7 @@ using namespace ns3;
 
 class SatelliteNetworkTestSuite : public TestSuite {
 public:
-  SatelliteNetworkTestSuite() : TestSuite("satellite-network", UNIT) {
+  SatelliteNetworkTestSuite() : TestSuite("satellite-network", Type::UNIT) {
 
     // Running it complete with reading in files etc.
     AddTestCase(new EndToEndTestCase, TestCase::Duration::QUICK);
