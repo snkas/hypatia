@@ -14,32 +14,31 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- * 
+ *
  * (Based on point-to-point network device)
  * Author: Andre Aguas  March 2020
  */
 
-
 #ifndef GSL_NET_DEVICE_H
 #define GSL_NET_DEVICE_H
 
+#include "ns3/address.h"
+#include "ns3/callback.h"
+#include "ns3/data-rate.h"
+#include "ns3/mac48-address.h"
+#include "ns3/net-device.h"
+#include "ns3/node-container.h"
+#include "ns3/node.h"
+#include "ns3/nstime.h"
+#include "ns3/packet.h"
+#include "ns3/ptr.h"
+#include "ns3/queue.h"
+#include "ns3/traced-callback.h"
 #include <cstring>
 #include <queue>
-#include "ns3/address.h"
-#include "ns3/node.h"
-#include "ns3/net-device.h"
-#include "ns3/callback.h"
-#include "ns3/packet.h"
-#include "ns3/traced-callback.h"
-#include "ns3/nstime.h"
-#include "ns3/data-rate.h"
-#include "ns3/ptr.h"
-#include "ns3/mac48-address.h"
-#include "ns3/node-container.h"
 
 namespace ns3 {
 
-template <typename Item> class Queue;
 class GSLChannel;
 class ErrorModel;
 
@@ -48,36 +47,35 @@ class ErrorModel;
  * \brief A Device for a GSL Network Link.
  *
  * This GSLNetDevice class specializes the NetDevice abstract
- * base class.  Together with a GSLChannel (and a peer 
- * GSLDevice), the class models, with some level of 
+ * base class.  Together with a GSLChannel (and a peer
+ * GSLDevice), the class models, with some level of
  * abstraction, a generic GSL.
- * Key parameters or objects that can be specified for this device 
- * include a queue, data rate, and interframe transmission gap (the 
+ * Key parameters or objects that can be specified for this device
+ * include a queue, data rate, and interframe transmission gap (the
  * propagation delay is set in the GSLChannel).
  */
-class GSLNetDevice : public NetDevice
-{
+class GSLNetDevice : public NetDevice {
 public:
   /**
    * \brief Get the TypeId
    *
    * \return The TypeId for this class
    */
-  static TypeId GetTypeId (void);
+  static TypeId GetTypeId(void);
 
   /**
    * Construct a GSLNetDevice
    *
    * This is the constructor for the GSLNetDevice
    */
-  GSLNetDevice ();
+  GSLNetDevice();
 
   /**
    * Destroy a GSLNetDevice
    *
    * This is the destructor for the GSLNetDevice.
    */
-  virtual ~GSLNetDevice ();
+  virtual ~GSLNetDevice();
 
   /**
    * Set the Data Rate used for transmission of packets.  The data rate is
@@ -86,7 +84,7 @@ public:
    *
    * \param bps the data rate at which this object operates
    */
-  void SetDataRate (DataRate bps);
+  void SetDataRate(DataRate bps);
 
   /**
    * Set the interframe gap used to separate packets.  The interframe gap
@@ -94,7 +92,7 @@ public:
    *
    * \param t the interframe gap time
    */
-  void SetInterframeGap (Time t);
+  void SetInterframeGap(Time t);
 
   /**
    * Attach the device to a channel.
@@ -102,24 +100,24 @@ public:
    * \param ch Ptr to the channel to which this object is being attached.
    * \return true if the operation was successful (always true actually)
    */
-  bool Attach (Ptr<GSLChannel> ch);
+  bool Attach(Ptr<GSLChannel> ch);
 
   /**
    * Attach a queue to the GSLNetDevice.
    *
-   * The GSLtNetDevice "owns" a queue that implements a queueing 
+   * The GSLtNetDevice "owns" a queue that implements a queueing
    * method such as DropTailQueue or RedQueue
    *
    * \param queue Ptr to the new queue.
    */
-  void SetQueue (Ptr<Queue<Packet> > queue);
+  void SetQueue(Ptr<Queue<Packet>> queue);
 
   /**
    * Get a copy of the attached Queue.
    *
    * \returns Ptr to the queue.
    */
-  Ptr<Queue<Packet> > GetQueue (void) const;
+  Ptr<Queue<Packet>> GetQueue(void) const;
 
   /**
    * Attach a receive ErrorModel to the GSLNetDevice.
@@ -129,60 +127,62 @@ public:
    *
    * \param em Ptr to the ErrorModel.
    */
-  void SetReceiveErrorModel (Ptr<ErrorModel> em);
+  void SetReceiveErrorModel(Ptr<ErrorModel> em);
 
   /**
    * Receive a packet from a connected GSLChannel.
    *
    * The GSLNetDevice receives packets from its connected channel
    * and forwards them up the protocol stack.  This is the public method
-   * used by the channel to indicate that the last bit of a packet has 
+   * used by the channel to indicate that the last bit of a packet has
    * arrived at the device.
    *
    * \param p Ptr to the received packet.
    */
-  void Receive (Ptr<Packet> p);
+  void Receive(Ptr<Packet> p);
 
   // The remaining methods are documented in ns3::NetDevice*
 
-  virtual void SetIfIndex (const uint32_t index);
-  virtual uint32_t GetIfIndex (void) const;
+  virtual void SetIfIndex(const uint32_t index);
+  virtual uint32_t GetIfIndex(void) const;
 
-  virtual Ptr<Channel> GetChannel (void) const;
+  virtual Ptr<Channel> GetChannel(void) const;
 
-  virtual void SetAddress (Address address);
-  virtual Address GetAddress (void) const;
+  virtual void SetAddress(Address address);
+  virtual Address GetAddress(void) const;
 
-  virtual bool SetMtu (const uint16_t mtu);
-  virtual uint16_t GetMtu (void) const;
+  virtual bool SetMtu(const uint16_t mtu);
+  virtual uint16_t GetMtu(void) const;
 
-  virtual bool IsLinkUp (void) const;
+  virtual bool IsLinkUp(void) const;
 
-  virtual void AddLinkChangeCallback (Callback<void> callback);
+  virtual void AddLinkChangeCallback(Callback<void> callback);
 
-  virtual bool IsBroadcast (void) const;
-  virtual Address GetBroadcast (void) const;
+  virtual bool IsBroadcast(void) const;
+  virtual Address GetBroadcast(void) const;
 
-  virtual bool IsMulticast (void) const;
-  virtual Address GetMulticast (Ipv4Address multicastGroup) const;
+  virtual bool IsMulticast(void) const;
+  virtual Address GetMulticast(Ipv4Address multicastGroup) const;
 
-  virtual bool IsPointToPoint (void) const;
-  virtual bool IsBridge (void) const;
+  virtual bool IsPointToPoint(void) const;
+  virtual bool IsBridge(void) const;
 
-  virtual bool Send (Ptr<Packet> packet, const Address &dest, uint16_t protocolNumber);
-  virtual bool SendFrom (Ptr<Packet> packet, const Address& source, const Address& dest, uint16_t protocolNumber);
+  virtual bool Send(Ptr<Packet> packet, const Address &dest,
+                    uint16_t protocolNumber);
+  virtual bool SendFrom(Ptr<Packet> packet, const Address &source,
+                        const Address &dest, uint16_t protocolNumber);
 
-  virtual Ptr<Node> GetNode (void) const;
-  virtual void SetNode (Ptr<Node> node);
+  virtual Ptr<Node> GetNode(void) const;
+  virtual void SetNode(Ptr<Node> node);
 
-  virtual bool NeedsArp (void) const;
+  virtual bool NeedsArp(void) const;
 
-  virtual void SetReceiveCallback (NetDevice::ReceiveCallback cb);
+  virtual void SetReceiveCallback(NetDevice::ReceiveCallback cb);
 
-  virtual Address GetMulticast (Ipv6Address addr) const;
+  virtual Address GetMulticast(Ipv6Address addr) const;
 
-  virtual void SetPromiscReceiveCallback (PromiscReceiveCallback cb);
-  virtual bool SupportsSendFrom (void) const;
+  virtual void SetPromiscReceiveCallback(PromiscReceiveCallback cb);
+  virtual bool SupportsSendFrom(void) const;
 
 protected:
   /**
@@ -190,10 +190,9 @@ protected:
    *
    * \param p Packet received
    */
-  void DoMpiReceive (Ptr<Packet> p);
+  void DoMpiReceive(Ptr<Packet> p);
 
 private:
-
   /**
    * \brief Assign operator
    *
@@ -202,7 +201,7 @@ private:
    * \param o Other NetDevice
    * \return New instance of the NetDevice
    */
-  GSLNetDevice& operator = (const GSLNetDevice &o);
+  GSLNetDevice &operator=(const GSLNetDevice &o);
 
   /**
    * \brief Copy constructor
@@ -211,22 +210,21 @@ private:
 
    * \param o Other NetDevice
    */
-  GSLNetDevice (const GSLNetDevice &o);
+  GSLNetDevice(const GSLNetDevice &o);
 
   /**
    * \brief Dispose of the object
    */
-  virtual void DoDispose (void);
+  virtual void DoDispose(void);
 
 private:
-
   /**
    * Adds the necessary headers and trailers to a packet of data in order to
    * respect the protocol implemented by the agent.
    * \param p packet
    * \param protocolNumber protocol number
    */
-  void AddHeader (Ptr<Packet> p, uint16_t protocolNumber);
+  void AddHeader(Ptr<Packet> p, uint16_t protocolNumber);
 
   /**
    * Removes, from a packet of data, all headers and trailers that
@@ -236,7 +234,7 @@ private:
    * \return Returns true if the packet should be forwarded up the
    * protocol stack.
    */
-  bool ProcessHeader (Ptr<Packet> p, uint16_t& param);
+  bool ProcessHeader(Ptr<Packet> p, uint16_t &param);
 
   /**
    * Start Sending a Packet Down the Wire.
@@ -254,7 +252,7 @@ private:
    * \param address where the packet is to be sent
    * \returns true if success, false on failure
    */
-  bool TransmitStart (Ptr<Packet> p, const Address address);
+  bool TransmitStart(Ptr<Packet> p, const Address address);
 
   /**
    * Stop Sending a Packet Down the Wire and Begin the Interframe Gap.
@@ -262,22 +260,21 @@ private:
    * The TransmitComplete method is used internally to finish the process
    * of sending a packet out on the channel.
    */
-  void TransmitComplete (const Address destination);
+  void TransmitComplete(const Address destination);
 
   /**
    * \brief Make the link up and running
    *
    * It calls also the linkChange callback.
    */
-  void NotifyLinkUp (void);
+  void NotifyLinkUp(void);
 
   /**
    * Enumeration of the states of the transmit machine of the net device.
    */
-  enum TxMachineState
-  {
-    READY,   /**< The transmitter is ready to begin transmission of a packet */
-    BUSY     /**< The transmitter is busy transmitting a packet */
+  enum TxMachineState {
+    READY, /**< The transmitter is ready to begin transmission of a packet */
+    BUSY   /**< The transmitter is busy transmitting a packet */
   };
   /**
    * The state of the Net Device transmit state machine.
@@ -288,13 +285,13 @@ private:
    * The data rate that the Net Device uses to simulate packet transmission
    * timing.
    */
-  DataRate       m_bps;
+  DataRate m_bps;
 
   /**
    * The interframe gap that the Net Device uses to throttle packet
    * transmission
    */
-  Time           m_tInterframeGap;
+  Time m_tInterframeGap;
 
   /**
    * The GSLChannel to which this GSLNetDevice has been
@@ -308,11 +305,11 @@ private:
    * and it has the responsibility for deletion.
    * \see class DropTailQueue
    */
-  Ptr<Queue<Packet> > m_queue;
+  Ptr<Queue<Packet>> m_queue;
 
-    /**
-     * The FIFO queue for the destination MAC addresses
-     */
+  /**
+   * The FIFO queue for the destination MAC addresses
+   */
   std::queue<Address> m_queueDests;
 
   /**
@@ -324,91 +321,91 @@ private:
    * The trace source fired when packets come into the "top" of the device
    * at the L3/L2 transition, before being queued for transmission.
    */
-  TracedCallback<Ptr<const Packet> > m_macTxTrace;
+  TracedCallback<Ptr<const Packet>> m_macTxTrace;
 
   /**
    * The trace source fired when packets coming into the "top" of the device
    * at the L3/L2 transition are dropped before being queued for transmission.
    */
-  TracedCallback<Ptr<const Packet> > m_macTxDropTrace;
+  TracedCallback<Ptr<const Packet>> m_macTxDropTrace;
 
   /**
    * The trace source fired for packets successfully received by the device
-   * immediately before being forwarded up to higher layers (at the L2/L3 
+   * immediately before being forwarded up to higher layers (at the L2/L3
    * transition).  This is a promiscuous trace (which doesn't mean a lot here
    * in the GSL device).
    */
-  TracedCallback<Ptr<const Packet> > m_macPromiscRxTrace;
+  TracedCallback<Ptr<const Packet>> m_macPromiscRxTrace;
 
   /**
    * The trace source fired for packets successfully received by the device
-   * immediately before being forwarded up to higher layers (at the L2/L3 
-   * transition).  This is a non-promiscuous trace (which doesn't mean a lot 
+   * immediately before being forwarded up to higher layers (at the L2/L3
+   * transition).  This is a non-promiscuous trace (which doesn't mean a lot
    * here in the GSL device).
    */
-  TracedCallback<Ptr<const Packet> > m_macRxTrace;
+  TracedCallback<Ptr<const Packet>> m_macRxTrace;
 
   /**
    * The trace source fired for packets successfully received by the device
-   * but are dropped before being forwarded up to higher layers (at the L2/L3 
+   * but are dropped before being forwarded up to higher layers (at the L2/L3
    * transition).
    */
-  TracedCallback<Ptr<const Packet> > m_macRxDropTrace;
+  TracedCallback<Ptr<const Packet>> m_macRxDropTrace;
 
   /**
    * The trace source fired when a packet begins the transmission process on
    * the medium.
    */
-  TracedCallback<Ptr<const Packet> > m_phyTxBeginTrace;
+  TracedCallback<Ptr<const Packet>> m_phyTxBeginTrace;
 
   /**
    * The trace source fired when a packet ends the transmission process on
    * the medium.
    */
-  TracedCallback<Ptr<const Packet> > m_phyTxEndTrace;
+  TracedCallback<Ptr<const Packet>> m_phyTxEndTrace;
 
   /**
    * The trace source fired when the phy layer drops a packet before it tries
    * to transmit it.
    */
-  TracedCallback<Ptr<const Packet> > m_phyTxDropTrace;
+  TracedCallback<Ptr<const Packet>> m_phyTxDropTrace;
 
   /**
    * The trace source fired when a packet begins the reception process from
    * the medium -- when the simulated first bit(s) arrive.
    */
-  TracedCallback<Ptr<const Packet> > m_phyRxBeginTrace;
+  TracedCallback<Ptr<const Packet>> m_phyRxBeginTrace;
 
   /**
    * The trace source fired when a packet ends the reception process from
    * the medium.
    */
-  TracedCallback<Ptr<const Packet> > m_phyRxEndTrace;
+  TracedCallback<Ptr<const Packet>> m_phyRxEndTrace;
 
   /**
    * The trace source fired when the phy layer drops a packet it has received.
    * This happens if the receiver is not enabled or the error model is active
    * and indicates that the packet is corrupt.
    */
-  TracedCallback<Ptr<const Packet> > m_phyRxDropTrace;
+  TracedCallback<Ptr<const Packet>> m_phyRxDropTrace;
 
   /**
-   * A trace source that emulates a non-promiscuous protocol sniffer connected 
-   * to the device.  Unlike your average everyday sniffer, this trace source 
+   * A trace source that emulates a non-promiscuous protocol sniffer connected
+   * to the device.  Unlike your average everyday sniffer, this trace source
    * will not fire on PACKET_OTHERHOST events.
    *
    * On the transmit size, this trace hook will fire after a packet is dequeued
    * from the device queue for transmission.  In Linux, for example, this would
-   * correspond to the point just before a device \c hard_start_xmit where 
-   * \c dev_queue_xmit_nit is called to dispatch the packet to the PF_PACKET 
+   * correspond to the point just before a device \c hard_start_xmit where
+   * \c dev_queue_xmit_nit is called to dispatch the packet to the PF_PACKET
    * ETH_P_ALL handlers.
    *
    * On the receive side, this trace hook will fire when a packet is received,
-   * just before the receive callback is executed.  In Linux, for example, 
-   * this would correspond to the point at which the packet is dispatched to 
+   * just before the receive callback is executed.  In Linux, for example,
+   * this would correspond to the point at which the packet is dispatched to
    * packet sniffers in \c netif_receive_skb.
    */
-  TracedCallback<Ptr<const Packet> > m_snifferTrace;
+  TracedCallback<Ptr<const Packet>> m_snifferTrace;
 
   /**
    * A trace source that emulates a promiscuous mode protocol sniffer connected
@@ -417,34 +414,35 @@ private:
    *
    * On the transmit size, this trace hook will fire after a packet is dequeued
    * from the device queue for transmission.  In Linux, for example, this would
-   * correspond to the point just before a device \c hard_start_xmit where 
-   * \c dev_queue_xmit_nit is called to dispatch the packet to the PF_PACKET 
+   * correspond to the point just before a device \c hard_start_xmit where
+   * \c dev_queue_xmit_nit is called to dispatch the packet to the PF_PACKET
    * ETH_P_ALL handlers.
    *
    * On the receive side, this trace hook will fire when a packet is received,
-   * just before the receive callback is executed.  In Linux, for example, 
-   * this would correspond to the point at which the packet is dispatched to 
+   * just before the receive callback is executed.  In Linux, for example,
+   * this would correspond to the point at which the packet is dispatched to
    * packet sniffers in \c netif_receive_skb.
    */
-  TracedCallback<Ptr<const Packet> > m_promiscSnifferTrace;
+  TracedCallback<Ptr<const Packet>> m_promiscSnifferTrace;
 
-  Ptr<Node> m_node;                                     //!< Node owning this NetDevice
-  Mac48Address m_address;                               //!< Mac48Address of this NetDevice
-  NetDevice::ReceiveCallback m_rxCallback;              //!< Receive callback
-  NetDevice::PromiscReceiveCallback m_promiscCallback;  //!< Receive callback
-                                                        //   (promisc data)
-  uint32_t m_ifIndex;                      //!< Index of the interface
-  bool m_linkUp;                           //!< Identify if the link is up or not
-  TracedCallback<> m_linkChangeCallbacks;  //!< Callback for the link change event
+  Ptr<Node> m_node;                        //!< Node owning this NetDevice
+  Mac48Address m_address;                  //!< Mac48Address of this NetDevice
+  NetDevice::ReceiveCallback m_rxCallback; //!< Receive callback
+  NetDevice::PromiscReceiveCallback m_promiscCallback; //!< Receive callback
+                                                       //   (promisc data)
+  uint32_t m_ifIndex; //!< Index of the interface
+  bool m_linkUp;      //!< Identify if the link is up or not
+  TracedCallback<>
+      m_linkChangeCallbacks; //!< Callback for the link change event
 
   static const uint16_t DEFAULT_MTU = 1500; //!< Default MTU
 
   /**
    * \brief The Maximum Transmission Unit
    *
-   * This corresponds to the maximum 
+   * This corresponds to the maximum
    * number of bytes that can be transmitted as seen from higher layers.
-   * This corresponds to the 1500 byte MTU size often seen on IP over 
+   * This corresponds to the 1500 byte MTU size often seen on IP over
    * Ethernet.
    */
   uint32_t m_mtu;
@@ -456,14 +454,14 @@ private:
    * \param protocol A PPP protocol number
    * \return The corresponding Ethernet protocol number
    */
-  static uint16_t PppToEther (uint16_t protocol);
+  static uint16_t PppToEther(uint16_t protocol);
 
   /**
    * \brief Ethernet to PPP protocol number mapping
    * \param protocol An Ethernet protocol number
    * \return The corresponding PPP protocol number
    */
-  static uint16_t EtherToPpp (uint16_t protocol);
+  static uint16_t EtherToPpp(uint16_t protocol);
 };
 
 } // namespace ns3
