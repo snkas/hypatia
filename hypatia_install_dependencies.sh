@@ -8,9 +8,22 @@ echo ""
 # General
 sudo apt-get update || exit 1
 
+python3 -m venv ./env
+source ./env/bin/activate || exit 1
+
 # satgenpy
 echo "Installing dependencies for satgenpy..."
 pip install numpy astropy ephem networkx sgp4 geopy matplotlib statsmodels || exit 1
+
+
+# Due to libdeflate-dev depends candidate version 1.19-1build1 as libdeflate0 version, but Ubuntu 24.04 has 1.19-1build1.1 as candidate version, it shows libdeflate-dev may lack of maintaince. So we need to install libdeflate0 with specific version to avoid the error.
+
+sudo apt-get install libdeflate0=1.19-1build1 || exit 1
+
+# Due to libzstd-dev depends candidate version 1.5.5+dfsg2-2build1 as libzstd1 version, but Ubuntu 24.04 has 1.5.5+dfsg2-2build1.1 as candidate version, it shows libzstd-dev may lack of maintaince. So we need to install libzstd1 with specific version to avoid the error.
+
+sudo apt-get install libzstd1=1.5.5+dfsg2-2build1 || exit 1
+
 sudo apt-get install libproj-dev proj-data proj-bin libgeos-dev || exit 1
 # Mac alternatives (to be able to pip install cartopy)
 # brew install proj geos
