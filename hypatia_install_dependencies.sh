@@ -8,6 +8,8 @@ echo ""
 # General
 sudo apt-get update || exit 1
 
+sudo apt-get install -y python3-venv || exit 1
+
 python3 -m venv ./env
 source ./env/bin/activate || exit 1
 
