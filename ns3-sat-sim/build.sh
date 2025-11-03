@@ -17,7 +17,7 @@ cd simulator || exit 1
 echo "Updating git submodules"
 git submodule update || exit 1
 
-source ../env/bin/activate
+source ../env/bin/activate || echo "pass"
 
 # Configure the build
 if [ "$1" == "--debug_all" ]; then

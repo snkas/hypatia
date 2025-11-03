@@ -24,6 +24,16 @@ echo "Nothing to build for satviz."
 # paper
 echo "Nothing to build for paper."
 
+# build and rebuild?
+
+echo "Building ns3-sat-sim..."
+cd ns3-sat-sim || exit 1
+bash build.sh --debug_all || exit 1
+cd simulator || exit 1
+python3 test.py -v -s "satellite-network" -t ../test_results/test_results_satellite_network 
+cd .. || exit 1
+cd .. || exit 1
+
 # Confirmation build is finished
 echo ""
 echo "Hypatia modules have been built."
