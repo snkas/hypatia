@@ -20,69 +20,67 @@
  *         Simon        2020
  */
 
-
 #ifndef GSL_CHANNEL_H
 #define GSL_CHANNEL_H
 
+#include "gsl-net-device.h"
 #include "ns3/channel.h"
 #include "ns3/data-rate.h"
-#include "ns3/mobility-model.h"
-#include "ns3/sgi-hashmap.h"
 #include "ns3/mac48-address.h"
+#include "ns3/mobility-model.h"
+#include <map>
+#include <unordered_map>
 
 namespace ns3 {
 
 class GSLNetDevice;
 class Packet;
 
-class Mac48AddressHash : public std::unary_function<Mac48Address, size_t> {
-    public:
-        size_t operator() (Mac48Address const &x) const;
+class Mac48AddressHash {
+public:
+  size_t operator()(Mac48Address const &x) const;
 };
 
-class GSLChannel : public Channel 
-{
+class GSLChannel : public Channel {
 public:
-  static TypeId GetTypeId (void);
-  GSLChannel ();
+  static TypeId GetTypeId(void);
+  GSLChannel();
 
   // Transmission
-  virtual bool TransmitStart (
-          Ptr<const Packet> p,
-          Ptr<GSLNetDevice> src,
-          Address dst_address,
-          Time txTime
-  );
-  bool TransmitTo(
-          Ptr<const Packet> p,
-          Ptr<GSLNetDevice> srcNetDevice,
-          Ptr<GSLNetDevice> dstNetDevice,
-          Time txTime,
-          bool isSameSystem
-  );
+  virtual bool TransmitStart(Ptr<const Packet> p, Ptr<GSLNetDevice> src,
+                             Address dst_address, Time txTime);
+  bool TransmitTo(Ptr<const Packet> p, Ptr<GSLNetDevice> srcNetDevice,
+                  Ptr<GSLNetDevice> dstNetDevice, Time txTime,
+                  bool isSameSystem);
 
   // Device management
-  void Attach (Ptr<GSLNetDevice> device);
-  virtual std::size_t GetNDevices (void) const;
-  virtual Ptr<NetDevice> GetDevice (std::size_t i) const;
+  void Attach(Ptr<GSLNetDevice> device);
+  virtual std::size_t GetNDevices(void) const;
+  virtual Ptr<NetDevice> GetDevice(std::size_t i) const;
 
 protected:
-  Time GetDelay (Ptr<MobilityModel> senderMobility, Ptr<MobilityModel> receiverMobility) const;
+  Time GetDelay(Ptr<MobilityModel> senderMobility,
+                Ptr<MobilityModel> receiverMobility) const;
 
-  Time   m_lowerBoundDelay;                   //!< Propagation delay which is
-                                              //   used to give a minimum lookahead time to the
-                                              //   distributed simulator (if it were enabled).
-                                              //   See also: distributed-simulator-impl.cc (line 173 onwards)
+  Time m_lowerBoundDelay; //!< Propagation delay which is
+                          //   used to give a minimum lookahead time to the
+                          //   distributed simulator (if it were enabled).
+                          //   See also: distributed-simulator-impl.cc (line 173
+                          //   onwards)
 
-  double m_propagationSpeedMetersPerSecond;   //!< Propagation speed on the channel (used to live calculate the delay
-                                              //   for each packet which is sent over this channel.
+  double
+      m_propagationSpeedMetersPerSecond; //!< Propagation speed on the channel
+                                         //!< (used to live calculate the delay
+                                         //   for each packet which is sent over
+                                         //   this channel.
 
   // Mac address to net device
-  typedef sgi::hash_map<Mac48Address, Ptr<GSLNetDevice>, Mac48AddressHash> MacToNetDevice;
-  typedef sgi::hash_map<Mac48Address, Ptr<GSLNetDevice>, Mac48AddressHash>::iterator MacToNetDeviceI;
+  typedef std::unordered_map<Mac48Address, Ptr<GSLNetDevice>, Mac48AddressHash>
+      MacToNetDevice;
+  typedef std::unordered_map<Mac48Address, Ptr<GSLNetDevice>,
+                             Mac48AddressHash>::iterator MacToNetDeviceI;
   MacToNetDevice m_link;
   std::vector<Ptr<GSLNetDevice>> m_net_devices;
-
 };
 
 } // namespace ns3
