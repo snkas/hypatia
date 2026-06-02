@@ -176,11 +176,11 @@ ORB_WISE_IDS[2] = []
 
 
 # General files needed to generate visualizations; Do not change for different simulations
-topFile = "../static_html/top.html"
-bottomFile = "../static_html/bottom.html"
+topFile = "static_html/top.html"
+bottomFile = "static_html/bottom.html"
 
 # Output directory for creating visualization html files
-OUT_DIR = "../viz_output/"
+OUT_DIR = "viz_output/"
 # JSON_NAME  = NAME+"_5shell.json"
 # OUT_JSON_FILE = OUT_DIR + JSON_NAME
 OUT_HTML_FILE = OUT_DIR + NAME + ".html"
@@ -248,5 +248,6 @@ def write_viz_files():
     writer_html.close()
 
 
-viz_string = generate_satelite_trajectories()
+viz_string = generate_satellite_trajectories()
 write_viz_files()
+
