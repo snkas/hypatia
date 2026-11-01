@@ -24,10 +24,12 @@
 #ifndef GSL_CHANNEL_H
 #define GSL_CHANNEL_H
 
+#include "gsl-net-device.h"
 #include "ns3/channel.h"
 #include "ns3/data-rate.h"
 #include "ns3/mobility-model.h"
-#include "ns3/sgi-hashmap.h"
+#include <map>
+#include <unordered_map>
 #include "ns3/mac48-address.h"
 
 namespace ns3 {
@@ -35,7 +37,7 @@ namespace ns3 {
 class GSLNetDevice;
 class Packet;
 
-class Mac48AddressHash : public std::unary_function<Mac48Address, size_t> {
+class Mac48AddressHash {
     public:
         size_t operator() (Mac48Address const &x) const;
 };
@@ -78,8 +80,8 @@ protected:
                                               //   for each packet which is sent over this channel.
 
   // Mac address to net device
-  typedef sgi::hash_map<Mac48Address, Ptr<GSLNetDevice>, Mac48AddressHash> MacToNetDevice;
-  typedef sgi::hash_map<Mac48Address, Ptr<GSLNetDevice>, Mac48AddressHash>::iterator MacToNetDeviceI;
+  typedef std::unordered_map<Mac48Address, Ptr<GSLNetDevice>, Mac48AddressHash> MacToNetDevice;
+  typedef std::unordered_map<Mac48Address, Ptr<GSLNetDevice>, Mac48AddressHash>::iterator MacToNetDeviceI;
   MacToNetDevice m_link;
   std::vector<Ptr<GSLNetDevice>> m_net_devices;
 

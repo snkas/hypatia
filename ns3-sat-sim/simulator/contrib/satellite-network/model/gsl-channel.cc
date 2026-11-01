@@ -25,7 +25,7 @@
 #include "ns3/core-module.h"
 #include "ns3/abort.h"
 #include "ns3/mpi-interface.h"
-#include "ns3/gsl-net-device.h"
+#include "gsl-net-device.h"
 
 namespace ns3 {
 
@@ -129,7 +129,7 @@ void
 GSLChannel::Attach (Ptr<GSLNetDevice> device)
 {
     NS_LOG_FUNCTION (this << device);
-    NS_ABORT_MSG_IF (device == 0, "Cannot add zero pointer network device.");
+    NS_ABORT_MSG_IF (device == Ptr<GSLNetDevice>(nullptr), "Cannot add zero pointer network device.");
 
     Mac48Address address48 = Mac48Address::ConvertFrom (device->GetAddress());
     m_link[address48] = device;

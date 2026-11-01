@@ -34,12 +34,12 @@
 #include "ns3/nstime.h"
 #include "ns3/data-rate.h"
 #include "ns3/ptr.h"
+#include "ns3/queue.h"
 #include "ns3/mac48-address.h"
 #include "ns3/node-container.h"
 
 namespace ns3 {
 
-template <typename Item> class Queue;
 class GSLChannel;
 class ErrorModel;
 

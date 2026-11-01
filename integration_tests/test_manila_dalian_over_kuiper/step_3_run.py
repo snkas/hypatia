@@ -45,10 +45,8 @@ for run in get_tcp_run_list():
     local_shell.make_full_dir(logs_ns3_dir)
     commands_to_run.append(
         "cd ../../ns3-sat-sim/simulator; "
-        "./waf --run=\"main_satnet "
-        "--run_dir='../../integration_tests/test_manila_dalian_over_kuiper/temp/runs/" + run["name"] + "'\" "
-        "2>&1 | "
-        "tee '../../integration_tests/test_manila_dalian_over_kuiper/" + logs_ns3_dir + "/console.txt'"
+        "./ns3 run \"main_satnet --run_dir=../../integration_tests/test_manila_dalian_over_kuiper/temp/runs/" + run["name"] + "\" "
+        "2>&1 | tee '../../integration_tests/test_manila_dalian_over_kuiper/" + logs_ns3_dir + "/console.txt'"
     )
 
 # Run the commands
