@@ -5,6 +5,7 @@
 #include <fstream>
 #include <string>
 #include <ctime>
+#include <cstdio>
 #include <iostream>
 #include <fstream>
 #include <sys/stat.h>
@@ -19,6 +20,7 @@
 #include "ns3/tcp-optimizer.h"
 #include "ns3/arbiter-single-forward-helper.h"
 #include "ns3/ipv4-arbiter-routing-helper.h"
+#include "ns3/pointer.h"
 #include "ns3/gsl-if-bandwidth-helper.h"
 
 #include "ns3/test.h"

@@ -2,6 +2,8 @@
 ns-3.30.1
 *.pyc
 CMakeLists.txt
+!simulator/src/satellite/CMakeLists.txt
+!simulator/contrib/satellite-network/CMakeLists.txt
 cmake-build-debug
 copy_simulator*
 coverage_report/
